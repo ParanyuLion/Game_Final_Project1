@@ -12,6 +12,7 @@ class Player:
         self.__speed = 2
         self.__dash_speed = 120
 
+
     def move(self, dir):
         self.last_move_rect = self.player_rect.copy()
 
@@ -48,6 +49,5 @@ class Player:
     def draw(self, screen):
         screen.blit(self.player_char, self.player_rect)
 
-
-
-
+    def get_size(self):
+        return self.player_char.get_size()
