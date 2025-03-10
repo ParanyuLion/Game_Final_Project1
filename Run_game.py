@@ -30,6 +30,24 @@ class Run_game:
         for enemies in self.enemies:
             enemies.draw(self.__screen)
 
+    def entities_events(self):
+        for bullet in self.bullets:
+            if 1000 > bullet.x > 0 and 1000 > bullet.y > 0:
+                bullet.x += bullet.velocity[0]
+                bullet.y += bullet.velocity[1]
+                for enemy in self.enemies:
+                    enemy.get_hit((bullet.x, bullet.y))
+                    if enemy.check_dead():
+                        self.enemies.pop(self.enemies.index(enemy))
+            else:
+                self.bullets.pop(self.bullets.index(bullet))
+        for enemy in self.enemies:
+            width, height = self.player.get_size()
+            enemy.move((self.player.player_rect.x + width // 2, self.player.player_rect.y + height // 2))
+
+            if enemy.hit_player((self.player.player_rect.x + width // 2, self.player.player_rect.y + height // 2)):
+                self.enemies.pop(self.enemies.index(enemy))
+
     def run_loop(self):
         clock = pg.time.Clock()
         while self.__running:
@@ -40,24 +58,14 @@ class Run_game:
                 if event.type == pg.KEYDOWN:
                     if event.key == pg.K_SPACE:
                         self.player.dash()
-                    if event.key == pg.K_q:
-                        width, height = self.player.get_size()
-                        self.bullets.append(Bullet(self.player.player_rect.x+width//2, self.player.player_rect.y+height//2,self.player.move_direction, 10))
-            for bullet in self.bullets:
-                if 1000 > bullet.x > 0 and 1000 > bullet.y > 0:
-                    bullet.x += bullet.velocity[0]
-                    bullet.y += bullet.velocity[1]
-                else:
-                    self.bullets.pop(self.bullets.index(bullet))
-            for enemy in self.enemies:
-                width, height = self.player.get_size()
+                if event.type == pg.MOUSEBUTTONDOWN:
+                    mouse_pos = pg.mouse.get_pos()
+                    width, height = self.player.get_size()
+                    self.bullets.append(Bullet(self.player.player_rect.x+width//2,
+                                               self.player.player_rect.y+height//2,
+                                               mouse_pos, 10))
 
-                enemy.move((self.player.player_rect.x+width//2, self.player.player_rect.y+height//2))
-                if enemy.hit_player((self.player.player_rect.x+width//2, self.player.player_rect.y+height//2)):
-                    self.enemies.pop(self.enemies.index(enemy))
-                    # print('pwh', width, height)
-                    # print('p pos', self.player.player_rect.x, self.player.player_rect.y)
-                    # print('-------------------')
+            self.entities_events()
             key = pg.key.get_pressed()
             # print(self.player.player_rect.y, self.player.player_rect.x)
             if key[pg.K_w] and self.player.player_rect.y > 0:

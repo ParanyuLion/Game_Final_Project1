@@ -1,17 +1,18 @@
 import pygame as pg
 from game_config import Config
+
+
 class Player:
     def __init__(self, health=100):
         self.health = health
         # self.__positions = [0,0]
-        self.player_char = pg.image.load("Game_Final_Project1/picture/beast.png")
+        self.player_char = pg.transform.scale(pg.image.load("Game_Final_Project1/picture/knight.png"), (80,80))
         self.player_rect = self.player_char.get_rect()
         self.player_rect.center = (Config.get("WIN_WIDTH") // 2, Config.get("WIN_HEIGHT") // 2)
         self.last_move_rect = self.player_rect.copy()
         self.move_direction = "RIGHT"
         self.__speed = 2
         self.__dash_speed = 120
-
 
     def move(self, dir):
         self.last_move_rect = self.player_rect.copy()

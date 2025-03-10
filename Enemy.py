@@ -3,7 +3,7 @@ import random
 
 
 class Enemy:
-    def __init__(self, health=100):
+    def __init__(self, health=10):
         self.health = health
         self.speed = 0.01
         self.enemy_char = pg.transform.scale(pg.image.load("Game_Final_Project1/picture/blue_slime1.png"), (80,80))
@@ -24,14 +24,24 @@ class Enemy:
         # elif self.enemy_rect.y + height//2 > pos[1]:
         #     self.enemy_rect.y -= self.speed
         if self.enemy_rect.x + width//2 != pos[0] or self.enemy_rect.y + height//2 != pos[1]:
-            self.enemy_rect.x += -(self.enemy_rect.x + width//2-pos[0])*self.speed
-            self.enemy_rect.y += -(self.enemy_rect.y + width//2-pos[1])*self.speed
-            print(-(self.enemy_rect.x + width//2-pos[0])*self.speed)
+            self.enemy_rect.x += (pos[0]-(self.enemy_rect.x + width//2))*self.speed
+            self.enemy_rect.y += (pos[1]-(self.enemy_rect.y + width//2))*self.speed
+            # print(-(self.enemy_rect.x + width//2-pos[0])*self.speed)
+
+    def get_hit(self, pos):
+        width, height = self.get_size()
+        if (abs(self.enemy_rect.x + width // 2 - pos[0]) < 60) and (abs(self.enemy_rect.y + height // 2 - pos[1]) < 60):
+            self.health -= 1
+            # print(self.health)
+
+    def check_dead(self):
+        if self.health <= 0:
+            return True
 
     def hit_player(self, pos):
         width, height = self.get_size()
 
-        if (abs(self.enemy_rect.x + width//2 - pos[0]) < 100) and (abs(self.enemy_rect.y + height//2 - pos[1]) < 100):
+        if (abs(self.enemy_rect.x + width//2 - pos[0]) < 60) and (abs(self.enemy_rect.y + height//2 - pos[1]) < 60):
             # print(width, height)
             # print("pos e", self.enemy_rect.x, self.enemy_rect.y)
             # print((self.enemy_rect.x + width//2 - pos[0]) ,(self.enemy_rect.y + height//2 - pos[1]))
