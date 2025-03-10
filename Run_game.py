@@ -38,11 +38,10 @@ class Run_game:
     def entities_events(self):
         """"bullets event"""
         for bullet in self.bullets:
-            if 1000 > bullet.x > 0 and 1000 > bullet.y > 0:
-                bullet.x += bullet.velocity[0]
-                bullet.y += bullet.velocity[1]
+            if 1000 > bullet.bullet_rect.centerx > 0 and 1000 > bullet.bullet_rect.centery > 0:
+                bullet.update()
                 for enemy in self.enemies:
-                    if enemy.get_damage((bullet.x, bullet.y)):
+                    if enemy.get_damage((bullet.bullet_rect.x, bullet.bullet_rect.y)):
                         if bullet in self.bullets:
                             self.bullets.pop(self.bullets.index(bullet))
                     if enemy.check_dead():
@@ -52,11 +51,9 @@ class Run_game:
 
         """"enemies event"""
         for enemy in self.enemies:
-            width, height = self.player.get_size()
-            enemy.move((self.player.player_rect.x + width // 2, self.player.player_rect.y + height // 2))
+            enemy.move((self.player.player_rect.centerx , self.player.player_rect.centery))
 
-            if enemy.hit_player((self.player.player_rect.x + width // 2, self.player.player_rect.y + height // 2)):
-                self.player.health -= 1
+            if enemy.hit_player(self.player):
                 print(self.player.health)
 
     def run_loop(self):
@@ -74,7 +71,7 @@ class Run_game:
                     width, height = self.player.get_size()
                     self.bullets.append(Bullet(self.player.player_rect.x + width // 2,
                                                self.player.player_rect.y + height // 2,
-                                               mouse_pos, 10))
+                                               mouse_pos, (20, 20)))
 
             self.entities_events()
             key = pg.key.get_pressed()
