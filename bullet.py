@@ -1,5 +1,6 @@
-import pygame
+import pygame as pg
 import math
+
 
 class Bullet:
     def __init__(self, x, y, mouse_pos,radius):
@@ -9,7 +10,7 @@ class Bullet:
         self.velocity = self.calculate_direction(mouse_pos)
         self.color = (255, 0, 0)
         self.radius = radius
-
+        self.not_hit = True
 
     def calculate_direction(self, mouse_pos):
         dir_x = (mouse_pos[0] - self.x)
@@ -19,4 +20,4 @@ class Bullet:
         return dir_vector
 
     def draw(self, screen):
-        pygame.draw.circle(screen, self.color, (self.x, self.y), self.radius)
+        pg.draw.circle(screen, self.color, (self.x, self.y), self.radius)

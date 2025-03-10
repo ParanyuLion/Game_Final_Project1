@@ -4,6 +4,7 @@ from background import Background
 from game_config import Config
 from bullet import Bullet
 from Enemy import Enemy
+from UI import HealthBar
 
 
 class Run_game:
@@ -18,6 +19,7 @@ class Run_game:
         self.__running = True
         self.bullets = []
         self.enemies = []
+        self.health_bar = HealthBar(20, 20, 300, 35, self.player.health)
         for i in range(3):
             self.enemies.append(Enemy())
 
@@ -27,26 +29,35 @@ class Run_game:
         self.player.draw(self.__screen)
         for bullet in self.bullets:
             bullet.draw(self.__screen)
+
         for enemies in self.enemies:
             enemies.draw(self.__screen)
 
+        self.health_bar.draw(self.__screen, self.player.health)
+
     def entities_events(self):
+        """"bullets event"""
         for bullet in self.bullets:
             if 1000 > bullet.x > 0 and 1000 > bullet.y > 0:
                 bullet.x += bullet.velocity[0]
                 bullet.y += bullet.velocity[1]
                 for enemy in self.enemies:
-                    enemy.get_hit((bullet.x, bullet.y))
+                    if enemy.get_damage((bullet.x, bullet.y)):
+                        if bullet in self.bullets:
+                            self.bullets.pop(self.bullets.index(bullet))
                     if enemy.check_dead():
                         self.enemies.pop(self.enemies.index(enemy))
             else:
                 self.bullets.pop(self.bullets.index(bullet))
+
+        """"enemies event"""
         for enemy in self.enemies:
             width, height = self.player.get_size()
             enemy.move((self.player.player_rect.x + width // 2, self.player.player_rect.y + height // 2))
 
             if enemy.hit_player((self.player.player_rect.x + width // 2, self.player.player_rect.y + height // 2)):
-                self.enemies.pop(self.enemies.index(enemy))
+                self.player.health -= 1
+                print(self.player.health)
 
     def run_loop(self):
         clock = pg.time.Clock()
@@ -61,8 +72,8 @@ class Run_game:
                 if event.type == pg.MOUSEBUTTONDOWN:
                     mouse_pos = pg.mouse.get_pos()
                     width, height = self.player.get_size()
-                    self.bullets.append(Bullet(self.player.player_rect.x+width//2,
-                                               self.player.player_rect.y+height//2,
+                    self.bullets.append(Bullet(self.player.player_rect.x + width // 2,
+                                               self.player.player_rect.y + height // 2,
                                                mouse_pos, 10))
 
             self.entities_events()
@@ -70,11 +81,11 @@ class Run_game:
             # print(self.player.player_rect.y, self.player.player_rect.x)
             if key[pg.K_w] and self.player.player_rect.y > 0:
                 self.player.move("UP")
-            if key[pg.K_s] and self.player.player_rect.y < Config.get('WIN_HEIGHT')-160:
+            if key[pg.K_s] and self.player.player_rect.y < Config.get('WIN_HEIGHT') - 160:
                 self.player.move("DOWN")
             if key[pg.K_a] and self.player.player_rect.x > 0:
                 self.player.move("LEFT")
-            if key[pg.K_d] and self.player.player_rect.x < Config.get('WIN_WIDTH')-160:
+            if key[pg.K_d] and self.player.player_rect.x < Config.get('WIN_WIDTH') - 160:
                 self.player.move("RIGHT")
 
             pg.display.update()
