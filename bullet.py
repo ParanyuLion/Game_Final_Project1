@@ -6,7 +6,7 @@ class Bullet:
     def __init__(self, x, y, mouse_pos, size):
         self.__speed = 10
         self.__size = size
-        self.__frame_speed = 50
+        self.__frame_speed = 100
         self.__bullet_pic = pg.image.load("Game_Final_Project1/picture/bullet1_strip.png")
         self.__frames = self.load_frames(frame_width=10, frame_height=10, num_frames=2)
         self.__frame_index = 0

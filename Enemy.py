@@ -31,9 +31,8 @@ class Enemy:
             self.enemy_rect.x += (pos[0] - (self.enemy_rect.x + width // 2)) * self.__speed
             self.enemy_rect.y += (pos[1] - (self.enemy_rect.y + width // 2)) * self.__speed
 
-    def get_damage(self, pos):
-        width, height = self.get_size()
-        if (abs(self.enemy_rect.x + width // 2 - pos[0]) < 40) and (abs(self.enemy_rect.y + height // 2 - pos[1]) < 40):
+    def get_damage(self, bullet):
+        if self.enemy_rect.colliderect(bullet.bullet_rect):
             self.__health -= 1
             return True
 

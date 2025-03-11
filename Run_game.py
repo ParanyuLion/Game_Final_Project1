@@ -14,7 +14,7 @@ class Run_game:
         self.__screen = pg.display.set_mode((Config.get('WIN_WIDTH'), Config.get('WIN_HEIGHT')))
         self.__screen.fill(Config.get('BG_COLOR'))
         self.__background = pg.image.load(Background.get("FOREST"))
-        self.player = player.Player()
+        self.player = player.Player(Config.get('WIN_WIDTH')//2, Config.get('WIN_HEIGHT')//2)
         self.player.draw(self.__screen)
         self.__running = True
         self.bullets = []
@@ -41,7 +41,7 @@ class Run_game:
             if 1000 > bullet.bullet_rect.centerx > 0 and 1000 > bullet.bullet_rect.centery > 0:
                 bullet.update()
                 for enemy in self.enemies:
-                    if enemy.get_damage((bullet.bullet_rect.x, bullet.bullet_rect.y)):
+                    if enemy.get_damage(bullet):
                         if bullet in self.bullets:
                             self.bullets.pop(self.bullets.index(bullet))
                     if enemy.check_dead():
@@ -49,9 +49,9 @@ class Run_game:
             else:
                 self.bullets.pop(self.bullets.index(bullet))
 
-        """"enemies event"""
+        """enemies event"""
         for enemy in self.enemies:
-            enemy.move((self.player.player_rect.centerx , self.player.player_rect.centery))
+            enemy.move((self.player.player_rect.centerx, self.player.player_rect.centery))
 
             if enemy.hit_player(self.player):
                 print(self.player.health)
