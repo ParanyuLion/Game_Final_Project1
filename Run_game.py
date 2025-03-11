@@ -78,11 +78,11 @@ class Run_game:
             # print(self.player.player_rect.y, self.player.player_rect.x)
             if key[pg.K_w] and self.player.player_rect.y > 0:
                 self.player.move("UP")
-            if key[pg.K_s] and self.player.player_rect.y < Config.get('WIN_HEIGHT') - 160:
+            if key[pg.K_s] and self.player.player_rect.y < Config.get('WIN_HEIGHT'):
                 self.player.move("DOWN")
             if key[pg.K_a] and self.player.player_rect.x > 0:
                 self.player.move("LEFT")
-            if key[pg.K_d] and self.player.player_rect.x < Config.get('WIN_WIDTH') - 160:
+            if key[pg.K_d] and self.player.player_rect.x < Config.get('WIN_WIDTH'):
                 self.player.move("RIGHT")
 
             pg.display.update()
