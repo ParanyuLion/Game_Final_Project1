@@ -12,9 +12,9 @@ class Player(Entity):
         self.__frames = self.load_frames(8, 9)
         self.__frame_speed = 100
         self.__frame_index = 0
-        self.image = self.__frames[self.__frame_index]
+        self.__current_frame = self.__frames[self.__frame_index]
         self.__last_update = 0
-        self.rect = self.image.get_rect(center=(x, y))
+        self.rect = self.__current_frame.get_rect(center=(x, y))
         self.last_move_rect = self.rect.copy()
         self.move_direction = "RIGHT"
         self.__speed = 2
@@ -40,20 +40,20 @@ class Player(Entity):
             self.__last_update = now
             self.__frame_index = (self.__frame_index + 1) % len(self.__frames)
             if self.move_direction == "RIGHT":
-                self.image = self.__frames[self.__frame_index]
+                self.__current_frame = self.__frames[self.__frame_index]
             else:
-                self.image = pg.transform.flip(self.__frames[self.__frame_index], True, False)
+                self.__current_frame = pg.transform.flip(self.__frames[self.__frame_index], True, False)
 
-    def atk_animation(self, screen, camera):
+    def atk_animation(self, screen):
         for i in range(len(self.__atk_frames)):
             now = pg.time.get_ticks()
             if now - self.__last_update > 1:
                 self.__last_update = now
                 self.__atk_frames_index = (self.__atk_frames_index + 1) % len(self.__atk_frames)
                 if self.atk_state:
-                    self.image = self.__atk_frames[self.__atk_frames_index]
+                    self.__current_frame = self.__atk_frames[self.__atk_frames_index]
                     print("atk", self.__atk_frames_index)
-            screen.blit(self.image, self.rect)
+            screen.blit(self.__current_frame, self.rect)
             if self.__atk_frames_index == 7:
                 self.atk_state = False
                 break
@@ -94,13 +94,13 @@ class Player(Entity):
         if self.move_direction == "DOWN":
             self.rect.y += self.__dash_speed
 
-    def draw(self, screen, camera):
+    def draw(self, screen):
         """attack animation"""
         if self.atk_state:
-            self.atk_animation(screen, camera)
+            self.atk_animation(screen)
         else:
             """normal animation"""
-            screen.blit(self.image, self.rect)
+            screen.blit(self.__current_frame, self.rect)
 
     def get_size(self):
-        return self.image.get_size()
+        return self.__current_frame.get_size()
