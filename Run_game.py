@@ -69,6 +69,7 @@ class Run_game:
                 if event.type == pg.MOUSEBUTTONDOWN:
                     mouse_pos = pg.mouse.get_pos()
                     width, height = self.player.get_size()
+                    self.player.attack()
                     self.bullets.append(Bullet(self.player.player_rect.x + width // 2,
                                                self.player.player_rect.y + height // 2,
                                                mouse_pos, (20, 20)))
