@@ -51,24 +51,10 @@ class Enemy(Entity):
                 self.last_attack_time = current_time
                 return True
 
-    def walk(self, dir):
-        self.last_move_rect = self.rect.copy()
-
-        if dir == "UP":
-            self.rect.y -= self.__speed
-            # self.move_direction = "UP"
-        if dir == "LEFT":
-            self.rect.x -= self.__speed
-            self.move_direction = "LEFT"
-        if dir == "RIGHT":
-            self.rect.x += self.__speed
-            self.move_direction = "RIGHT"
-        if dir == "DOWN":
-            self.rect.y += self.__speed
-
-    def draw(self, screen):
-        self.health_bar.draw(screen, self.__health, self.rect.x, self.rect.y)
-        screen.blit(self.image, self.rect)
+    def draw(self, screen,camera):
+        bar_x, bar_y = camera.apply(self).topleft
+        self.health_bar.draw(screen, self.__health, bar_x, bar_y - 20)
+        screen.blit(self.image, camera.apply(self))
 
     def get_size(self):
         return self.image.get_size()

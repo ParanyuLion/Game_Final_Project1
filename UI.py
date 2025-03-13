@@ -1,8 +1,9 @@
 import pygame as pg
 
 
-class HealthBar:
+class HealthBar(pg.sprite.Sprite):
     def __init__(self, x, y, width, height, max_hp):
+        super().__init__()
         self.x = x
         self.y = y
         self.width = width

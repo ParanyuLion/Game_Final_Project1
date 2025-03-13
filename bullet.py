@@ -11,7 +11,7 @@ class Bullet(Entity):
         self.__frame_speed = 100
         self.__frames = self.load_frames(frame_width=10, frame_height=10, num_frames=2)
         self.__frame_index = 0
-        self.__current_frame = self.__frames[self.__frame_index]
+        self.image = self.__frames[self.__frame_index]
         self.__last_update = pg.time.get_ticks()
         # self.rect = self.rect(center=(x,y))
         self.velocity = self.calculate_direction(mouse_pos)
@@ -40,7 +40,7 @@ class Bullet(Entity):
         if now - self.__last_update > self.__frame_speed:
             self.__last_update = now
             self.__frame_index = (self.__frame_index + 1) % len(self.__frames)
-            self.__current_frame = self.__frames[self.__frame_index]
+            self.image = self.__frames[self.__frame_index]
 
-    def draw(self, screen):
-        screen.blit(self.__current_frame, self.rect)
+    def draw(self, screen, camera):
+        screen.blit(self.image, camera.apply(self))
