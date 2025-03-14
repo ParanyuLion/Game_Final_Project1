@@ -13,6 +13,8 @@ class Bullet(Entity):
         self.__frame_index = 0
         self.image = self.__frames[self.__frame_index]
         self.__last_update = pg.time.get_ticks()
+
+
         # self.rect = self.rect(center=(x,y))
         self.velocity = self.calculate_direction(mouse_pos)
         self.color = (255, 0, 0)

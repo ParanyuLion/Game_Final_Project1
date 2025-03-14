@@ -70,13 +70,14 @@ class Run_game:
                     self.bg_width-self.__border_y - self.bullet_size[1]> bullet.rect.centery > self.__border_y):
                 bullet.update()
                 for enemy in self.enemies:
-                    if enemy.get_damage(bullet):
-                        if bullet in self.bullets:
-                            self.camera.remove(bullet)
-                            self.bullets.pop(self.bullets.index(bullet))
-                    if enemy.check_dead():
-                        self.camera.remove(enemy)
-                        self.enemies.pop(self.enemies.index(enemy))
+                    if enemy.check_alive():
+                        if enemy.get_damage(bullet):
+                            if bullet in self.bullets:
+                                self.camera.remove(bullet)
+                                self.bullets.pop(self.bullets.index(bullet))
+                    # if enemy.check_dead():
+                    #     self.camera.remove(enemy)
+                    #     self.enemies.pop(self.enemies.index(enemy))
 
             else:
                 self.camera.remove(bullet)
@@ -87,7 +88,7 @@ class Run_game:
             enemy.move(self.player)
 
             if enemy.hit_player(self.player):
-                print(self.player.health)
+                pass
 
     def run_loop(self):
         clock = pg.time.Clock()

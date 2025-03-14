@@ -9,33 +9,40 @@ class Player(Entity):
         self.health = health
         self.__atk_frames = []
         self.__atk_frames_index = 0
-        self.__frames = self.load_frames(8, 9)
+
+        self.__last_update = 0
+        self.__frames = self.__load_frames(8, 9)
         self.__frame_speed = 100
         self.__frame_index = 0
         self.image = self.__frames[self.__frame_index]
-        self.__last_update = 0
+
         self.rect = self.image.get_rect(center=(x, y))
         self.last_move_rect = self.rect.copy()
         self.move_direction = "RIGHT"
         self.__left_right = "RIGHT"
         self.__speed = 2
         self.__dash_speed = 120
+
         self.atk_speed = 30
         self.atk_state = False
         self.walk_state = False
         self.idle_state = True
 
-    def load_frames(self, num_frames, num_movement):
+
+    def __load_frames(self, num_frames, num_movement):
         sheet_width, sheet_height = self.image.get_size()
         frame_width = sheet_width // num_frames
         frame_height = sheet_height // num_movement
         frames = []
+        """load walk animation"""
         for i in range(num_frames):
             frame = pg.transform.scale(self.image.subsurface(pg.Rect(i * frame_width, 3 * frame_height, frame_width, frame_height)), (80,80))
             frames.append(frame)
+        """load attack animation"""
         for i in range(num_frames):
-            atk_frames = pg.transform.scale(self.image.subsurface(pg.Rect(i * frame_width, 8 * frame_height, frame_width, frame_height)),(80, 80))
-            self.__atk_frames.append(atk_frames)
+            atk_frame = pg.transform.scale(self.image.subsurface(pg.Rect(i * frame_width, 8 * frame_height, frame_width, frame_height)),(80, 80))
+            self.__atk_frames.append(atk_frame)
+
         return frames
 
     def walk_animation(self):
@@ -59,14 +66,14 @@ class Player(Entity):
                         self.image = self.__atk_frames[self.__atk_frames_index]
                     else:
                         self.image = pg.transform.flip(self.__atk_frames[self.__atk_frames_index], True, False)
-                    print("atk", self.__atk_frames_index)
+                    # print("atk", self.__atk_frames_index)
             screen.blit(self.image, camera.apply(self))
             if self.__atk_frames_index == 7:
                 self.atk_state = False
                 break
 
     def move(self, dir):
-        print(self.__frame_index)
+        # print(self.__frame_index)
         self.walk_animation()
         self.last_move_rect = self.rect.copy()
         self.walk_state = True
