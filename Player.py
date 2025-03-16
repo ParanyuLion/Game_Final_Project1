@@ -28,7 +28,6 @@ class Player(Entity):
         self.walk_state = False
         self.idle_state = True
 
-
     def __load_frames(self, num_frames, num_movement):
         sheet_width, sheet_height = self.image.get_size()
         frame_width = sheet_width // num_frames

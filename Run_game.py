@@ -44,7 +44,7 @@ class Run_game:
         self.enemies = []
         self.health_bar = HealthBar(20, 20, 300, 35, self.player.health)
         for i in range(3):
-            self.enemies.append(Enemy(x=random.randint(0, 1000), y=random.randint(0, 620)))
+            self.enemies.append(Enemy(x=random.randint(0, 1000), y=random.randint(0, 620),health=10))
         self.camera = Camera(Config.get('WIN_WIDTH'), Config.get('WIN_HEIGHT'))
         self.camera.add(self.player, *self.enemies, *self.bullets)
         self.player.draw(self.__screen, self.camera)
@@ -85,8 +85,7 @@ class Run_game:
 
         """enemies event"""
         for enemy in self.enemies:
-            enemy.move(self.player)
-
+            enemy.move(self.player, self.enemies)
             if enemy.hit_player(self.player):
                 pass
 

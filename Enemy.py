@@ -24,10 +24,10 @@ class Enemy(Entity):
         self.__move_state = True
         self.__already_dead = False
 
-
         self.__atk_speed = 500
         self.__atk_frame_speed = self.__atk_speed//8
         self.__health = health
+
         self.__speed = 1.5
         self.__damage = damage
         self.__direction = pg.math.Vector2()
@@ -107,7 +107,7 @@ class Enemy(Entity):
                 self.atk_state = False
                 break
 
-    def move(self, player):
+    def move(self, player, enemies):
         if self.check_alive():
             player_hitbox = player.rect.inflate(-player.rect.width * 0.7, -player.rect.height * 0.7)
             if not self.rect.colliderect(player_hitbox):
@@ -127,15 +127,30 @@ class Enemy(Entity):
                         self.__direction = (player_vector - enemy_vector).normalize()
                     else:
                         self.__direction = pg.math.Vector2()
-
+                    self.avoid_others(enemies)
                     self.__position += self.__direction * self.__speed
+
                     self.rect.topleft = (int(self.__position.x), int(self.__position.y))
 
+    def avoid_others(self, enemies):
+        avoid_vector = pg.math.Vector2(0, 0)
+        for other_enemy in enemies:
+            if other_enemy is not self:
+                distance = self.__position.distance_to(other_enemy.__position)
+                if distance < 50:  # กำหนดระยะที่ต้องการให้หลีกเลี่ยง
+                    avoid_vector += (self.__position - other_enemy.__position).normalize()
+
+        if avoid_vector.length() > 0:
+            self.__direction += avoid_vector.normalize() * 0.5  # ปรับให้ทิศทางหลีกเลี่ยง
+    def respawn(self, health=10):
+        self.__health = health
+        self.__already_dead = False
 
     def get_damage(self, bullet):
         if self.rect.colliderect(bullet.rect):
             self.__health -= 1
             return True
+
 
     def check_alive(self):
         if self.__health > 0:
@@ -170,3 +185,11 @@ class Enemy(Entity):
 
     def get_size(self):
         return self.image.get_size()
+
+    # def collide_other(self, others):
+    #     for other in others:
+    #         if other != self:
+    #             if self.rect.colliderect(other.rect):
+    #                 return True
+    #     return False
+
