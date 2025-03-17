@@ -22,7 +22,7 @@ class Enemy(Entity):
         self.image = self.__frames[self.__frame_index]
         self.__atk_state = False
         self.__move_state = True
-        self.__already_dead = False
+        self.already_dead = False
 
         self.__atk_speed = 500
         self.__atk_frame_speed = self.__atk_speed//8
@@ -65,15 +65,15 @@ class Enemy(Entity):
             if now - self.__last_update > self.__dead_frames_speed:
                 self.__last_update = now
                 self.__dead_frames_index = (self.__dead_frames_index + 1) % len(self.__dead_frames)
-                if not self.check_alive() and not self.__already_dead:
+                if not self.check_alive() and not self.already_dead:
                     if self.__left_right == "RIGHT":
                         self.image = self.__dead_frames[self.__dead_frames_index]
                     else:
                         self.image = pg.transform.flip(self.__dead_frames[self.__dead_frames_index], True, False)
-                    print("dead", self.__atk_frames_index)
+                    # print("dead", self.__atk_frames_index)
             screen.blit(self.image, camera.apply(self))
             if self.__dead_frames_index == 4:
-                self.__already_dead = True
+                self.already_dead = True
                 break
 
     def __walk_animation(self):
@@ -101,7 +101,7 @@ class Enemy(Entity):
                         self.image = self.__atk_frames[self.__atk_frames_index]
                     else:
                         self.image = pg.transform.flip(self.__atk_frames[self.__atk_frames_index], True, False)
-                    print("atk", self.__atk_frames_index)
+                    # print("atk", self.__atk_frames_index)
             screen.blit(self.image, camera.apply(self))
             if self.__atk_frames_index == 7:
                 self.atk_state = False
@@ -137,14 +137,15 @@ class Enemy(Entity):
         for other_enemy in enemies:
             if other_enemy is not self:
                 distance = self.__position.distance_to(other_enemy.__position)
-                if distance < 50:  # กำหนดระยะที่ต้องการให้หลีกเลี่ยง
+                if distance < 50:
                     avoid_vector += (self.__position - other_enemy.__position).normalize()
 
         if avoid_vector.length() > 0:
-            self.__direction += avoid_vector.normalize() * 0.5  # ปรับให้ทิศทางหลีกเลี่ยง
+            self.__direction += avoid_vector.normalize() * 0.5
+
     def respawn(self, health=10):
         self.__health = health
-        self.__already_dead = False
+        self.already_dead = False
 
     def get_damage(self, bullet):
         if self.rect.colliderect(bullet.rect):
@@ -180,7 +181,7 @@ class Enemy(Entity):
                 self.__atk_animation(screen, camera)
             else:
                 screen.blit(self.image, camera.apply(self))
-        elif not self.__already_dead:
+        elif not self.already_dead:
             self.__dead_animation(screen, camera)
 
     def get_size(self):

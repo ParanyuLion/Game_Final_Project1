@@ -19,12 +19,12 @@ class Camera(pg.sprite.Group):
         return entity.rect.move(-self.camera_rect.x, -self.camera_rect.y)
 
     def update(self, target):
-        x = target.rect.centerx - 500
-        y = target.rect.centery - 360
+        x = target.rect.centerx - Config.get('WIN_WIDTH')//2
+        y = target.rect.centery - Config.get('WIN_HEIGHT')//2
         self.camera_rect.topleft = (x, y)
 
 
-class Run_game:
+class RunGame:
     def __init__(self):
         """set up game"""
         pg.init()
@@ -33,28 +33,32 @@ class Run_game:
         self.__screen.fill(Config.get('BG_COLOR'))
         self.__running = True
         """background attribute"""
-        self.__background = pg.transform.scale(pg.image.load("Game_Final_Project1/picture/Dungeon_tile.png"), (1500, 1500))
+        self.__background = pg.transform.scale(pg.image.load("Game_Final_Project1/picture/Dungeon_tile.png"),
+                                               (1500, 1500))
         self.bg_width, self.bg_height = self.__background.get_size()
         self.__border_x = 200
         self.__border_y = 180
         """entities attribute"""
         self.player = Player(self.bg_width // 2, self.bg_height // 2)
         self.bullets = []
-        self.bullet_size = (20,20)
+        self.bullet_size = (20, 20)
         self.enemies = []
         self.health_bar = HealthBar(20, 20, 300, 35, self.player.health)
-        for i in range(3):
-            self.enemies.append(Enemy(x=random.randint(0, 1000), y=random.randint(0, 620),health=10))
+        for i in range(1):
+            self.enemies.append(Enemy(x=random.randint(0, 1000), y=random.randint(0, 620), health=5))
         self.camera = Camera(Config.get('WIN_WIDTH'), Config.get('WIN_HEIGHT'))
         self.camera.add(self.player, *self.enemies, *self.bullets)
         self.player.draw(self.__screen, self.camera)
         self.__last_shot_time = 0
+        # self.count = 0
+        self.__level = 1
+        self.__complete_level = False
 
     def update_all(self):
         self.camera.update(self.player)
         self.__screen.fill(Config.get('BG_COLOR'))
         self.__screen.blit(self.__background,
-                           (-self.camera.camera_rect.x, -self.camera.camera_rect.y))  # ✅ พื้นหลังสัมพันธ์กับกล้อง
+                           (-self.camera.camera_rect.x, -self.camera.camera_rect.y))
         # self.player.draw(self.__screen, self.camera)
         for entity in self.camera:
             entity.draw(self.__screen, self.camera)
@@ -66,8 +70,8 @@ class Run_game:
         """"bullets event"""
         for bullet in self.bullets:
             # check that bullets not go out of border
-            if (self.bg_width-self.__border_x-self.bullet_size[0] > bullet.rect.centerx > self.__border_x and
-                    self.bg_width-self.__border_y - self.bullet_size[1]> bullet.rect.centery > self.__border_y):
+            if (self.bg_width - self.__border_x - self.bullet_size[0] > bullet.rect.centerx > self.__border_x and
+                    self.bg_width - self.__border_y - self.bullet_size[1] > bullet.rect.centery > self.__border_y):
                 bullet.update()
                 for enemy in self.enemies:
                     if enemy.check_alive():
@@ -88,6 +92,54 @@ class Run_game:
             enemy.move(self.player, self.enemies)
             if enemy.hit_player(self.player):
                 pass
+            if enemy.already_dead:
+                self.enemies.remove(enemy)
+                self.camera.remove(enemy)
+        # if count >= len(self.enemies):
+        #     self.__complete_level = True
+        # else:
+        #     self.__complete_level = False
+        if len(self.enemies) == 0:
+            self.__complete_level = True
+        else:
+            self.__complete_level = False
+
+    def load_level(self):
+        self.enemies.clear()
+        if self.__level == 1:
+            pass
+
+        elif self.__level == 2:
+            for i in range(2):
+                self.enemies.append(Enemy(x=random.randint(0, 1000), y=random.randint(0, 620), health=5))
+            self.camera.add(*self.enemies)
+            self.__background = pg.transform.scale(pg.image.load("Game_Final_Project1/picture/Dungeon tileset.png"),
+                                                   (1500, 1500))
+            w,h = self.__background.get_size()
+            self.player.rect.center = (w//2, h//2)
+
+        elif self.__level == 3:
+            for i in range(3):
+                self.enemies.append(Enemy(x=random.randint(0, 1000), y=random.randint(0, 620), health=5))
+            self.camera.add(*self.enemies)
+            self.__background = pg.transform.scale(pg.image.load("Game_Final_Project1/picture/bg1.png"),
+                                                   (1500, 1500))
+            w, h = self.__background.get_size()
+            self.player.rect.center = (w // 2, h // 2)
+
+        elif self.__level == 4:
+            for i in range(4):
+                self.enemies.append(Enemy(x=random.randint(0, 1000), y=random.randint(0, 620), health=5))
+            self.camera.add(*self.enemies)
+            w, h = self.__background.get_size()
+            self.player.rect.center = (w // 2, h // 2)
+
+        else:
+            for i in range(self.__level):
+                self.enemies.append(Enemy(x=random.randint(0, 1000), y=random.randint(0, 620), health=5))
+            self.camera.add(*self.enemies)
+            w, h = self.__background.get_size()
+            self.player.rect.center = (w // 2, h // 2)
 
     def run_loop(self):
         clock = pg.time.Clock()
@@ -99,15 +151,18 @@ class Run_game:
                 if event.type == pg.KEYDOWN:
                     if event.key == pg.K_SPACE:
                         self.player.dash()
+                    if event.key == pg.K_e and self.__complete_level:
+                        self.__level += 1
+                        self.load_level()
                 if event.type == pg.MOUSEBUTTONDOWN:
                     if event.button == pg.BUTTON_LEFT:
                         now = pg.time.get_ticks()
-                        if now-self.__last_shot_time > self.player.atk_speed*4:
+                        if now - self.__last_shot_time > self.player.atk_speed * 4:
                             mouse_pos = pg.mouse.get_pos()
 
                             mouse_pos_world = (mouse_pos[0] + self.camera.camera_rect.x,
                                                mouse_pos[1] + self.camera.camera_rect.y)
-                            if mouse_pos_world[0]<self.player.rect.x:
+                            if mouse_pos_world[0] < self.player.rect.x:
                                 self.player.set_left_right("LEFT")
                             else:
                                 self.player.set_left_right("RIGHT")
@@ -123,11 +178,11 @@ class Run_game:
             # print(self.player.player_rect.y, self.player.player_rect.x)
             if key[pg.K_w] and self.player.rect.y > self.__border_y:
                 self.player.move("UP")
-            if key[pg.K_s] and self.player.rect.y < self.bg_height-80-self.__border_y-20:
+            if key[pg.K_s] and self.player.rect.y < self.bg_height - 80 - self.__border_y - 20:
                 self.player.move("DOWN")
             if key[pg.K_a] and self.player.rect.x > self.__border_x:
                 self.player.move("LEFT")
-            if key[pg.K_d] and self.player.rect.x < self.bg_width-80-self.__border_x:
+            if key[pg.K_d] and self.player.rect.x < self.bg_width - 80 - self.__border_x:
                 self.player.move("RIGHT")
 
             pg.display.update()
@@ -135,5 +190,5 @@ class Run_game:
         pg.quit()
 
 
-play = Run_game()
+play = RunGame()
 play.run_loop()
