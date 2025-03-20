@@ -20,7 +20,7 @@ class Player(Entity):
         self.last_move_rect = self.rect.copy()
         self.move_direction = "RIGHT"
         self.__left_right = "RIGHT"
-        self.__speed = 2
+        self.__speed = 7 #initial2
         self.__dash_speed = 120
 
         self.atk_speed = 30
@@ -70,6 +70,26 @@ class Player(Entity):
             if self.__atk_frames_index == 7:
                 self.atk_state = False
                 break
+
+    def wall_collision(self, dir, wall, bg):
+        print(self.rect.x, self.rect.y)
+        if dir == "LEFT":
+            if wall < self.rect.x:
+                return True
+            return False
+        elif dir == "RIGHT":
+            if wall > self.rect.x:
+                return True
+            return False
+        elif dir == "UP":
+            if wall < self.rect.y:
+                return True
+            return False
+        elif dir == "DOWN":
+            if wall > self.rect.y:
+                return True
+            return False
+
 
     def move(self, dir):
         # print(self.__frame_index)
@@ -127,4 +147,3 @@ class Player(Entity):
 
     def set_left_right(self, dir):
         self.__left_right = dir
-
