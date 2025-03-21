@@ -1,4 +1,6 @@
 import pygame as pg
+
+from Game_Final_Project1 import entity
 from Player import Player
 from background import Background as bgd
 from game_config import Config
@@ -34,14 +36,16 @@ class RunGame:
         self.__running = True
 
         """background attribute"""
-        self.__background = bgd.load_bg('lv1')
+        self.level_name = 'lv1'
+        self.__background = bgd.load_bg(self.level_name)
         self.bg_width, self.bg_height = self.__background.get_size()
-        self.__border = bgd.get('lv1', 'border')
+        self.__border = bgd.get(self.level_name, 'border')
         self.__level = 1
         self.__complete_level = False
 
         """entities attribute"""
-        self.player = Player(bgd.get('lv1', 'spawn')[0], bgd.get('lv1', 'spawn')[1])
+        spawn_point = bgd.get('lv1', 'spawn')
+        self.player = Player(spawn_point[0], spawn_point[1])
         self.bullets = []
         self.bullet_size = (20, 20)
         self.enemies = []
@@ -52,16 +56,13 @@ class RunGame:
         self.camera.add(self.player, *self.enemies, *self.bullets)
         self.player.draw(self.__screen, self.camera)
         self.__last_shot_time = 0
+        self.__at_door = False
         # self.count = 0
-
-
-
 
     def update_all(self):
         self.camera.update(self.player)
         self.__screen.fill(Config.get('BG_COLOR'))
-        self.__screen.blit(self.__background,
-                           (-self.camera.camera_rect.x, -self.camera.camera_rect.y))
+        self.__screen.blit(self.__background,(-self.camera.camera_rect.x, -self.camera.camera_rect.y))
         # self.player.draw(self.__screen, self.camera)
         for entity in self.camera:
             entity.draw(self.__screen, self.camera)
@@ -70,6 +71,9 @@ class RunGame:
         # self.camera.draw(self.__screen)
 
     def entities_events(self):
+        """players event"""
+        self.__at_door = self.player.door_collision(bgd.get(self.level_name, 'door'))
+
         """"bullets event"""
         for bullet in self.bullets:
             # check that bullets not go out of border
@@ -77,15 +81,12 @@ class RunGame:
                     self.__border["DOWN"] + self.bullet_size[1]*3.5 > bullet.rect.centery > self.__border["UP"]):
                 bullet.update()
                 for enemy in self.enemies:
-                    if enemy.check_alive():
-                        if enemy.get_damage(bullet):
-                            if bullet in self.bullets:
-                                self.camera.remove(bullet)
-                                self.bullets.pop(self.bullets.index(bullet))
-                    # if enemy.check_dead():
-                    #     self.camera.remove(enemy)
-                    #     self.enemies.pop(self.enemies.index(enemy))
-
+                    if enemy.check_alive() and enemy.get_damage(bullet):
+                        if bullet in self.bullets:
+                            self.camera.remove(bullet)
+                            # self.bullets.pop(self.bullets.index(bullet))
+                            self.bullets.remove(bullet)
+                            self.camera.remove(bullet)
             else:
                 self.camera.remove(bullet)
                 self.bullets.pop(self.bullets.index(bullet))
@@ -111,31 +112,36 @@ class RunGame:
     def load_level(self):
         self.enemies.clear()
         if self.__level == 1:
-            self.set_level('lv1')
+            self.level_name = 'lv1'
+            self.set_level(self.level_name)
 
         elif self.__level == 2:
+            self.level_name = 'lv2'
             for i in range(2):
                 self.enemies.append(Enemy(x=random.randint(0, 1000), y=random.randint(0, 620), health=5))
             self.camera.add(*self.enemies)
-            self.set_level('lv2')
+            self.set_level(self.level_name)
 
         elif self.__level == 3:
+            self.level_name = 'lv3'
             for i in range(3):
                 self.enemies.append(Enemy(x=random.randint(0, 1000), y=random.randint(0, 620), health=5))
             self.camera.add(*self.enemies)
-            self.set_level('lv3')
+            self.set_level(self.level_name)
 
         elif self.__level == 4:
+            self.level_name = 'lv2'
             for i in range(4):
                 self.enemies.append(Enemy(x=random.randint(0, 1000), y=random.randint(0, 620), health=5))
             self.camera.add(*self.enemies)
-            self.set_level('lv4')
+            self.set_level(self.level_name)
 
         else:
+            self.level_name = 'lv2'
             for i in range(self.__level):
                 self.enemies.append(Enemy(x=random.randint(0, 1000), y=random.randint(0, 620), health=5))
             self.camera.add(*self.enemies)
-            self.set_level('lv2')
+            self.set_level(self.level_name)
 
     def run_loop(self):
         clock = pg.time.Clock()
@@ -147,7 +153,7 @@ class RunGame:
                 if event.type == pg.KEYDOWN:
                     if event.key == pg.K_SPACE:
                         self.player.dash()
-                    if event.key == pg.K_e and self.__complete_level:
+                    if event.key == pg.K_e and self.__complete_level and self.__at_door:
                         self.__level += 1
                         self.load_level()
                 if event.type == pg.MOUSEBUTTONDOWN:
@@ -172,13 +178,13 @@ class RunGame:
             self.entities_events()
             key = pg.key.get_pressed()
             # print(self.player.player_rect.y, self.player.player_rect.x)
-            if key[pg.K_w] and self.player.wall_collision("UP", self.__border["UP"], self.__background.get_size()):
+            if key[pg.K_w] and self.player.wall_collision("UP", self.__border["UP"]):
                 self.player.move("UP")
-            if key[pg.K_s] and self.player.wall_collision("DOWN", self.__border["DOWN"], self.__background.get_size()):
+            if key[pg.K_s] and self.player.wall_collision("DOWN", self.__border["DOWN"]):
                 self.player.move("DOWN")
-            if key[pg.K_a] and self.player.wall_collision("LEFT", self.__border["LEFT"], self.__background.get_size()):
+            if key[pg.K_a] and self.player.wall_collision("LEFT", self.__border["LEFT"]):
                 self.player.move("LEFT")
-            if key[pg.K_d] and self.player.wall_collision("RIGHT", self.__border["RIGHT"], self.__background.get_size()):
+            if key[pg.K_d] and self.player.wall_collision("RIGHT", self.__border["RIGHT"]):
                 self.player.move("RIGHT")
 
             pg.display.update()

@@ -71,7 +71,12 @@ class Player(Entity):
                 self.atk_state = False
                 break
 
-    def wall_collision(self, dir, wall, bg):
+    def door_collision(self, door):
+        if (door['x'][0] <= self.rect.x <= door['x'][1]) and (door['y'][0] <= self.rect.y <= door['y'][1]):
+            return True
+        return False
+
+    def wall_collision(self, dir, wall):
         print(self.rect.x, self.rect.y)
         if dir == "LEFT":
             if wall < self.rect.x:
