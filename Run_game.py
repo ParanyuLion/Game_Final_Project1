@@ -1,12 +1,11 @@
 import pygame as pg
-
-from Game_Final_Project1 import entity
 from Player import Player
-from background import Background as bgd
+from background import Background as Bgd
 from game_config import Config
 from bullet import Bullet
-from Enemy import Enemy
+from Slime import Slime
 from UI import HealthBar
+from Minotaur import Minotaur
 import random
 
 
@@ -37,21 +36,18 @@ class RunGame:
 
         """background attribute"""
         self.level_name = 'lv1'
-        self.__background = bgd.load_bg(self.level_name)
+        self.__background = Bgd.load_bg(self.level_name)
         self.bg_width, self.bg_height = self.__background.get_size()
-        self.__border = bgd.get(self.level_name, 'border')
-        self.__level = 1
+        self.__border = Bgd.get(self.level_name, 'border')
+        self.__level = 0
         self.__complete_level = False
-
         """entities attribute"""
-        spawn_point = bgd.get('lv1', 'spawn')
+        spawn_point = Bgd.get('lv1', 'spawn')
         self.player = Player(spawn_point[0], spawn_point[1])
         self.bullets = []
         self.bullet_size = (20, 20)
         self.enemies = []
         self.health_bar = HealthBar(20, 20, 300, 35, self.player.health)
-        for i in range(1):
-            self.enemies.append(Enemy(x=random.randint(0, 1000), y=random.randint(0, 620), health=5))
         self.camera = Camera(Config.get('WIN_WIDTH'), Config.get('WIN_HEIGHT'))
         self.camera.add(self.player, *self.enemies, *self.bullets)
         self.player.draw(self.__screen, self.camera)
@@ -62,7 +58,7 @@ class RunGame:
     def update_all(self):
         self.camera.update(self.player)
         self.__screen.fill(Config.get('BG_COLOR'))
-        self.__screen.blit(self.__background,(-self.camera.camera_rect.x, -self.camera.camera_rect.y))
+        self.__screen.blit(self.__background, (-self.camera.camera_rect.x, -self.camera.camera_rect.y))
         # self.player.draw(self.__screen, self.camera)
         for entity in self.camera:
             entity.draw(self.__screen, self.camera)
@@ -72,7 +68,7 @@ class RunGame:
 
     def entities_events(self):
         """players event"""
-        self.__at_door = self.player.door_collision(bgd.get(self.level_name, 'door'))
+        self.__at_door = self.player.door_collision(Bgd.get(self.level_name, 'door'))
 
         """"bullets event"""
         for bullet in self.bullets:
@@ -105,41 +101,45 @@ class RunGame:
             self.__complete_level = False
 
     def set_level(self, name):
-        self.__background = bgd.load_bg(name)
-        self.__border = bgd.get(name, 'border')
-        self.player.rect.center = bgd.get(name, 'spawn')
+        self.__background = Bgd.load_bg(name)
+        self.__border = Bgd.get(name, 'border')
+        self.player.rect.center = Bgd.get(name, 'spawn')
 
     def load_level(self):
         self.enemies.clear()
         if self.__level == 1:
             self.level_name = 'lv1'
+            for i in range(2):
+                self.enemies.append(Minotaur(x=random.randint(0, 1000), y=random.randint(0, 620), health=5))
+            self.camera.add(*self.enemies)
             self.set_level(self.level_name)
 
         elif self.__level == 2:
             self.level_name = 'lv2'
+
             for i in range(2):
-                self.enemies.append(Enemy(x=random.randint(0, 1000), y=random.randint(0, 620), health=5))
+                self.enemies.append(Minotaur(x=random.randint(0, 1000), y=random.randint(0, 620), health=5))
             self.camera.add(*self.enemies)
             self.set_level(self.level_name)
 
         elif self.__level == 3:
             self.level_name = 'lv3'
             for i in range(3):
-                self.enemies.append(Enemy(x=random.randint(0, 1000), y=random.randint(0, 620), health=5))
+                self.enemies.append(Slime(x=random.randint(0, 1000), y=random.randint(0, 620), health=5))
             self.camera.add(*self.enemies)
             self.set_level(self.level_name)
 
         elif self.__level == 4:
             self.level_name = 'lv2'
             for i in range(4):
-                self.enemies.append(Enemy(x=random.randint(0, 1000), y=random.randint(0, 620), health=5))
+                self.enemies.append(Slime(x=random.randint(0, 1000), y=random.randint(0, 620), health=5))
             self.camera.add(*self.enemies)
             self.set_level(self.level_name)
 
         else:
             self.level_name = 'lv2'
             for i in range(self.__level):
-                self.enemies.append(Enemy(x=random.randint(0, 1000), y=random.randint(0, 620), health=5))
+                self.enemies.append(Slime(x=random.randint(0, 1000), y=random.randint(0, 620), health=5))
             self.camera.add(*self.enemies)
             self.set_level(self.level_name)
 
