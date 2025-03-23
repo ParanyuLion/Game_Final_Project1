@@ -3,9 +3,11 @@ from Player import Player
 from background import Background as Bgd
 from game_config import Config
 from bullet import Bullet
-from Slime import Slime
+
 from UI import HealthBar
+from Slime import Slime
 from Minotaur import Minotaur
+from Cthulu import Cthulu
 import random
 
 
@@ -109,8 +111,8 @@ class RunGame:
         self.enemies.clear()
         if self.__level == 1:
             self.level_name = 'lv1'
-            for i in range(2):
-                self.enemies.append(Minotaur(x=random.randint(0, 1000), y=random.randint(0, 620), health=5))
+            for i in range(1):
+                self.enemies.append(Cthulu(x=random.randint(0, 1000), y=random.randint(0, 620), health=5))
             self.camera.add(*self.enemies)
             self.set_level(self.level_name)
 
@@ -146,6 +148,7 @@ class RunGame:
     def run_loop(self):
         clock = pg.time.Clock()
         while self.__running:
+            # start_time = pg.time.get_ticks()
             self.update_all()
             for event in pg.event.get():
                 if event.type == pg.QUIT:
@@ -187,9 +190,11 @@ class RunGame:
             if key[pg.K_d] and self.player.wall_collision("RIGHT", self.__border["RIGHT"]):
                 self.player.move("RIGHT")
 
-            pg.display.update()
+            pg.display.flip()
             clock.tick(Config.get('FPS'))
-        pg.quit()
+            # end_time = pg.time.get_ticks()  # วัดเวลาสิ้นสุดของเฟรม
+            # print(f"Frame time: {end_time - start_time} ms")
+    pg.quit()
 
 
 play = RunGame()

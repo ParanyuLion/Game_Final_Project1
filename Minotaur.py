@@ -23,16 +23,18 @@ class Minotaur(Entity, Enemy):
         self.__atk_state = False
         self.__move_state = True
         self.already_dead = False
+        self.__change_phase = False
 
-        self.__atk_speed = 600
+        self.__atk_speed = 700
         self.__atk_frame_speed = self.__atk_speed // 8
         self.__health = health
+        self.__max_health = health
 
         self.__speed = 2
         self.__damage = damage
         self.__direction = pg.math.Vector2()
         self.__velocity = pg.math.Vector2()
-        self.health_bar = HealthBar(self.rect.x, self.rect.y, self.image.get_size()[0] // 2, 15, self.__health)
+        self.health_bar = HealthBar(self.rect.x, self.rect.y, self.image.get_size()[0] // 2, 15, self.__max_health)
         # self.last_move_rect = self.rect.copy()
         self.last_attack_time = 0
         self.__position = pg.math.Vector2(x, y)
@@ -77,6 +79,8 @@ class Minotaur(Entity, Enemy):
                     self.image = self.__dead_frames[self.__dead_frames_index]
                 else:
                     self.image = pg.transform.flip(self.__dead_frames[self.__dead_frames_index], True, False)
+        if self.__change_phase:
+            self.__color_set()
         screen.blit(self.image, camera.apply(self))
 
     def __walk_animation(self):
@@ -84,7 +88,6 @@ class Minotaur(Entity, Enemy):
         if now - self.__last_update > self.__frame_speed:
             self.__last_update = now
             self.__frame_index = (self.__frame_index + 1) % len(self.__frames)
-
             old_center = self.rect.center
             if self.__left_right == "LEFT":
                 self.image = self.__frames[self.__frame_index]
@@ -107,22 +110,25 @@ class Minotaur(Entity, Enemy):
                         self.image = self.__atk_frames1[self.__atk_frames_index]
                     else:
                         self.image = pg.transform.flip(self.__atk_frames1[self.__atk_frames_index], True, False)
+                if self.__atk_frames_index == len(self.__atk_frames1) - 1:
+                    self.__attack_animation_set = 2
+                    self.__atk_frames_index = -1
+                    self.__move_state = True
             else:
-
                 self.__atk_frames_index = (self.__atk_frames_index + 1) % len(self.__atk_frames2)
                 if self.__atk_state:
                     if self.__left_right == "LEFT":
                         self.image = self.__atk_frames2[self.__atk_frames_index]
                     else:
                         self.image = pg.transform.flip(self.__atk_frames2[self.__atk_frames_index], True, False)
+                if self.__atk_frames_index == len(self.__atk_frames2) - 1:
+                    self.__attack_animation_set = 1
+                    self.__atk_frames_index = -1
+                    self.__move_state = True
                 # print("atk", self.__atk_frames_index)
+        if self.__change_phase:
+            self.__color_set()
         screen.blit(self.image, camera.apply(self))
-        if self.__atk_frames_index == 8:
-            if self.__attack_animation_set == 1:
-                self.__attack_animation_set = 2
-            else:
-                self.__attack_animation_set = 1
-            self.__move_state = True
 
     def move(self, player, enemies):
         if self.check_alive():
@@ -162,10 +168,21 @@ class Minotaur(Entity, Enemy):
         if avoid_vector.length() > 0:
             self.__direction += avoid_vector.normalize() * 0.5
 
+    def change_color(self, old_color, new_color):
+        img_copy = self.image.copy()
+        px_array = pg.PixelArray(img_copy)
+        px_array.replace(old_color, new_color)
+        del px_array
+        self.image = img_copy
+
     def get_damage(self, bullet):
-        enemy_hitbox = self.rect.inflate(-self.rect.width * 0.7, -self.rect.height * 0.1)
+        enemy_hitbox = self.rect.inflate(-self.rect.width * 0.7, -self.rect.height * 0.7)
         if enemy_hitbox.colliderect(bullet.rect):
             self.__health -= 1
+            if self.__health == self.__max_health//2 and not self.__change_phase:
+                self.__change_phase = True
+                self.__speed *= 2
+                self.__damage = int(1.5* self.__damage)
             return True
 
     def check_alive(self):
@@ -190,6 +207,12 @@ class Minotaur(Entity, Enemy):
             self.__move_state = True
             return False
 
+    def __color_set(self):
+        self.change_color((160, 96, 64), (98, 43, 17))
+        self.change_color((128, 64, 32), (55, 26, 13))
+        self.change_color((255, 255, 255), (255, 1, 1))
+        self.change_color((176, 176, 176), (135, 16, 16))
+
     def draw(self, screen, camera):
         if self.check_alive():
             bar_x = camera.apply(self).centerx - self.health_bar.width // 2
@@ -198,6 +221,8 @@ class Minotaur(Entity, Enemy):
             if self.__atk_state:
                 self.__atk_animation(screen, camera)
             else:
+                if self.__change_phase:
+                    self.__color_set()
                 screen.blit(self.image, camera.apply(self))
         elif not self.already_dead:
             self.__dead_animation(screen, camera)
