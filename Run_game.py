@@ -70,8 +70,6 @@ class RunGame:
         # text_rect = text.get_rect(center=(Config.get('WIN_WIDTH') // 2, Config.get('WIN_HEIGHT') // 2))
         # self.__screen.blit(text, text_rect)
 
-
-
     def update_all(self):
         self.camera.update(self.player)
         self.__screen.fill(Config.get('BG_COLOR'))
@@ -106,6 +104,7 @@ class RunGame:
 
         """enemies event"""
         for enemy in self.enemies:
+            # print(f"Enemy Position: {enemy.rect.x}, {enemy.rect.y}")
             enemy.move(self.player, self.enemies)
             if enemy.hit_player(self.player):
                 pass
@@ -136,29 +135,40 @@ class RunGame:
             self.level_name = 'lv1'
             self.random_spawn()
             for i in range(1):
-                self.enemies.append(Cthulu(self.random_spawn()[0], self.random_spawn()[1], health=5))
+                spawn_x, spawn_y = self.random_spawn()
+                new_enemy = Cthulu(spawn_x, spawn_y, health=5)
+                new_enemy.rect.topleft = (spawn_x, spawn_y)
+                self.enemies.append(new_enemy)
             self.camera.add(*self.enemies)
             self.set_level(self.level_name)
 
         elif self.__level == 2:
             self.level_name = 'lv2'
-
             for i in range(2):
-                self.enemies.append(Minotaur(self.random_spawn()[0], self.random_spawn()[1], health=5))
+                spawn_x, spawn_y = self.random_spawn()
+                new_enemy = Minotaur(spawn_x, spawn_y, health=5)
+                new_enemy.rect.topleft = (spawn_x, spawn_y)
+                self.enemies.append(new_enemy)
             self.camera.add(*self.enemies)
             self.set_level(self.level_name)
 
         elif self.__level == 3:
             self.level_name = 'lv3'
             for i in range(3):
-                self.enemies.append(Slime(self.random_spawn()[0], self.random_spawn()[1], health=5))
+                spawn_x, spawn_y = self.random_spawn()
+                new_enemy = Slime(spawn_x, spawn_y, health=5)
+                new_enemy.rect.topleft = (spawn_x, spawn_y)
+                self.enemies.append(new_enemy)
             self.camera.add(*self.enemies)
             self.set_level(self.level_name)
 
         elif self.__level == 4:
             self.level_name = 'lv2'
             for i in range(4):
-                self.enemies.append(Slime(self.random_spawn()[0], self.random_spawn()[1], health=5))
+                spawn_x, spawn_y = self.random_spawn()
+                new_enemy = Slime(spawn_x, spawn_y, health=5)
+                new_enemy.rect.topleft = (spawn_x, spawn_y)
+                self.enemies.append(new_enemy)
             self.camera.add(*self.enemies)
             self.set_level(self.level_name)
 
