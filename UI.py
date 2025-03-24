@@ -34,3 +34,5 @@ class HealthBar(pg.sprite.Sprite):
             text_rect = text.get_rect(center=(x+self.width//2, y+self.height//2))
             screen.blit(text, text_rect)
 
+
+
