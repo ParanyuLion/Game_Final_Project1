@@ -3,7 +3,7 @@ from Player import Player
 from background import Background as Bgd
 from game_config import Config
 from bullet import Bullet
-
+from Effects import Explosion
 from UI import HealthBar
 from Slime import Slime
 from Minotaur import Minotaur
@@ -50,9 +50,10 @@ class RunGame:
         self.bullets = []
         self.bullet_size = (20, 20)
         self.enemies = []
+        self.effects = []
         self.health_bar = HealthBar(20, 20, 300, 35, self.player.health)
         self.camera = Camera(Config.get('WIN_WIDTH'), Config.get('WIN_HEIGHT'))
-        self.camera.add(self.player, *self.enemies, *self.bullets)
+        self.camera.add(self.player, *self.enemies, *self.bullets, *self.effects)
         self.player.draw(self.__screen, self.camera)
         self.__last_shot_time = 0
         self.__at_door = False
@@ -76,6 +77,10 @@ class RunGame:
         self.__screen.blit(self.__background, (-self.camera.camera_rect.x, -self.camera.camera_rect.y))
         # self.player.draw(self.__screen, self.camera)
         for entity in self.camera:
+            if isinstance(entity, Explosion):
+                if entity.finish:
+                    self.effects.remove(entity)
+                    self.camera.remove(entity)
             entity.draw(self.__screen, self.camera)
 
         self.health_bar.draw(self.__screen, self.player.health)
@@ -94,6 +99,9 @@ class RunGame:
                 for enemy in self.enemies:
                     if enemy.check_alive() and enemy.get_damage(bullet):
                         if bullet in self.bullets:
+                            explosion = Explosion(bullet.rect.x, bullet.rect.y)
+                            self.effects.append(explosion)
+                            self.camera.add(explosion)
                             self.camera.remove(bullet)
                             # self.bullets.pop(self.bullets.index(bullet))
                             self.bullets.remove(bullet)
@@ -117,11 +125,9 @@ class RunGame:
             self.__complete_level = False
 
     def random_spawn(self):
-        print(Bgd.get(self.level_name, 'enemy_spawn'))
         spawn = Bgd.get(self.level_name, 'enemy_spawn')
         spawn_x = spawn['x']
         spawn_y = spawn['y']
-        print(spawn_x, spawn_y)
         return random.randint(spawn_x[0],spawn_x[1]), random.randint(spawn_y[0],spawn_y[1])
 
     def set_level(self, name):
@@ -163,7 +169,7 @@ class RunGame:
             self.set_level(self.level_name)
 
         elif self.__level == 4:
-            self.level_name = 'lv2'
+            self.level_name = 'lv4'
             for i in range(4):
                 spawn_x, spawn_y = self.random_spawn()
                 new_enemy = Slime(spawn_x, spawn_y, health=5)
@@ -182,14 +188,17 @@ class RunGame:
     def run_loop(self):
         clock = pg.time.Clock()
         while self.__running:
-            # start_time = pg.time.get_ticks()
+            start_time = pg.time.get_ticks()
 
             for event in pg.event.get():
                 if event.type == pg.QUIT:
                     self.__running = False
                 if event.type == pg.KEYDOWN:
+                    # pause game
+                    # if event.key == pg.K_ESCAPE:
+                    #     self.__start_game = False
                     if event.key == pg.K_SPACE:
-                        self.player.dash()
+                        self.player.dash(self.__border)
                     if event.key == pg.K_e and self.__complete_level and self.__at_door:
                         self.__level += 1
                         self.load_level()
@@ -234,7 +243,7 @@ class RunGame:
 
             pg.display.flip()
             clock.tick(Config.get('FPS'))
-            # end_time = pg.time.get_ticks()
+            end_time = pg.time.get_ticks()
             # print(f"Frame time: {end_time - start_time} ms")
     pg.quit()
 

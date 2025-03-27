@@ -125,19 +125,36 @@ class Player(Entity):
     def attack(self):
         self.atk_state = True
 
-    def dash(self):
+    def dash(self, border):
+        predict_rect = self.rect.copy()
         self.last_move_rect = self.rect.copy()
         if self.move_direction == "UP":
-            self.rect.y -= self.__dash_speed
+            predict_rect.y -= self.__dash_speed
+            if predict_rect.y > border[self.move_direction]:
+                self.rect.y -= self.__dash_speed
+            else:
+                self.rect.y = border[self.move_direction]
 
         if self.move_direction == "LEFT":
-            self.rect.x -= self.__dash_speed
+            predict_rect.x -= self.__dash_speed
+            if predict_rect.x > border[self.move_direction]:
+                self.rect.x -= self.__dash_speed
+            else:
+                self.rect.x = border[self.move_direction]
 
         if self.move_direction == "RIGHT":
-            self.rect.x += self.__dash_speed
+            predict_rect.x += self.__dash_speed
+            if predict_rect.x < border[self.move_direction]:
+                self.rect.x += self.__dash_speed
+            else:
+                self.rect.x = border[self.move_direction]
 
         if self.move_direction == "DOWN":
-            self.rect.y += self.__dash_speed
+            predict_rect.y += self.__dash_speed
+            if predict_rect.y < border[self.move_direction]:
+                self.rect.y += self.__dash_speed
+            else:
+                self.rect.y = border[self.move_direction]
 
     def draw(self, screen, camera):
         """attack animation"""
