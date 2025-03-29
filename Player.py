@@ -22,6 +22,7 @@ class Player(Entity):
         self.__left_right = "RIGHT"
         self.__speed = 7 #initial2
         self.__dash_speed = 120
+        self.dash_cooldown = 1000
 
         self.atk_speed = 30
         self.atk_state = False

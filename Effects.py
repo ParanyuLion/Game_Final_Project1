@@ -3,9 +3,13 @@ from entity import Entity
 
 
 class Explosion(Entity):
+    _cached_frames = None
+
     def __init__(self, x, y, img="Game_Final_Project1/picture/explosion.png"):
         super().__init__(img, x, y)
-        self.__frames = self.__load_frames(7, 1)
+        if Explosion._cached_frames is None:
+            Explosion._cached_frames = self.__load_frames(7, 1)
+        self.__frames = Explosion._cached_frames
         self.__last_update = 0
         self.__frame_speed = 50
         self.__frame_index = 0
@@ -43,3 +47,48 @@ class Explosion(Entity):
             self.__run_animation()
             screen.blit(self.image, camera.apply(self))
 
+class DashEffect(Entity):
+    def __init__(self, x, y, img="Game_Final_Project1/picture/dash/FX001_01.png"):
+        super().__init__(img, x, y)
+        image1 = pg.image.load("Game_Final_Project1/picture/dash/FX001_01.png").convert_alpha()
+        image2 = pg.image.load("Game_Final_Project1/picture/dash/FX001_02.png").convert_alpha()
+        image3 = pg.image.load("Game_Final_Project1/picture/dash/FX001_03.png").convert_alpha()
+        image4 = pg.image.load("Game_Final_Project1/picture/dash/FX001_04.png").convert_alpha()
+        image5 = pg.image.load("Game_Final_Project1/picture/dash/FX001_05.png").convert_alpha()
+        self.__list_img = [image1, image2, image3, image4, image5]
+        self.__frames = self.__load_frames()
+        self.__last_update = 0
+        self.__frame_speed = 50
+        self.__frame_index = 0
+        self.finish = True
+        self.image = self.__frames[self.__frame_index]
+
+
+    def __load_frames(self):
+        frame_width, frame_height = self.image.get_size()
+        size = 3
+        w, h = frame_width * size, frame_height * size
+        frames = []
+        """load animation"""
+
+        for i in self.__list_img:
+            frame = pg.transform.scale(i, (w, h))
+            frames.append(frame)
+        return frames
+
+    def __run_animation(self):
+        now = pg.time.get_ticks()
+        if now - self.__last_update > self.__frame_speed:
+            self.__last_update = now
+            self.__frame_index = (self.__frame_index + 1) % len(self.__frames)
+            old_center = self.rect.center
+            self.image = self.__frames[self.__frame_index]
+            self.rect.size = self.image.get_size()
+            self.rect.center = old_center
+        if self.__frame_index == len(self.__frames) - 1:
+            self.finish = True
+
+    def draw(self, screen, camera):
+        if not self.finish:
+            self.__run_animation()
+            screen.blit(self.image, camera.apply(self))

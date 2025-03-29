@@ -3,7 +3,7 @@ from Player import Player
 from background import Background as Bgd
 from game_config import Config
 from bullet import Bullet
-from Effects import Explosion
+from Effects import Explosion, DashEffect
 from UI import HealthBar
 from Slime import Slime
 from Minotaur import Minotaur
@@ -56,8 +56,14 @@ class RunGame:
         self.camera.add(self.player, *self.enemies, *self.bullets, *self.effects)
         self.player.draw(self.__screen, self.camera)
         self.__last_shot_time = 0
+        self.__dash_time = 0
         self.__at_door = False
+        self.__dash = False
+        self.__before_dash_pos = self.player.rect
         # self.count = 0
+        dash_effect = DashEffect(self.player.rect.centerx, self.player.rect.centery)
+        self.effects.append(dash_effect)
+        self.camera.add(dash_effect)
 
     def main_menu(self):
         self.__screen.fill((0,0,0))
@@ -76,13 +82,21 @@ class RunGame:
         self.__screen.fill(Config.get('BG_COLOR'))
         self.__screen.blit(self.__background, (-self.camera.camera_rect.x, -self.camera.camera_rect.y))
         # self.player.draw(self.__screen, self.camera)
-        for entity in self.camera:
-            if isinstance(entity, Explosion):
-                if entity.finish:
-                    self.effects.remove(entity)
-                    self.camera.remove(entity)
-            entity.draw(self.__screen, self.camera)
+        finish_effect = []
 
+        for entity in self.camera:
+            if isinstance(entity, DashEffect):
+                if self.__dash:
+                    entity.rect = self.__before_dash_pos
+                    entity.finish = False
+                    self.__dash = False
+            elif isinstance(entity, Explosion):
+                if entity.finish:
+                    finish_effect.append(entity)
+            entity.draw(self.__screen, self.camera)
+        for effect in finish_effect:
+            self.effects.remove(effect)
+            self.camera.remove(effect)
         self.health_bar.draw(self.__screen, self.player.health)
         # self.camera.draw(self.__screen)
 
@@ -111,14 +125,18 @@ class RunGame:
                 self.bullets.pop(self.bullets.index(bullet))
 
         """enemies event"""
+        dead_enemies = []
         for enemy in self.enemies:
             # print(f"Enemy Position: {enemy.rect.x}, {enemy.rect.y}")
             enemy.move(self.player, self.enemies)
             if enemy.hit_player(self.player):
                 pass
             if enemy.already_dead:
-                self.enemies.remove(enemy)
-                self.camera.remove(enemy)
+                dead_enemies.append(enemy)
+        for enemy in dead_enemies:
+            self.enemies.remove(enemy)
+            self.camera.remove(enemy)
+            enemy.kill()
         if len(self.enemies) == 0:
             self.__complete_level = True
         else:
@@ -197,8 +215,12 @@ class RunGame:
                     # pause game
                     # if event.key == pg.K_ESCAPE:
                     #     self.__start_game = False
-                    if event.key == pg.K_SPACE:
+                    now = pg.time.get_ticks()
+                    if event.key == pg.K_SPACE and now - self.__dash_time > self.player.dash_cooldown:
+                        self.__before_dash_pos = self.player.rect.copy()
                         self.player.dash(self.__border)
+                        self.__dash = True
+                        self.__dash_time = now
                     if event.key == pg.K_e and self.__complete_level and self.__at_door:
                         self.__level += 1
                         self.load_level()
@@ -244,7 +266,8 @@ class RunGame:
             pg.display.flip()
             clock.tick(Config.get('FPS'))
             end_time = pg.time.get_ticks()
-            # print(f"Frame time: {end_time - start_time} ms")
+            if end_time - start_time > 17:
+                print(f"Frame time: {end_time - start_time} ms")
     pg.quit()
 
 
