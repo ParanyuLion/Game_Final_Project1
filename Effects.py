@@ -47,6 +47,7 @@ class Explosion(Entity):
             self.__run_animation()
             screen.blit(self.image, camera.apply(self))
 
+
 class DashEffect(Entity):
     def __init__(self, x, y, img="Game_Final_Project1/picture/dash/FX001_01.png"):
         super().__init__(img, x, y)
@@ -63,14 +64,12 @@ class DashEffect(Entity):
         self.finish = True
         self.image = self.__frames[self.__frame_index]
 
-
     def __load_frames(self):
         frame_width, frame_height = self.image.get_size()
         size = 3
         w, h = frame_width * size, frame_height * size
         frames = []
         """load animation"""
-
         for i in self.__list_img:
             frame = pg.transform.scale(i, (w, h))
             frames.append(frame)

@@ -4,12 +4,16 @@ from entity import Entity
 
 
 class Bullet(Entity):
+    _cached_frames = None
+
     def __init__(self, x, y, mouse_pos, size):
         super().__init__("Game_Final_Project1/picture/bullet1_strip.png",x, y)
         self.__speed = 20
         self.__size = size
         self.__frame_speed = 100
-        self.__frames = self.load_frames(frame_width=10, frame_height=10, num_frames=2)
+        if Bullet._cached_frames is None:
+            Bullet._cached_frames = self.load_frames(frame_width=10, frame_height=10, num_frames=2)
+        self.__frames = Bullet._cached_frames
         self.__frame_index = 0
         self.image = self.__frames[self.__frame_index]
         self.__last_update = pg.time.get_ticks()

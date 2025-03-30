@@ -1,11 +1,11 @@
 import pygame as pg
-from game_config import Config
+# from game_config import Config
 from entity import Entity
 
 
 class Player(Entity):
     def __init__(self, x, y, health=100):
-        super().__init__("Game_Final_Project1/picture/AnimationSheet_Character.png",x, y)
+        super().__init__("Game_Final_Project1/picture/AnimationSheet_Character.png", x, y)
         self.health = health
         self.__atk_frames = []
         self.__atk_frames_index = 0
@@ -19,8 +19,8 @@ class Player(Entity):
         self.rect = self.image.get_rect(center=(x, y))
         self.last_move_rect = self.rect.copy()
         self.move_direction = "RIGHT"
-        self.__left_right = "RIGHT"
-        self.__speed = 7 #initial2
+        self.left_right = "RIGHT"
+        self.__speed = 7  # initial2
         self.__dash_speed = 120
         self.dash_cooldown = 1000
 
@@ -36,11 +36,13 @@ class Player(Entity):
         frames = []
         """load walk animation"""
         for i in range(num_frames):
-            frame = pg.transform.scale(self.image.subsurface(pg.Rect(i * frame_width, 3 * frame_height, frame_width, frame_height)), (80,80))
+            frame = pg.transform.scale(
+                self.image.subsurface(pg.Rect(i * frame_width, 3 * frame_height, frame_width, frame_height)), (80, 80))
             frames.append(frame)
         """load attack animation"""
         for i in range(num_frames):
-            atk_frame = pg.transform.scale(self.image.subsurface(pg.Rect(i * frame_width, 8 * frame_height, frame_width, frame_height)),(80, 80))
+            atk_frame = pg.transform.scale(
+                self.image.subsurface(pg.Rect(i * frame_width, 8 * frame_height, frame_width, frame_height)), (80, 80))
             self.__atk_frames.append(atk_frame)
 
         return frames
@@ -50,7 +52,7 @@ class Player(Entity):
         if now - self.__last_update > self.__frame_speed:
             self.__last_update = now
             self.__frame_index = (self.__frame_index + 1) % len(self.__frames)
-            if self.__left_right == "RIGHT":
+            if self.left_right == "RIGHT":
                 self.image = self.__frames[self.__frame_index]
             else:
                 self.image = pg.transform.flip(self.__frames[self.__frame_index], True, False)
@@ -62,7 +64,7 @@ class Player(Entity):
                 self.__last_update = now
                 self.__atk_frames_index = (self.__atk_frames_index + 1) % len(self.__atk_frames)
                 if self.atk_state:
-                    if self.__left_right == "RIGHT":
+                    if self.left_right == "RIGHT":
                         self.image = self.__atk_frames[self.__atk_frames_index]
                     else:
                         self.image = pg.transform.flip(self.__atk_frames[self.__atk_frames_index], True, False)
@@ -77,48 +79,47 @@ class Player(Entity):
             return True
         return False
 
-    def wall_collision(self, dir, wall):
+    def wall_collision(self, direction, wall):
         print(self.rect.x, self.rect.y)
-        if dir == "LEFT":
+        if direction == "LEFT":
             if wall < self.rect.x:
                 return True
             return False
-        elif dir == "RIGHT":
+        elif direction == "RIGHT":
             if wall > self.rect.x:
                 return True
             return False
-        elif dir == "UP":
+        elif direction == "UP":
             if wall < self.rect.y:
                 return True
             return False
-        elif dir == "DOWN":
+        elif direction == "DOWN":
             if wall > self.rect.y:
                 return True
             return False
 
-
-    def move(self, dir):
+    def move(self, direction):
         # print(self.__frame_index)
         self.walk_animation()
         self.last_move_rect = self.rect.copy()
         self.walk_state = True
         self.idle_state = False
 
-        if dir == "UP":
+        if direction == "UP":
             self.rect.y -= self.__speed
             if not self.atk_state:
                 self.move_direction = "UP"
-        if dir == "LEFT":
+        if direction == "LEFT":
             self.rect.x -= self.__speed
             if not self.atk_state:
                 self.move_direction = "LEFT"
-                self.__left_right = "LEFT"
-        if dir == "RIGHT":
+                self.left_right = "LEFT"
+        if direction == "RIGHT":
             self.rect.x += self.__speed
             if not self.atk_state:
                 self.move_direction = "RIGHT"
-                self.__left_right = "RIGHT"
-        if dir == "DOWN":
+                self.left_right = "RIGHT"
+        if direction == "DOWN":
             self.rect.y += self.__speed
             if not self.atk_state:
                 self.move_direction = "DOWN"
@@ -168,5 +169,5 @@ class Player(Entity):
     def get_size(self):
         return self.image.get_size()
 
-    def set_left_right(self, dir):
-        self.__left_right = dir
+    def set_left_right(self, direction):
+        self.left_right = direction

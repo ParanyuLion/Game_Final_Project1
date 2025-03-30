@@ -1,4 +1,5 @@
 import pygame as pg
+from Enemy import Enemy
 from Player import Player
 from background import Background as Bgd
 from game_config import Config
@@ -8,6 +9,7 @@ from UI import HealthBar
 from Slime import Slime
 from Minotaur import Minotaur
 from Cthulu import Cthulu
+from Magic import FireBreath
 import random
 
 
@@ -22,8 +24,8 @@ class Camera(pg.sprite.Group):
         return entity.rect.move(-self.camera_rect.x, -self.camera_rect.y)
 
     def update(self, target):
-        x = target.rect.centerx - Config.get('WIN_WIDTH')//2
-        y = target.rect.centery - Config.get('WIN_HEIGHT')//2
+        x = target.rect.centerx - Config.get('WIN_WIDTH') // 2
+        y = target.rect.centery - Config.get('WIN_HEIGHT') // 2
         self.camera_rect.topleft = (x, y)
 
 
@@ -46,14 +48,16 @@ class RunGame:
         self.__complete_level = False
         """entities attribute"""
         spawn_point = Bgd.get('lv1', 'spawn')
+
         self.player = Player(spawn_point[0], spawn_point[1])
+        self.FireBreath = FireBreath(self.player.rect.x, self.player.rect.y)
         self.bullets = []
         self.bullet_size = (20, 20)
         self.enemies = []
         self.effects = []
         self.health_bar = HealthBar(20, 20, 300, 35, self.player.health)
         self.camera = Camera(Config.get('WIN_WIDTH'), Config.get('WIN_HEIGHT'))
-        self.camera.add(self.player, *self.enemies, *self.bullets, *self.effects)
+        self.camera.add(self.player, *self.enemies, *self.bullets, *self.effects, self.FireBreath)
         self.player.draw(self.__screen, self.camera)
         self.__last_shot_time = 0
         self.__dash_time = 0
@@ -66,7 +70,7 @@ class RunGame:
         self.camera.add(dash_effect)
 
     def main_menu(self):
-        self.__screen.fill((0,0,0))
+        self.__screen.fill((0, 0, 0))
         self.__screen.blit(self.__background, (0, 0))
         text = pg.image.load("Game_Final_Project1/picture/start_game_text.png")
         text.set_colorkey((0, 0, 0))
@@ -94,9 +98,14 @@ class RunGame:
                 if entity.finish:
                     finish_effect.append(entity)
             entity.draw(self.__screen, self.camera)
+        remove_set = set(finish_effect)
+        self.enemies = [b for b in self.enemies if b not in remove_set]
         for effect in finish_effect:
             self.effects.remove(effect)
             self.camera.remove(effect)
+        # for effect in finish_effect:
+        #     self.effects.remove(effect)
+        #     self.camera.remove(effect)
         self.health_bar.draw(self.__screen, self.player.health)
         # self.camera.draw(self.__screen)
 
@@ -105,26 +114,28 @@ class RunGame:
         self.__at_door = self.player.door_collision(Bgd.get(self.level_name, 'door'))
 
         """"bullets event"""
+        remove_bullets = []
         for bullet in self.bullets:
             # check that bullets not go out of border
-            if (self.__border["RIGHT"] + self.bullet_size[0]*2.5 > bullet.rect.centerx > self.__border["LEFT"] and
-                    self.__border["DOWN"] + self.bullet_size[1]*3.5 > bullet.rect.centery > self.__border["UP"]):
+            if (self.__border["RIGHT"] + self.bullet_size[0] * 2.5 > bullet.rect.centerx > self.__border["LEFT"] and
+                    self.__border["DOWN"] + self.bullet_size[1] * 3.5 > bullet.rect.centery > self.__border["UP"]):
                 bullet.update()
                 for enemy in self.enemies:
                     if enemy.check_alive() and enemy.get_damage(bullet):
-                        if bullet in self.bullets:
-                            explosion = Explosion(bullet.rect.x, bullet.rect.y)
-                            self.effects.append(explosion)
-                            self.camera.add(explosion)
-                            self.camera.remove(bullet)
-                            # self.bullets.pop(self.bullets.index(bullet))
-                            self.bullets.remove(bullet)
-                            self.camera.remove(bullet)
+                        # if bullet in self.bullets:
+                        explosion = Explosion(bullet.rect.x, bullet.rect.y)
+                        self.effects.append(explosion)
+                        self.camera.add(explosion)
+                        remove_bullets.append(bullet)
             else:
-                self.camera.remove(bullet)
-                self.bullets.pop(self.bullets.index(bullet))
+                remove_bullets.append(bullet)
+        remove_set = set(remove_bullets)
+        self.bullets = [b for b in self.bullets if b not in remove_set]
+        for bullet in remove_bullets:
+            self.camera.remove(bullet)
 
         """enemies event"""
+        self.FireBreath.hit_enemy(self.enemies)
         dead_enemies = []
         for enemy in self.enemies:
             # print(f"Enemy Position: {enemy.rect.x}, {enemy.rect.y}")
@@ -133,8 +144,9 @@ class RunGame:
                 pass
             if enemy.already_dead:
                 dead_enemies.append(enemy)
+        remove_set = set(dead_enemies)
+        self.enemies = [b for b in self.enemies if b not in remove_set]
         for enemy in dead_enemies:
-            self.enemies.remove(enemy)
             self.camera.remove(enemy)
             enemy.kill()
         if len(self.enemies) == 0:
@@ -146,7 +158,7 @@ class RunGame:
         spawn = Bgd.get(self.level_name, 'enemy_spawn')
         spawn_x = spawn['x']
         spawn_y = spawn['y']
-        return random.randint(spawn_x[0],spawn_x[1]), random.randint(spawn_y[0],spawn_y[1])
+        return random.randint(spawn_x[0], spawn_x[1]), random.randint(spawn_y[0], spawn_y[1])
 
     def set_level(self, name):
         self.__background = Bgd.load_bg(name)
@@ -160,7 +172,7 @@ class RunGame:
             self.random_spawn()
             for i in range(1):
                 spawn_x, spawn_y = self.random_spawn()
-                new_enemy = Cthulu(spawn_x, spawn_y, health=5)
+                new_enemy = Cthulu(spawn_x, spawn_y, health=50)
                 new_enemy.rect.topleft = (spawn_x, spawn_y)
                 self.enemies.append(new_enemy)
             self.camera.add(*self.enemies)
@@ -260,6 +272,11 @@ class RunGame:
                     self.player.move("LEFT")
                 if key[pg.K_d] and self.player.wall_collision("RIGHT", self.__border["RIGHT"]):
                     self.player.move("RIGHT")
+                if key[pg.K_q]:
+                    self.FireBreath.activate = True
+                    self.FireBreath.set_position(self.player.rect, self.player.left_right)
+                else:
+                    self.FireBreath.activate = False
             else:
                 self.main_menu()
 
@@ -268,6 +285,7 @@ class RunGame:
             end_time = pg.time.get_ticks()
             if end_time - start_time > 17:
                 print(f"Frame time: {end_time - start_time} ms")
+
     pg.quit()
 
 

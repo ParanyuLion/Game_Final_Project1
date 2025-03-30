@@ -27,13 +27,13 @@ class Slime(Entity, Enemy):
 
         self.__atk_speed = 500
         self.__atk_frame_speed = self.__atk_speed//8
-        self.__health = health
+        self.health = health
 
         self.__speed = 1.5
         self.__damage = damage
         self.__direction = pg.math.Vector2()
         self.__velocity = pg.math.Vector2()
-        self.health_bar = HealthBar(self.rect.x, self.rect.y, 100, 15, self.__health)
+        self.health_bar = HealthBar(self.rect.x, self.rect.y, 100, 15, self.health)
         # self.last_move_rect = self.rect.copy()
         self.last_attack_time = 0
         self.__position = pg.math.Vector2(x,y)
@@ -142,16 +142,16 @@ class Slime(Entity, Enemy):
             self.__direction += avoid_vector.normalize() * 0.5
 
     def respawn(self, health=10):
-        self.__health = health
+        self.health = health
         self.already_dead = False
 
     def get_damage(self, bullet):
         if self.rect.colliderect(bullet.rect):
-            self.__health -= 1
+            self.health -= 1
             return True
 
     def check_alive(self):
-        if self.__health > 0:
+        if self.health > 0:
             return True
         return False
 
@@ -174,13 +174,14 @@ class Slime(Entity, Enemy):
         if self.check_alive():
             bar_x = camera.apply(self).centerx - self.health_bar.width // 2
             bar_y = camera.apply(self).top
-            self.health_bar.draw(screen, self.__health, bar_x, bar_y)
+            self.health_bar.draw(screen, self.health, bar_x, bar_y)
             if self.__atk_state:
                 self.__atk_animation(screen, camera)
             else:
                 screen.blit(self.image, camera.apply(self))
         elif not self.already_dead:
             self.__dead_animation(screen, camera)
+        # pg.draw.rect(screen, (0, 255, 0), camera.apply(self), 2)
 
     def get_size(self):
         return self.image.get_size()

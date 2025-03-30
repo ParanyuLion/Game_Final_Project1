@@ -27,7 +27,7 @@ class Minotaur(Entity, Enemy):
 
         self.__atk_speed = 700
         self.__atk_frame_speed = self.__atk_speed // 8
-        self.__health = health
+        self.health = health
         self.__max_health = health
 
         self.__speed = 2
@@ -178,15 +178,15 @@ class Minotaur(Entity, Enemy):
     def get_damage(self, bullet):
         enemy_hitbox = self.rect.inflate(-self.rect.width * 0.7, -self.rect.height * 0.7)
         if enemy_hitbox.colliderect(bullet.rect):
-            self.__health -= 1
-            if self.__health == self.__max_health//2 and not self.__change_phase:
+            self.health -= 1
+            if self.health == self.__max_health//2 and not self.__change_phase:
                 self.__change_phase = True
                 self.__speed *= 2
                 self.__damage = int(1.5* self.__damage)
             return True
 
     def check_alive(self):
-        if self.__health > 0:
+        if self.health > 0:
             return True
         return False
 
@@ -217,7 +217,7 @@ class Minotaur(Entity, Enemy):
         if self.check_alive():
             bar_x = camera.apply(self).centerx - self.health_bar.width // 2
             bar_y = camera.apply(self).top
-            self.health_bar.draw(screen, self.__health, bar_x, bar_y)
+            self.health_bar.draw(screen, self.health, bar_x, bar_y)
             if self.__atk_state:
                 self.__atk_animation(screen, camera)
             else:
@@ -226,6 +226,7 @@ class Minotaur(Entity, Enemy):
                 screen.blit(self.image, camera.apply(self))
         elif not self.already_dead:
             self.__dead_animation(screen, camera)
+        # pg.draw.rect(screen, (0, 255, 0), camera.apply(self), 2)
 
     def get_size(self):
         return self.image.get_size()

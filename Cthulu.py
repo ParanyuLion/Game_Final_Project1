@@ -27,7 +27,7 @@ class Cthulu(Entity, Enemy):
 
         self.__atk_speed = 600
         self.__atk_frame_speed = self.__atk_speed // 9
-        self.__health = health
+        self.health = health
 
         self.__speed = 2
         self.__damage = damage
@@ -38,6 +38,7 @@ class Cthulu(Entity, Enemy):
         # self.last_move_rect = self.rect.copy()
         self.last_attack_time = 0
         self.__position = pg.math.Vector2(x, y)
+
 
     def __load_frames(self, num_frames, num_movement):
         sheet_width, sheet_height = self.image.get_size()
@@ -177,14 +178,14 @@ class Cthulu(Entity, Enemy):
     def get_damage(self, bullet):
         enemy_hitbox = self.rect.inflate(-self.rect.width * 0.7, -self.rect.height * 0.7)
         if enemy_hitbox.colliderect(bullet.rect):
-            self.__health -= 1
-            if self.__health == self.__max_health//2:
+            self.health -= 1
+            if self.health == self.__max_health//2:
                 self.__frames = self.__fly_frames
                 self.__speed = 4
             return True
 
     def check_alive(self):
-        if self.__health > 0:
+        if self.health > 0:
             return True
         return False
 
@@ -209,13 +210,14 @@ class Cthulu(Entity, Enemy):
         if self.check_alive():
             bar_x = camera.apply(self).centerx - self.health_bar.width // 2
             bar_y = camera.apply(self).top
-            self.health_bar.draw(screen, self.__health, bar_x, bar_y)
+            self.health_bar.draw(screen, self.health, bar_x, bar_y)
             if self.__atk_state:
                 self.__atk_animation(screen, camera)
             else:
                 screen.blit(self.image, camera.apply(self))
         elif not self.already_dead:
             self.__dead_animation(screen, camera)
+        # pg.draw.rect(screen, (0, 255, 0), camera.apply(self), 2)
 
     def get_size(self):
         return self.image.get_size()
