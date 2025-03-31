@@ -9,7 +9,7 @@ class Player(Entity):
         self.health = health
         self.__atk_frames = []
         self.__atk_frames_index = 0
-
+        self.gold = 500
         self.__last_update = 0
         self.__frames = self.__load_frames(8, 9)
         self.__frame_speed = 100
@@ -20,7 +20,7 @@ class Player(Entity):
         self.last_move_rect = self.rect.copy()
         self.move_direction = "RIGHT"
         self.left_right = "RIGHT"
-        self.__speed = 7  # initial2
+        self.speed = 7  # initial2
         self.__dash_speed = 120
         self.dash_cooldown = 1000
 
@@ -106,21 +106,21 @@ class Player(Entity):
         self.idle_state = False
 
         if direction == "UP":
-            self.rect.y -= self.__speed
+            self.rect.y -= self.speed
             if not self.atk_state:
                 self.move_direction = "UP"
         if direction == "LEFT":
-            self.rect.x -= self.__speed
+            self.rect.x -= self.speed
             if not self.atk_state:
                 self.move_direction = "LEFT"
                 self.left_right = "LEFT"
         if direction == "RIGHT":
-            self.rect.x += self.__speed
+            self.rect.x += self.speed
             if not self.atk_state:
                 self.move_direction = "RIGHT"
                 self.left_right = "RIGHT"
         if direction == "DOWN":
-            self.rect.y += self.__speed
+            self.rect.y += self.speed
             if not self.atk_state:
                 self.move_direction = "DOWN"
 

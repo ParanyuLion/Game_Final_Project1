@@ -10,6 +10,7 @@ from Slime import Slime
 from Minotaur import Minotaur
 from Cthulu import Cthulu
 from Magic import FireBreath
+from Shop import Shop
 import random
 
 
@@ -47,7 +48,7 @@ class RunGame:
         self.__level = 0
         self.__complete_level = False
         """entities attribute"""
-        spawn_point = Bgd.get('lv1', 'spawn')
+        spawn_point = Bgd.get(1, 'spawn')
 
         self.player = Player(spawn_point[0], spawn_point[1])
         self.FireBreath = FireBreath(self.player.rect.x, self.player.rect.y)
@@ -68,11 +69,12 @@ class RunGame:
         dash_effect = DashEffect(self.player.rect.centerx, self.player.rect.centery)
         self.effects.append(dash_effect)
         self.camera.add(dash_effect)
+        self.shop = Shop(self.player)
 
     def main_menu(self):
         self.__screen.fill((0, 0, 0))
         self.__screen.blit(self.__background, (0, 0))
-        text = pg.image.load("Game_Final_Project1/picture/start_game_text.png")
+        text = pg.image.load("Game_Final_Project1/picture/background/start_game_text.png")
         text.set_colorkey((0, 0, 0))
         self.__screen.blit(text, (0, 0))
         # font_size = 50
@@ -82,6 +84,7 @@ class RunGame:
         # self.__screen.blit(text, text_rect)
 
     def update_all(self):
+
         self.camera.update(self.player)
         self.__screen.fill(Config.get('BG_COLOR'))
         self.__screen.blit(self.__background, (-self.camera.camera_rect.x, -self.camera.camera_rect.y))
@@ -108,6 +111,8 @@ class RunGame:
         #     self.camera.remove(effect)
         self.health_bar.draw(self.__screen, self.player.health)
         # self.camera.draw(self.__screen)
+        if self.level_name == 'shop':
+            self.shop.draw(self.__screen)
 
     def entities_events(self):
         """players event"""
@@ -165,21 +170,23 @@ class RunGame:
         self.__border = Bgd.get(name, 'border')
         self.player.rect.center = Bgd.get(name, 'spawn')
 
-    def load_level(self):
+    def load_level(self, level):
         self.enemies.clear()
-        if self.__level == 1:
-            self.level_name = 'lv1'
-            self.random_spawn()
+        if level == 'shop':
+            self.level_name = 'shop'
+            self.set_level(self.level_name)
+        elif level == 1:
+            self.level_name = 1
             for i in range(1):
                 spawn_x, spawn_y = self.random_spawn()
-                new_enemy = Cthulu(spawn_x, spawn_y, health=50)
+                new_enemy = Cthulu(spawn_x, spawn_y, health=1)
                 new_enemy.rect.topleft = (spawn_x, spawn_y)
                 self.enemies.append(new_enemy)
             self.camera.add(*self.enemies)
             self.set_level(self.level_name)
 
-        elif self.__level == 2:
-            self.level_name = 'lv2'
+        elif level == 2:
+            self.level_name = 2
             for i in range(2):
                 spawn_x, spawn_y = self.random_spawn()
                 new_enemy = Minotaur(spawn_x, spawn_y, health=5)
@@ -188,8 +195,8 @@ class RunGame:
             self.camera.add(*self.enemies)
             self.set_level(self.level_name)
 
-        elif self.__level == 3:
-            self.level_name = 'lv3'
+        elif level == 3:
+            self.level_name = 3
             for i in range(3):
                 spawn_x, spawn_y = self.random_spawn()
                 new_enemy = Slime(spawn_x, spawn_y, health=5)
@@ -198,8 +205,8 @@ class RunGame:
             self.camera.add(*self.enemies)
             self.set_level(self.level_name)
 
-        elif self.__level == 4:
-            self.level_name = 'lv4'
+        elif level == 4:
+            self.level_name = 4
             for i in range(4):
                 spawn_x, spawn_y = self.random_spawn()
                 new_enemy = Slime(spawn_x, spawn_y, health=5)
@@ -209,7 +216,7 @@ class RunGame:
             self.set_level(self.level_name)
 
         else:
-            self.level_name = 'lv2'
+            self.level_name = 2
             for i in range(self.__level):
                 self.enemies.append(Slime(x=random.randint(0, 1000), y=random.randint(0, 620), health=5))
             self.camera.add(*self.enemies)
@@ -219,7 +226,6 @@ class RunGame:
         clock = pg.time.Clock()
         while self.__running:
             start_time = pg.time.get_ticks()
-
             for event in pg.event.get():
                 if event.type == pg.QUIT:
                     self.__running = False
@@ -228,20 +234,24 @@ class RunGame:
                     # if event.key == pg.K_ESCAPE:
                     #     self.__start_game = False
                     now = pg.time.get_ticks()
-                    if event.key == pg.K_SPACE and now - self.__dash_time > self.player.dash_cooldown:
+                    if event.key == pg.K_SPACE and now - self.__dash_time > self.player.dash_cooldown and self.level_name != 'shop':
                         self.__before_dash_pos = self.player.rect.copy()
                         self.player.dash(self.__border)
                         self.__dash = True
                         self.__dash_time = now
-                    if event.key == pg.K_e and self.__complete_level and self.__at_door:
-                        self.__level += 1
-                        self.load_level()
+                    if event.key == pg.K_e:
+                        if self.level_name == 'shop':
+                            self.__level += 1
+                            self.load_level(self.__level)
+                            self.shop.toggle_shop()
+                        elif self.__complete_level and self.__at_door:
+                            self.load_level('shop')
+                            self.shop.toggle_shop()
                 if event.type == pg.MOUSEBUTTONDOWN:
                     if event.button == pg.BUTTON_LEFT and self.__start_game:
                         now = pg.time.get_ticks()
                         if now - self.__last_shot_time > self.player.atk_speed * 4:
                             mouse_pos = pg.mouse.get_pos()
-
                             mouse_pos_world = (mouse_pos[0] + self.camera.camera_rect.x,
                                                mouse_pos[1] + self.camera.camera_rect.y)
                             if mouse_pos_world[0] < self.player.rect.x:
@@ -257,26 +267,28 @@ class RunGame:
                     elif event.button == pg.BUTTON_LEFT and not self.__start_game:
                         self.__level += 1
                         self.__start_game = True
-                        self.load_level()
-
+                        self.load_level(self.__level)
+                    if self.level_name == 'shop':
+                        self.shop.handle_event(event)
             if self.__start_game:
                 self.update_all()
                 self.entities_events()
                 key = pg.key.get_pressed()
                 # print(self.player.player_rect.y, self.player.player_rect.x)
-                if key[pg.K_w] and self.player.wall_collision("UP", self.__border["UP"]):
-                    self.player.move("UP")
-                if key[pg.K_s] and self.player.wall_collision("DOWN", self.__border["DOWN"]):
-                    self.player.move("DOWN")
-                if key[pg.K_a] and self.player.wall_collision("LEFT", self.__border["LEFT"]):
-                    self.player.move("LEFT")
-                if key[pg.K_d] and self.player.wall_collision("RIGHT", self.__border["RIGHT"]):
-                    self.player.move("RIGHT")
-                if key[pg.K_q]:
-                    self.FireBreath.activate = True
-                    self.FireBreath.set_position(self.player.rect, self.player.left_right)
-                else:
-                    self.FireBreath.activate = False
+                if self.level_name != 'shop':
+                    if key[pg.K_w] and self.player.wall_collision("UP", self.__border["UP"]):
+                        self.player.move("UP")
+                    if key[pg.K_s] and self.player.wall_collision("DOWN", self.__border["DOWN"]):
+                        self.player.move("DOWN")
+                    if key[pg.K_a] and self.player.wall_collision("LEFT", self.__border["LEFT"]):
+                        self.player.move("LEFT")
+                    if key[pg.K_d] and self.player.wall_collision("RIGHT", self.__border["RIGHT"]):
+                        self.player.move("RIGHT")
+                    if key[pg.K_q]:
+                        self.FireBreath.activate = True
+                        self.FireBreath.set_position(self.player.rect, self.player.left_right)
+                    else:
+                        self.FireBreath.activate = False
             else:
                 self.main_menu()
 

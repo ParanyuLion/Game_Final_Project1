@@ -189,6 +189,7 @@ class Cthulu(Entity, Enemy):
             return True
         return False
 
+
     def hit_player(self, player):
         if self.check_alive():
             current_time = pg.time.get_ticks()

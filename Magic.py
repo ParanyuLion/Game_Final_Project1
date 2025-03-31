@@ -50,7 +50,6 @@ class FireBreath(Entity):
             frames.append(frame)
         return frames
 
-
     def hit_enemy(self, enemies):
         now = pg.time.get_ticks()
         if now - self.last_hit > self.__frame_speed * 2 and self.activate:
@@ -60,7 +59,6 @@ class FireBreath(Entity):
             for enemy in hit_list:
                 enemy.health -= 2
             self.last_hit = now
-
 
     def __run_animation(self):
         now = pg.time.get_ticks()
