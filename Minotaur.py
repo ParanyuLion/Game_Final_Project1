@@ -5,16 +5,29 @@ from Enemy import Enemy
 
 
 class Minotaur(Entity, Enemy):
+    _cached_frames = None
+    _atk_frames1 = []
+    _atk_frames2 = []
+    _dead_frames = []
+
     def __init__(self, x, y, health=100, damage=20, img="Game_Final_Project1/picture/Minotaur - Sprite Sheet.png"):
         super().__init__(img, x, y)
-        self.__atk_frames1 = []
-        self.__atk_frames2 = []
+        self.gold_drop = 100
+
+        # self.__atk_frames1 = []
+        # self.__atk_frames2 = []
         self.__atk_frames_index = 0
         self.__attack_animation_set = 1
-        self.__dead_frames = []
+        # self.__dead_frames = []
         self.__dead_frames_index = 0
         self.__dead_frames_speed = 100
-        self.__frames = self.__load_frames(10.6, 20)
+        if Minotaur._cached_frames is None:
+            Minotaur._cached_frames = self.__load_frames(10.6, 20)
+
+        self.__frames = Minotaur._cached_frames
+        self.__atk_frames1 = Minotaur._atk_frames1
+        self.__atk_frames2 = Minotaur._atk_frames2
+        self.__dead_frames = Minotaur._dead_frames
         self.__last_update = 0
         self.__frame_speed = 150
         self.__frame_index = 0
@@ -55,16 +68,16 @@ class Minotaur(Entity, Enemy):
         for i in range(9):
             atk_frame = pg.transform.scale(
                 self.image.subsurface(pg.Rect(i * frame_width, 6 * frame_height, frame_width, frame_height)), (w, h))
-            self.__atk_frames1.append(atk_frame)
+            Minotaur._atk_frames1.append(atk_frame)
         for i in range(9):
             atk_frame = pg.transform.scale(
                 self.image.subsurface(pg.Rect(i * frame_width, 3 * frame_height, frame_width, frame_height)), (w, h))
-            self.__atk_frames2.append(atk_frame)
+            Minotaur._atk_frames2.append(atk_frame)
         """load dead animation"""
         for i in range(6):
             dead_frame = pg.transform.scale(
                 self.image.subsurface(pg.Rect(i * frame_width, 9 * frame_height, frame_width, frame_height)), (w, h))
-            self.__dead_frames.append(dead_frame)
+            Minotaur._dead_frames.append(dead_frame)
         return frames
 
     def __dead_animation(self, screen, camera):
@@ -160,7 +173,7 @@ class Minotaur(Entity, Enemy):
     def avoid_others(self, enemies):
         avoid_vector = pg.math.Vector2(0, 0)
         for other_enemy in enemies:
-            if other_enemy is not self:
+            if other_enemy is not self and abs(self.__position.x - other_enemy.__position.x) < 100:
                 distance = self.__position.distance_to(other_enemy.__position)
                 if distance < 50:
                     avoid_vector += (self.__position - other_enemy.__position).normalize()
@@ -175,10 +188,10 @@ class Minotaur(Entity, Enemy):
         del px_array
         self.image = img_copy
 
-    def get_damage(self, bullet):
+    def get_damage(self, bullet, damage):
         enemy_hitbox = self.rect.inflate(-self.rect.width * 0.7, -self.rect.height * 0.7)
         if enemy_hitbox.colliderect(bullet.rect):
-            self.health -= 1
+            self.health -= damage
             if self.health == self.__max_health//2 and not self.__change_phase:
                 self.__change_phase = True
                 self.__speed *= 2
@@ -198,9 +211,8 @@ class Minotaur(Entity, Enemy):
             if enemy_hitbox.colliderect(player_hitbox):
                 self.__atk_state = True
                 if current_time - self.last_attack_time > self.__atk_speed:
-                    if enemy_hitbox.colliderect(player_hitbox):
-                        print("hit")
-                        player.health -= self.__damage
+                    print("hit")
+                    player.health -= self.__damage
                     self.last_attack_time = current_time
                     self.__move_state = False
                     return True

@@ -5,16 +5,25 @@ from Enemy import Enemy
 
 
 class Slime(Entity, Enemy):
+    _cached_frames = None
+    _atk_frames = []
+    _dead_frames = []
+
     def __init__(self,x,y, health=10, damage=2, img="Game_Final_Project1/picture/slime-Sheet.png"):
         super().__init__(img,x,y)
-        self.__atk_frames = []
-        self.__atk_frames_index = 0
+        self.gold_drop = 50
 
-        self.__dead_frames = []
+        # self.__atk_frames = []
+        self.__atk_frames_index = 0
+        # self.__dead_frames = []
         self.__dead_frames_index = 0
         self.__dead_frames_speed = 100
 
-        self.__frames = self.__load_frames(8, 3)
+        if Slime._cached_frames is None:
+            Slime._cached_frames = self.__load_frames(8, 3)
+        self.__frames = Slime._cached_frames
+        self.__atk_frames = Slime._atk_frames
+        self.__dead_frames = Slime._dead_frames
 
         self.__last_update = 0
         self.__frame_speed = 150
@@ -52,12 +61,12 @@ class Slime(Entity, Enemy):
         for i in range(num_frames):
             atk_frame = pg.transform.scale(
                 self.image.subsurface(pg.Rect(i * frame_width, 1 * frame_height, frame_width, frame_height)), (80, 80))
-            self.__atk_frames.append(atk_frame)
+            Slime._atk_frames.append(atk_frame)
         """load dead animation"""
         for i in range(5):
             dead_frame = pg.transform.scale(
                 self.image.subsurface(pg.Rect(i * frame_width, 2 * frame_height, frame_width, frame_height)), (80, 80))
-            self.__dead_frames.append(dead_frame)
+            Slime._dead_frames.append(dead_frame)
         return frames
 
     def __dead_animation(self,screen, camera):
@@ -133,7 +142,7 @@ class Slime(Entity, Enemy):
     def avoid_others(self, enemies):
         avoid_vector = pg.math.Vector2(0, 0)
         for other_enemy in enemies:
-            if other_enemy is not self:
+            if other_enemy is not self and abs(self.__position.x - other_enemy.__position.x) < 100:
                 distance = self.__position.distance_to(other_enemy.__position)
                 if distance < 50:
                     avoid_vector += (self.__position - other_enemy.__position).normalize()
@@ -145,9 +154,9 @@ class Slime(Entity, Enemy):
         self.health = health
         self.already_dead = False
 
-    def get_damage(self, bullet):
+    def get_damage(self, bullet, damage):
         if self.rect.colliderect(bullet.rect):
-            self.health -= 1
+            self.health -= damage
             return True
 
     def check_alive(self):

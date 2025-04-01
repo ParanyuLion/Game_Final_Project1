@@ -84,7 +84,6 @@ class RunGame:
         # self.__screen.blit(text, text_rect)
 
     def update_all(self):
-
         self.camera.update(self.player)
         self.__screen.fill(Config.get('BG_COLOR'))
         self.__screen.blit(self.__background, (-self.camera.camera_rect.x, -self.camera.camera_rect.y))
@@ -106,9 +105,7 @@ class RunGame:
         for effect in finish_effect:
             self.effects.remove(effect)
             self.camera.remove(effect)
-        # for effect in finish_effect:
-        #     self.effects.remove(effect)
-        #     self.camera.remove(effect)
+
         self.health_bar.draw(self.__screen, self.player.health)
         # self.camera.draw(self.__screen)
         if self.level_name == 'shop':
@@ -126,7 +123,7 @@ class RunGame:
                     self.__border["DOWN"] + self.bullet_size[1] * 3.5 > bullet.rect.centery > self.__border["UP"]):
                 bullet.update()
                 for enemy in self.enemies:
-                    if enemy.check_alive() and enemy.get_damage(bullet):
+                    if enemy.check_alive() and enemy.get_damage(bullet, self.player.damage):
                         # if bullet in self.bullets:
                         explosion = Explosion(bullet.rect.x, bullet.rect.y)
                         self.effects.append(explosion)
@@ -143,7 +140,6 @@ class RunGame:
         self.FireBreath.hit_enemy(self.enemies)
         dead_enemies = []
         for enemy in self.enemies:
-            # print(f"Enemy Position: {enemy.rect.x}, {enemy.rect.y}")
             enemy.move(self.player, self.enemies)
             if enemy.hit_player(self.player):
                 pass
@@ -152,6 +148,7 @@ class RunGame:
         remove_set = set(dead_enemies)
         self.enemies = [b for b in self.enemies if b not in remove_set]
         for enemy in dead_enemies:
+            self.player.gold += enemy.gold_drop
             self.camera.remove(enemy)
             enemy.kill()
         if len(self.enemies) == 0:
@@ -179,7 +176,7 @@ class RunGame:
             self.level_name = 1
             for i in range(1):
                 spawn_x, spawn_y = self.random_spawn()
-                new_enemy = Cthulu(spawn_x, spawn_y, health=1)
+                new_enemy = Cthulu(spawn_x, spawn_y, health=3)
                 new_enemy.rect.topleft = (spawn_x, spawn_y)
                 self.enemies.append(new_enemy)
             self.camera.add(*self.enemies)
@@ -199,7 +196,7 @@ class RunGame:
             self.level_name = 3
             for i in range(3):
                 spawn_x, spawn_y = self.random_spawn()
-                new_enemy = Slime(spawn_x, spawn_y, health=5)
+                new_enemy = Minotaur(spawn_x, spawn_y, health=5)
                 new_enemy.rect.topleft = (spawn_x, spawn_y)
                 self.enemies.append(new_enemy)
             self.camera.add(*self.enemies)
@@ -284,7 +281,7 @@ class RunGame:
                         self.player.move("LEFT")
                     if key[pg.K_d] and self.player.wall_collision("RIGHT", self.__border["RIGHT"]):
                         self.player.move("RIGHT")
-                    if key[pg.K_q]:
+                    if key[pg.K_q] and self.player.unlock_fire_breathe:
                         self.FireBreath.activate = True
                         self.FireBreath.set_position(self.player.rect, self.player.left_right)
                     else:

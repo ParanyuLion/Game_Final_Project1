@@ -6,10 +6,16 @@ from entity import Entity
 class Player(Entity):
     def __init__(self, x, y, health=100):
         super().__init__("Game_Final_Project1/picture/AnimationSheet_Character.png", x, y)
+        self.max_health = health
         self.health = health
+        self.gold = 500
+        self.speed = 7  # initial2
+        self.damage = 1
+        self.unlock_fire_breathe = False
+
         self.__atk_frames = []
         self.__atk_frames_index = 0
-        self.gold = 500
+
         self.__last_update = 0
         self.__frames = self.__load_frames(8, 9)
         self.__frame_speed = 100
@@ -20,7 +26,7 @@ class Player(Entity):
         self.last_move_rect = self.rect.copy()
         self.move_direction = "RIGHT"
         self.left_right = "RIGHT"
-        self.speed = 7  # initial2
+
         self.__dash_speed = 120
         self.dash_cooldown = 1000
 

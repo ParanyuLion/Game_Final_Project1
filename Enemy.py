@@ -20,7 +20,7 @@ class Enemy:
     def avoid_others(self, enemies):
         pass
 
-    def get_damage(self, bullet):
+    def get_damage(self, bullet, damage):
         pass
 
     def check_alive(self):

@@ -5,17 +5,32 @@ from Enemy import Enemy
 
 
 class Cthulu(Entity, Enemy):
+    _cached_frames = None
+    _atk_frames1 = []
+    _atk_frames2 = []
+    _dead_frames = []
+    _fly_frames = []
+
     def __init__(self, x, y, health=100, damage=20, img="Game_Final_Project1/picture/cthulu_SpriteSheet.png"):
         super().__init__(img, x, y)
-        self.__atk_frames1 = []
-        self.__atk_frames2 = []
-        self.__fly_frames = []
+        self.gold_drop = 500
+
+        # self.__atk_frames1 = []
+        # self.__atk_frames2 = []
+        # self.__fly_frames = []
         self.__atk_frames_index = 0
         self.__attack_animation_set = 1
-        self.__dead_frames = []
+        # self.__dead_frames = []
         self.__dead_frames_index = 0
         self.__dead_frames_speed = 100
-        self.__frames = self.__load_frames(15, 7)
+        if Cthulu._cached_frames is None:
+            Cthulu._cached_frames = self.__load_frames(15, 7)
+
+        self.__frames = Cthulu._cached_frames
+        self.__atk_frames1 = Cthulu._atk_frames1
+        self.__atk_frames2 = Cthulu._atk_frames2
+        self.__dead_frames = Cthulu._dead_frames
+        self.__fly_frames = Cthulu._fly_frames
         self.__last_update = 0
         self.__frame_speed = 150
         self.__frame_index = 0
@@ -56,22 +71,22 @@ class Cthulu(Entity, Enemy):
         for i in range(6):
             frame = pg.transform.scale(
                 self.image.subsurface(pg.Rect(i * frame_width, 2 * frame_height, frame_width, frame_height)), (w, h))
-            self.__fly_frames.append(frame)
+            Cthulu._fly_frames.append(frame)
         """load melee attack animation"""
         for i in range(9):
             atk_frame = pg.transform.scale(
                 self.image.subsurface(pg.Rect(i * frame_width, 4 * frame_height, frame_width, frame_height)), (w, h))
-            self.__atk_frames1.append(atk_frame)
+            Cthulu._atk_frames1.append(atk_frame)
         """load range attack animation"""
         for i in range(7):
             atk_frame = pg.transform.scale(
                 self.image.subsurface(pg.Rect(i * frame_width, 3 * frame_height, frame_width, frame_height)), (w, h))
-            self.__atk_frames2.append(atk_frame)
+            Cthulu._atk_frames2.append(atk_frame)
         """load dead animation"""
         for i in range(11):
             dead_frame = pg.transform.scale(
                 self.image.subsurface(pg.Rect(i * frame_width, 6 * frame_height, frame_width, frame_height)), (w, h))
-            self.__dead_frames.append(dead_frame)
+            Cthulu._dead_frames.append(dead_frame)
         return frames
 
     def __dead_animation(self, screen, camera):
@@ -167,7 +182,7 @@ class Cthulu(Entity, Enemy):
     def avoid_others(self, enemies):
         avoid_vector = pg.math.Vector2(0, 0)
         for other_enemy in enemies:
-            if other_enemy is not self:
+            if other_enemy is not self and abs(self.__position.x - other_enemy.__position.x) < 100:
                 distance = self.__position.distance_to(other_enemy.__position)
                 if distance < 50:
                     avoid_vector += (self.__position - other_enemy.__position).normalize()
@@ -175,11 +190,11 @@ class Cthulu(Entity, Enemy):
         if avoid_vector.length() > 0:
             self.__direction += avoid_vector.normalize() * 0.5
 
-    def get_damage(self, bullet):
+    def get_damage(self, bullet, damage):
         enemy_hitbox = self.rect.inflate(-self.rect.width * 0.7, -self.rect.height * 0.7)
         if enemy_hitbox.colliderect(bullet.rect):
-            self.health -= 1
-            if self.health == self.__max_health//2:
+            self.health -= damage
+            if self.health == self.__max_health // 2 and self.__frames != self.__fly_frames:
                 self.__frames = self.__fly_frames
                 self.__speed = 4
             return True
@@ -198,9 +213,8 @@ class Cthulu(Entity, Enemy):
             if enemy_hitbox.colliderect(player_hitbox):
                 self.__atk_state = True
                 if current_time - self.last_attack_time > self.__atk_speed:
-                    if enemy_hitbox.colliderect(player_hitbox):
-                        print("hit")
-                        player.health -= self.__damage
+                    print("hit")
+                    player.health -= self.__damage
                     self.last_attack_time = current_time
                     self.__move_state = False
                     return True

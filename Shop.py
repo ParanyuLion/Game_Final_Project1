@@ -4,29 +4,35 @@ import pygame as pg
 class Shop:
     def __init__(self, player):
         self.player = player
+        self.size = (70,70)
         self.items = [
-            {"name": "Health Potion", "price": 100, "effect": self.increase_health,
-             "image": pg.image.load("Game_Final_Project1/picture/Potion/HealPotion.png")},
+            {"name": "Health Potion", "price": 10, "effect": self.increase_health,
+             "image": pg.transform.scale(pg.image.load("Game_Final_Project1/picture/Potion/HealPotion.png"), self.size),
+             "amount": 5},
             {"name": "Speed Potion", "price": 200, "effect": self.increase_speed,
-             "image": pg.image.load("Game_Final_Project1/picture/Potion/SpeedPotion.png")},
-            {"name": "Mana Potion", "price": 100, "effect": self.increase_attack,
-             "image": pg.image.load("Game_Final_Project1/picture/Potion/ManaPotion.png")},
+             "image": pg.transform.scale(pg.image.load("Game_Final_Project1/picture/Potion/SpeedPotion.png"), self.size),
+             "amount": 2},
+            {"name": "Mana Potion", "price": 100, "effect": self.increase_damage,
+             "image": pg.transform.scale(pg.image.load("Game_Final_Project1/picture/Potion/ManaPotion.png"), self.size),
+             "amount": 2},
             {"name": "Health Potion", "price": 100, "effect": self.increase_health,
-             "image": pg.image.load("Game_Final_Project1/picture/Potion/AttackPotion.png")},
-            {"name": "Speed Potion", "price": 200, "effect": self.increase_speed,
-             "image": pg.image.load("Game_Final_Project1/picture/Potion/SpeedPotion.png")},
-            {"name": "Attack Potion", "price": 300, "effect": self.increase_attack,
-             "image": pg.image.load("Game_Final_Project1/picture/Potion/ManaPotion.png")}
+             "image": pg.transform.scale(pg.image.load("Game_Final_Project1/picture/Potion/AttackPotion.png"), self.size),
+             "amount": 2},
+            {"name": "Fire Breath", "price": 200, "effect": self.unlock_fire_breathe,
+             "image": pg.transform.scale(pg.image.load("Game_Final_Project1/picture/Spell/FireBreathIcon.png"), self.size),
+             "amount": 1},
+            {"name": "Attack Potion", "price": 300, "effect": self.increase_damage,
+             "image": pg.transform.scale(pg.image.load("Game_Final_Project1/picture/Potion/ManaPotion.png"), self.size),
+             "amount": 2},
         ]
         self.font = pg.font.Font(None, 36)
         self.shop_open = False
         self.buttons = []
         for i in range(len(self.items)):
             if i < len(self.items)//2:
-                self.buttons.append(pg.Rect(320, 200 + i * 150, 100, 40))
+                self.buttons.append(pg.Rect(370, 200 + i * 150, 100, 40))
             else:
-                self.buttons.append(pg.Rect(320 + 500, 200 + (i-len(self.items)//2) * 150, 100, 40))
-
+                self.buttons.append(pg.Rect(370 + 500, 200 + (i-len(self.items)//2) * 150, 100, 40))
 
     def increase_health(self):
         self.player.health += 20
@@ -34,15 +40,20 @@ class Shop:
     def increase_speed(self):
         self.player.speed += 1
 
-    def increase_attack(self):
-        self.player.attack_power += 5
+    def increase_damage(self):
+        self.player.damage += 5
+
+    def unlock_fire_breathe(self):
+        self.player.unlock_fire_breathe = True
 
     def buy_item(self, index):
         item = self.items[index]
-        if self.player.gold >= item["price"]:
+        if self.player.gold >= item["price"] and item["amount"] > 0:
             self.player.gold -= item["price"]
             item["effect"]()
             print(f"Bought {item['name']}!")
+            item["amount"] -= 1
+
         else:
             print("Not enough gold!")
 
@@ -54,23 +65,33 @@ class Shop:
             screen.blit(gold_text, (120, 110))
             for i, item in enumerate(self.items):
                 if i < len(self.items) // 2:
-                    screen.blit(item["image"], (120, 150 + i * 150))
+                    screen.blit(item["image"], (170, 150 + i * 150))
 
                     text = self.font.render(f"{item['name']} - {item['price']} Gold", True, (255, 255, 255))
-                    screen.blit(text, (180, 150 + i * 150))
+                    screen.blit(text, (260, 150 + i * 150))
 
-                    pg.draw.rect(screen, (0, 200, 0), self.buttons[i])
-                    buy_text = self.font.render("Buy", True, (255, 255, 255))
-                    screen.blit(buy_text, (self.buttons[i].x + 25, self.buttons[i].y + 5))
+                    if item["amount"] > 0:
+                        pg.draw.rect(screen, (0, 200, 0), self.buttons[i])
+                        buy_text = self.font.render("Buy", True, (255, 255, 255))
+                        screen.blit(buy_text, (self.buttons[i].x + 25, self.buttons[i].y + 5))
+                    else:
+                        pg.draw.rect(screen, (200, 0, 0), self.buttons[i])
+                        buy_text = self.font.render("Sold", True, (255, 255, 255))
+                        screen.blit(buy_text, (self.buttons[i].x + 25, self.buttons[i].y + 5))
                 else:
-                    screen.blit(item["image"], (120 + 500, 150 + (i-len(self.items)//2) * 150))
+                    screen.blit(item["image"], (170 + 500, 150 + (i-len(self.items)//2) * 150))
 
                     text = self.font.render(f"{item['name']} - {item['price']} Gold", True, (255, 255, 255))
-                    screen.blit(text, (180 + 500, 150 + (i-len(self.items)//2) * 150))
+                    screen.blit(text, (260 + 500, 150 + (i-len(self.items)//2) * 150))
 
-                    pg.draw.rect(screen, (0, 200, 0), self.buttons[i])
-                    buy_text = self.font.render("Buy", True, (255, 255, 255))
-                    screen.blit(buy_text, (self.buttons[i].x + 25, self.buttons[i].y + 5))
+                    if item["amount"] > 0:
+                        pg.draw.rect(screen, (0, 200, 0), self.buttons[i])
+                        buy_text = self.font.render("Buy", True, (255, 255, 255))
+                        screen.blit(buy_text, (self.buttons[i].x + 25, self.buttons[i].y + 5))
+                    else:
+                        pg.draw.rect(screen, (200, 0, 0), self.buttons[i])
+                        buy_text = self.font.render("Sold", True, (255, 255, 255))
+                        screen.blit(buy_text, (self.buttons[i].x + 25, self.buttons[i].y + 5))
 
     def toggle_shop(self):
         self.shop_open = not self.shop_open
