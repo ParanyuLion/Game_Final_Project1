@@ -1,6 +1,7 @@
 from abc import ABC, abstractmethod
 from entity import Entity
 
+
 class Enemy(Entity, ABC):
     """
         An abstract class to be implemented to represent all kinds of elements to

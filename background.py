@@ -25,7 +25,7 @@ class Background:
                  'enemy_spawn': {'x': (500, 1900), 'y': (330, 800)}},
         'MainMenu': {'image': "Game_Final_Project1/picture/background/menu.png",
                      'border': {"LEFT": 9999, "RIGHT": 9999, "UP": 9999, "DOWN": 9999}},
-        'shop': {'image': "Game_Final_Project1/picture/background/menu.png",
+        'shop': {'image': "Game_Final_Project1/picture/background/shop_bg.png",
                  'door': {'x': (0, 9999), 'y': (0, 9999)},
                  'border': {"LEFT": 9999, "RIGHT": 9999, "UP": 9999, "DOWN": 9999}, 'spawn': (500, 500)},
     }
@@ -38,6 +38,8 @@ class Background:
     def load_bg(cls, name):
         bg = pg.image.load(Background.get(name, 'image'))
         w, h = bg.get_size()
+        if name == 'shop':
+            return pg.transform.scale(bg, (w * 1, h * 1))
         return pg.transform.scale(bg, (w * 3.5, h * 3.5))
 
     @classmethod
@@ -45,3 +47,4 @@ class Background:
         bg = pg.image.load(Background.get(name, 'image'))
         w, h = bg.get_size()
         return pg.transform.scale(bg, (w * 4.7, h * 4.7))
+

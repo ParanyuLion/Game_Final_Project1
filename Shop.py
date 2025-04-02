@@ -59,7 +59,11 @@ class Shop:
 
     def draw(self, screen):
         if self.shop_open:
-            pg.draw.rect(screen, (50, 50, 50), (100, 100, 1080, 520))
+            shop_bg = pg.Surface((1080, 520))
+            shop_bg.set_alpha(200)
+            shop_bg.fill((50, 50, 50))
+            screen.blit(shop_bg, (100, 100))
+            # pg.draw.rect(screen, (50, 50, 50), (100, 100, 1080, 520))
 
             gold_text = self.font.render(f"Gold: {self.player.gold}", True, (255, 255, 0))
             screen.blit(gold_text, (120, 110))

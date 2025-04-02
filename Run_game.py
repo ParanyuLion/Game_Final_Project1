@@ -89,7 +89,11 @@ class RunGame:
         self.__screen.blit(self.__background, (-self.camera.camera_rect.x, -self.camera.camera_rect.y))
         # self.player.draw(self.__screen, self.camera)
         finish_effect = []
-
+        if self.level_name == 'shop':
+            self.__screen.blit(self.__background, (0,0))
+            self.shop.draw(self.__screen)
+            self.health_bar.draw(self.__screen, self.player.health)
+            return None
         for entity in self.camera:
             if isinstance(entity, DashEffect):
                 if self.__dash:
@@ -108,8 +112,7 @@ class RunGame:
 
         self.health_bar.draw(self.__screen, self.player.health)
         # self.camera.draw(self.__screen)
-        if self.level_name == 'shop':
-            self.shop.draw(self.__screen)
+
 
     def entities_events(self):
         """players event"""

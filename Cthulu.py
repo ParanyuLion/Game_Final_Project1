@@ -11,7 +11,7 @@ class Cthulu(Enemy):
     _dead_frames = []
     _fly_frames = []
 
-    def __init__(self, x, y, health=100, damage=20, img="Game_Final_Project1/picture/cthulu_SpriteSheet.png"):
+    def __init__(self, x, y, health=100, damage=20, img="Game_Final_Project1/picture/enemy/cthulu_SpriteSheet.png"):
         super().__init__(x, y, health=health, damage=damage, img=img)
         self.gold_drop = 500
 

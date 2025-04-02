@@ -10,7 +10,7 @@ class Minotaur(Enemy):
     _atk_frames2 = []
     _dead_frames = []
 
-    def __init__(self, x, y, health=100, damage=20, img="Game_Final_Project1/picture/Minotaur - Sprite Sheet.png"):
+    def __init__(self, x, y, health=100, damage=20, img="Game_Final_Project1/picture/enemy/Minotaur - Sprite Sheet.png"):
         super().__init__(x, y, health=health, damage=damage, img=img)
         self.gold_drop = 100
 
