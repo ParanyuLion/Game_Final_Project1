@@ -4,14 +4,14 @@ from entity import Entity
 from Enemy import Enemy
 
 
-class Minotaur(Entity, Enemy):
+class Minotaur(Enemy):
     _cached_frames = None
     _atk_frames1 = []
     _atk_frames2 = []
     _dead_frames = []
 
     def __init__(self, x, y, health=100, damage=20, img="Game_Final_Project1/picture/Minotaur - Sprite Sheet.png"):
-        super().__init__(img, x, y)
+        super().__init__(x, y, health=health, damage=damage, img=img)
         self.gold_drop = 100
 
         # self.__atk_frames1 = []
@@ -22,7 +22,7 @@ class Minotaur(Entity, Enemy):
         self.__dead_frames_index = 0
         self.__dead_frames_speed = 100
         if Minotaur._cached_frames is None:
-            Minotaur._cached_frames = self.__load_frames(10.6, 20)
+            Minotaur._cached_frames = self._load_frames(10.6, 20)
 
         self.__frames = Minotaur._cached_frames
         self.__atk_frames1 = Minotaur._atk_frames1
@@ -52,7 +52,7 @@ class Minotaur(Entity, Enemy):
         self.last_attack_time = 0
         self.__position = pg.math.Vector2(x, y)
 
-    def __load_frames(self, num_frames, num_movement):
+    def _load_frames(self, num_frames, num_movement):
         sheet_width, sheet_height = self.image.get_size()
         frame_width = sheet_width // num_frames
         frame_height = sheet_height // num_movement
@@ -80,7 +80,7 @@ class Minotaur(Entity, Enemy):
             Minotaur._dead_frames.append(dead_frame)
         return frames
 
-    def __dead_animation(self, screen, camera):
+    def _dead_animation(self, screen, camera):
         now = pg.time.get_ticks()
         if now - self.__last_update > self.__dead_frames_speed:
             if self.__dead_frames_index == 4:
@@ -96,7 +96,7 @@ class Minotaur(Entity, Enemy):
             self.__color_set()
         screen.blit(self.image, camera.apply(self))
 
-    def __walk_animation(self):
+    def _walk_animation(self):
         now = pg.time.get_ticks()
         if now - self.__last_update > self.__frame_speed:
             self.__last_update = now
@@ -109,7 +109,7 @@ class Minotaur(Entity, Enemy):
             self.rect.size = self.image.get_size()
             self.rect.center = old_center
 
-    def __atk_animation(self, screen, camera):
+    def _atk_animation(self, screen, camera):
         self.__move_state = False
         now = pg.time.get_ticks()
         if now - self.__last_update > self.__atk_frame_speed:
@@ -156,7 +156,7 @@ class Minotaur(Entity, Enemy):
                     else:
                         self.__left_right = "RIGHT"
                     # self.last_move_rect = self.rect.copy()
-                    self.__walk_animation()
+                    self._walk_animation()
                     player_vector = pg.math.Vector2(player.rect.center)
                     enemy_vector = pg.math.Vector2(self.rect.center)
                     distance = enemy_vector.distance_to(player_vector)
@@ -165,12 +165,12 @@ class Minotaur(Entity, Enemy):
                         self.__direction = (player_vector - enemy_vector).normalize()
                     else:
                         self.__direction = pg.math.Vector2()
-                    self.avoid_others(enemies)
+                    self._avoid_others(enemies)
                     self.__position += self.__direction * self.__speed
 
                     self.rect.topleft = (int(self.__position.x), int(self.__position.y))
 
-    def avoid_others(self, enemies):
+    def _avoid_others(self, enemies):
         avoid_vector = pg.math.Vector2(0, 0)
         for other_enemy in enemies:
             if other_enemy is not self and abs(self.__position.x - other_enemy.__position.x) < 100:
@@ -231,13 +231,13 @@ class Minotaur(Entity, Enemy):
             bar_y = camera.apply(self).top
             self.health_bar.draw(screen, self.health, bar_x, bar_y)
             if self.__atk_state:
-                self.__atk_animation(screen, camera)
+                self._atk_animation(screen, camera)
             else:
                 if self.__change_phase:
                     self.__color_set()
                 screen.blit(self.image, camera.apply(self))
         elif not self.already_dead:
-            self.__dead_animation(screen, camera)
+            self._dead_animation(screen, camera)
         # pg.draw.rect(screen, (0, 255, 0), camera.apply(self), 2)
 
     def get_size(self):

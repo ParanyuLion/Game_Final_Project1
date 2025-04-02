@@ -1,37 +1,56 @@
-class Enemy:
-    def __init__(self):
+from abc import ABC, abstractmethod
+from entity import Entity
+
+class Enemy(Entity, ABC):
+    """
+        An abstract class to be implemented to represent all kinds of elements to
+        be displayed on the game's screen
+        """
+    def __init__(self, x, y, health=100, damage=20, img=None):
+        super().__init__(img, x, y)
         pass
 
-    def __load_frames(self, num_frames, num_movement):
-        pass
+    @abstractmethod
+    def _load_frames(self, num_frames, num_movement):
+        """load animation frames"""
 
-    def __dead_animation(self, screen, camera):
-        pass
+    @abstractmethod
+    def _dead_animation(self, screen, camera):
+        """run dead animation"""
 
-    def __walk_animation(self):
-        pass
+    @abstractmethod
+    def _walk_animation(self):
+        """run walk animation"""
 
-    def __atk_animation(self, screen, camera):
-        pass
+    @abstractmethod
+    def _atk_animation(self, screen, camera):
+        """run attack animation"""
 
+    @abstractmethod
     def move(self, player, enemies):
-        pass
+        """enemy moving to player"""
 
-    def avoid_others(self, enemies):
-        pass
+    @abstractmethod
+    def _avoid_others(self, enemies):
+        """avoid other enemies"""
 
+    @abstractmethod
     def get_damage(self, bullet, damage):
-        pass
+        """get shot by a bullet"""
 
+    @abstractmethod
     def check_alive(self):
-        pass
+        """check that enemy is alive or not"""
 
+    @abstractmethod
     def hit_player(self, player):
-        pass
+        """check that enemy hit player or not"""
 
+    @abstractmethod
     def draw(self, screen, camera):
-        pass
+        """draw this enemy and apply to camera"""
 
+    @abstractmethod
     def get_size(self):
-        pass
+        """get size of image"""
 
