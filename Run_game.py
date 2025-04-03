@@ -4,7 +4,7 @@ from Player import Player
 from background import Background as Bgd
 from game_config import Config
 from bullet import Bullet
-from Effects import Explosion, DashEffect
+from Effects import Explosion, DashEffect, FireBreatheEffect
 from UI import HealthBar
 from Slime import Slime
 from Minotaur import Minotaur
@@ -100,10 +100,16 @@ class RunGame:
                     entity.rect = self.__before_dash_pos
                     entity.finish = False
                     self.__dash = False
-            elif isinstance(entity, Explosion):
+            elif isinstance(entity, Explosion) or isinstance(entity, FireBreatheEffect):
                 if entity.finish:
                     finish_effect.append(entity)
             entity.draw(self.__screen, self.camera)
+        self.FireBreath.draw(self.__screen, self.camera)
+        # delete this loop if game is lag
+        for entity in self.camera:
+            if isinstance(entity, (Explosion, DashEffect, FireBreatheEffect)):
+                entity.draw(self.__screen, self.camera)
+
         remove_set = set(finish_effect)
         self.enemies = [b for b in self.enemies if b not in remove_set]
         for effect in finish_effect:
@@ -140,7 +146,7 @@ class RunGame:
             self.camera.remove(bullet)
 
         """enemies event"""
-        self.FireBreath.hit_enemy(self.enemies)
+        self.FireBreath.hit_enemy(self.enemies, self.effects, self.camera)
         dead_enemies = []
         for enemy in self.enemies:
             enemy.move(self.player, self.enemies)
@@ -179,7 +185,7 @@ class RunGame:
             self.level_name = 1
             for i in range(1):
                 spawn_x, spawn_y = self.random_spawn()
-                new_enemy = Cthulu(spawn_x, spawn_y, health=3)
+                new_enemy = Cthulu(spawn_x, spawn_y, health=30)
                 new_enemy.rect.topleft = (spawn_x, spawn_y)
                 self.enemies.append(new_enemy)
             self.camera.add(*self.enemies)

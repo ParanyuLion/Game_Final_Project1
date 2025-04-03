@@ -9,7 +9,7 @@ class Player(Entity):
         self.max_health = health
         self.health = health
         self.gold = 500
-        self.speed = 7  # initial2
+        self.speed = 7  # initial is 2
         self.damage = 1
         self.unlock_fire_breathe = False
 

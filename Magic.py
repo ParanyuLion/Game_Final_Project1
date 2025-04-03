@@ -1,6 +1,6 @@
 import pygame as pg
 from entity import Entity
-
+from Effects import FireBreatheEffect
 
 class FireBreath(Entity):
     _cached_frames = None
@@ -50,13 +50,15 @@ class FireBreath(Entity):
             frames.append(frame)
         return frames
 
-    def hit_enemy(self, enemies):
+    def hit_enemy(self, enemies, effect_list, camera):
         now = pg.time.get_ticks()
         if now - self.last_hit > self.__frame_speed * 2 and self.activate:
             hit_list = [enemy for enemy in enemies if
                         self.rect.colliderect(enemy.rect.inflate((-self.rect.width, -self.rect.height)))]
-
             for enemy in hit_list:
+                effect = FireBreatheEffect(enemy.rect.centerx, enemy.rect.centery)
+                effect_list.append(effect)
+                camera.add(effect)
                 enemy.health -= 2
             self.last_hit = now
 
