@@ -8,6 +8,7 @@ class Player(Entity):
         super().__init__("Game_Final_Project1/picture/AnimationSheet_Character.png", x, y)
         self.max_health = health
         self.health = health
+        self.mana = 100
         self.gold = 500
         self.speed = 7  # initial is 2
         self.damage = 1

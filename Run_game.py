@@ -5,7 +5,7 @@ from background import Background as Bgd
 from game_config import Config
 from bullet import Bullet
 from Effects import Explosion, DashEffect, FireBreatheEffect
-from UI import HealthBar
+from UI import HealthBar, ManaBar
 from Slime import Slime
 from Minotaur import Minotaur
 from Cthulu import Cthulu
@@ -56,7 +56,8 @@ class RunGame:
         self.bullet_size = (20, 20)
         self.enemies = []
         self.effects = []
-        self.health_bar = HealthBar(20, 20, 300, 35, self.player.health)
+        self.health_bar = HealthBar(20, 20, 450, 35, self.player.health)
+        self.mana_bar = ManaBar(20, 63, 450, 35, self.player.mana)
         self.camera = Camera(Config.get('WIN_WIDTH'), Config.get('WIN_HEIGHT'))
         self.camera.add(self.player, *self.enemies, *self.bullets, *self.effects, self.FireBreath)
         self.player.draw(self.__screen, self.camera)
@@ -93,6 +94,7 @@ class RunGame:
             self.__screen.blit(self.__background, (0,0))
             self.shop.draw(self.__screen)
             self.health_bar.draw(self.__screen, self.player.health)
+            self.mana_bar.draw(self.__screen, self.player.mana)
             return None
         for entity in self.camera:
             if isinstance(entity, DashEffect):
@@ -117,6 +119,7 @@ class RunGame:
             self.camera.remove(effect)
 
         self.health_bar.draw(self.__screen, self.player.health)
+        self.mana_bar.draw(self.__screen, self.player.mana)
         # self.camera.draw(self.__screen)
 
 
@@ -146,7 +149,7 @@ class RunGame:
             self.camera.remove(bullet)
 
         """enemies event"""
-        self.FireBreath.hit_enemy(self.enemies, self.effects, self.camera)
+        self.FireBreath.hit_enemy(self.enemies,self.player, self.effects, self.camera)
         dead_enemies = []
         for enemy in self.enemies:
             enemy.move(self.player, self.enemies)
@@ -185,7 +188,7 @@ class RunGame:
             self.level_name = 1
             for i in range(1):
                 spawn_x, spawn_y = self.random_spawn()
-                new_enemy = Cthulu(spawn_x, spawn_y, health=30)
+                new_enemy = Cthulu(spawn_x, spawn_y, health=5)
                 new_enemy.rect.topleft = (spawn_x, spawn_y)
                 self.enemies.append(new_enemy)
             self.camera.add(*self.enemies)
