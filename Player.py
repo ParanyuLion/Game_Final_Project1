@@ -8,10 +8,13 @@ class Player(Entity):
         super().__init__("Game_Final_Project1/picture/AnimationSheet_Character.png", x, y)
         self.max_health = health
         self.health = health
+        self.max_mana = 100
         self.mana = 100
         self.gold = 500
         self.speed = 7  # initial is 2
         self.damage = 1
+        self.health_potion = 0
+        self.mana_potion = 0
         self.unlock_fire_breathe = False
 
         self.__atk_frames = []
@@ -178,3 +181,15 @@ class Player(Entity):
 
     def set_left_right(self, direction):
         self.left_right = direction
+
+    def drink_potion(self, potion):
+        if potion == 'health_potion' and self.health_potion > 0:
+            self.health_potion -= 1
+            self.health += 20
+            if self.health > self.max_health:
+                self.health = self.max_health
+        elif potion == 'mana_potion' and self.mana_potion > 0:
+            self.mana_potion -= 1
+            self.mana += 20
+            if self.mana > self.max_mana:
+                self.mana = self.max_mana

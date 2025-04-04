@@ -5,7 +5,7 @@ from background import Background as Bgd
 from game_config import Config
 from bullet import Bullet
 from Effects import Explosion, DashEffect, FireBreatheEffect
-from UI import HealthBar, ManaBar
+from UI import HealthBar, ManaBar, Inventory
 from Slime import Slime
 from Minotaur import Minotaur
 from Cthulu import Cthulu
@@ -58,6 +58,7 @@ class RunGame:
         self.effects = []
         self.health_bar = HealthBar(20, 20, 450, 35, self.player.health)
         self.mana_bar = ManaBar(20, 63, 450, 35, self.player.mana)
+        self.inventory = Inventory(500, 570,100, 100, self.player)
         self.camera = Camera(Config.get('WIN_WIDTH'), Config.get('WIN_HEIGHT'))
         self.camera.add(self.player, *self.enemies, *self.bullets, *self.effects, self.FireBreath)
         self.player.draw(self.__screen, self.camera)
@@ -120,8 +121,8 @@ class RunGame:
 
         self.health_bar.draw(self.__screen, self.player.health)
         self.mana_bar.draw(self.__screen, self.player.mana)
+        self.inventory.draw(self.__screen, self.player)
         # self.camera.draw(self.__screen)
-
 
     def entities_events(self):
         """players event"""
@@ -256,6 +257,11 @@ class RunGame:
                         elif self.__complete_level and self.__at_door:
                             self.load_level('shop')
                             self.shop.toggle_shop()
+                    if event.key == pg.K_1:
+                        self.player.drink_potion('health_potion')
+                    if event.key == pg.K_2:
+                        self.player.drink_potion('mana_potion')
+
                 if event.type == pg.MOUSEBUTTONDOWN:
                     if event.button == pg.BUTTON_LEFT and self.__start_game:
                         now = pg.time.get_ticks()

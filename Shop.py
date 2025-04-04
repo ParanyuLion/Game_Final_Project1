@@ -6,16 +6,16 @@ class Shop:
         self.player = player
         self.size = (70,70)
         self.items = [
-            {"name": "Health Potion", "price": 10, "effect": self.increase_health,
+            {"name": "Health Potion", "price": 10, "effect": self.increase_health_potion,
              "image": pg.transform.scale(pg.image.load("Game_Final_Project1/picture/Potion/HealPotion.png"), self.size),
              "amount": 5},
             {"name": "Speed Potion", "price": 200, "effect": self.increase_speed,
              "image": pg.transform.scale(pg.image.load("Game_Final_Project1/picture/Potion/SpeedPotion.png"), self.size),
              "amount": 2},
-            {"name": "Mana Potion", "price": 100, "effect": self.increase_damage,
+            {"name": "Mana Potion", "price": 100, "effect": self.increase_mana_potion,
              "image": pg.transform.scale(pg.image.load("Game_Final_Project1/picture/Potion/ManaPotion.png"), self.size),
              "amount": 2},
-            {"name": "Health Potion", "price": 100, "effect": self.increase_health,
+            {"name": "Health Potion", "price": 100, "effect": self.increase_health_potion,
              "image": pg.transform.scale(pg.image.load("Game_Final_Project1/picture/Potion/AttackPotion.png"), self.size),
              "amount": 2},
             {"name": "Fire Breath", "price": 200, "effect": self.unlock_fire_breathe,
@@ -34,11 +34,14 @@ class Shop:
             else:
                 self.buttons.append(pg.Rect(370 + 500, 200 + (i-len(self.items)//2) * 150, 100, 40))
 
-    def increase_health(self):
-        self.player.health += 20
+    def increase_health_potion(self):
+        self.player.health_potion += 1
 
     def increase_speed(self):
         self.player.speed += 1
+
+    def increase_mana_potion(self):
+        self.player.mana_potion += 1
 
     def increase_damage(self):
         self.player.damage += 5

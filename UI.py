@@ -1,4 +1,5 @@
 import pygame as pg
+from Player import Player
 
 
 class HealthBar(pg.sprite.Sprite):
@@ -46,9 +47,9 @@ class HealthBar(pg.sprite.Sprite):
             screen.blit(text, text_rect)
 
 
-class ManaBar(pg.sprite.Sprite):
+class ManaBar():
     def __init__(self, x, y, width, height, max_mana):
-        super().__init__()
+
         self.x = x
         self.y = y
         self.width = width
@@ -73,3 +74,65 @@ class ManaBar(pg.sprite.Sprite):
 
         text_rect = text.get_rect(center=(self.x + self.width // 2, self.y + self.height // 2))
         screen.blit(text, text_rect)
+
+
+class Inventory:
+    def __init__(self, x, y, width, height, player):
+        self.player = player
+        self.x = x
+        self.y = y
+        self.width = width
+        self.height = height
+        self.border = height // 8
+        self.font_size = 20
+        self.font = pg.font.SysFont('calibri', self.font_size, bold=True)
+        self.item_size = (70,70)
+        self.inventory_slot = pg.transform.scale(pg.image.load('Game_Final_Project1/picture/InventorySlot.png').convert_alpha(),(80,80))
+        self.list_item = [{'key': '1',
+                           'img': pg.transform.scale(pg.image.load("Game_Final_Project1/picture/Potion/HealPotion.png"),
+                                                     self.item_size), 'value': 'heal_potion'},
+                          {'key': '2',
+                           'img': pg.transform.scale(pg.image.load("Game_Final_Project1/picture/Potion/ManaPotion.png"),
+                                                     self.item_size), 'value': 'mana_potion'},
+                          {'key': 'E',
+                           'img': pg.transform.scale(pg.image.load("Game_Final_Project1/picture/Spell/FireBreathIcon.png"),
+                                                     self.item_size), 'value': 'fire_breathe'},
+                          ]
+
+    def get_value(self, value):
+        if value == 'heal_potion':
+            return self.player.health_potion
+        if value == 'mana_potion':
+            return self.player.mana_potion
+        if value == 'fire_breathe':
+            return self.player.unlock_fire_breathe
+
+    def draw(self, screen, player):
+        slot_width, slot_height = self.inventory_slot.get_size()
+        for i, item in enumerate(self.list_item):
+            screen.blit(self.inventory_slot, (self.x + i * 80, self.y))
+            if not isinstance(self.get_value(item['value']), bool):
+                text = self.font.render(f"{self.get_value(item['value'])}", True, (255, 255, 255))
+                screen.blit(text, (self.x + i * 80+8, self.y+5+5))
+                if self.get_value(item['value']) == 0:
+                    img = item['img'].copy()
+                    img.set_alpha(50)
+                    screen.blit(img, (self.x + i * 80 + (slot_width - self.item_size[0]) / 2,
+                                              self.y + (slot_width - self.item_size[0]) / 2))
+                else:
+                    screen.blit(item['img'], (self.x + i * 80 + (slot_width - self.item_size[0]) / 2,
+                                                self.y + (slot_width - self.item_size[0]) / 2))
+
+
+            else:
+                if self.get_value(item['value']):
+                    screen.blit(item['img'], (self.x + i * 80 + (slot_width - self.item_size[0]) / 2, self.y + (slot_width - self.item_size[0]) / 2))
+                else:
+                    img = item['img'].copy()
+                    img.set_alpha(50)
+                    screen.blit(img, (self.x + i * 80 + (slot_width - self.item_size[0]) / 2,
+                                      self.y + (slot_width - self.item_size[0]) / 2))
+                    text = self.font.render(f"Locked", True, (255, 255, 255))
+                    screen.blit(text, (self.x + i * 80 + 12, self.y + 30))
+            text = self.font.render(f"[{(item['key'])}]", True, (255, 255, 255))
+            screen.blit(text, (self.x + i * 80 + 29, self.y + 90))
