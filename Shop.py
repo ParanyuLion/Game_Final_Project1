@@ -15,11 +15,11 @@ class Shop:
             {"name": "Mana Potion", "price": 100, "effect": self.increase_mana_potion,
              "image": pg.transform.scale(pg.image.load("Game_Final_Project1/picture/Potion/ManaPotion.png"), self.size),
              "amount": 2},
-            {"name": "Health Potion", "price": 100, "effect": self.increase_health_potion,
-             "image": pg.transform.scale(pg.image.load("Game_Final_Project1/picture/Potion/AttackPotion.png"), self.size),
+            {"name": "Thunder Strike", "price": 250, "effect": self.unlock_thunder_strike,
+             "image": pg.transform.scale(pg.image.load("Game_Final_Project1/picture/MagicIcon/ThunderStrikeIcon.png"), self.size),
              "amount": 2},
             {"name": "Fire Breath", "price": 200, "effect": self.unlock_fire_breathe,
-             "image": pg.transform.scale(pg.image.load("Game_Final_Project1/picture/Spell/FireBreathIcon.png"), self.size),
+             "image": pg.transform.scale(pg.image.load("Game_Final_Project1/picture/MagicIcon/FireBreathIcon.png"), self.size),
              "amount": 1},
             {"name": "Attack Potion", "price": 300, "effect": self.increase_damage,
              "image": pg.transform.scale(pg.image.load("Game_Final_Project1/picture/Potion/ManaPotion.png"), self.size),
@@ -48,6 +48,9 @@ class Shop:
 
     def unlock_fire_breathe(self):
         self.player.unlock_fire_breathe = True
+
+    def unlock_thunder_strike(self):
+        self.player.unlock_thunder_strike = True
 
     def buy_item(self, index):
         item = self.items[index]

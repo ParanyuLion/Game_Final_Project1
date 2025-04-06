@@ -121,7 +121,7 @@ class Cthulu(Enemy):
         self.__move_state = False
         now = pg.time.get_ticks()
         if now - self.__last_update > self.__atk_frame_speed:
-            print(self.rect.center)
+            # print(self.rect.center)
             self.__last_update = now
             if self.__attack_animation_set == 1:
 
@@ -182,10 +182,11 @@ class Cthulu(Enemy):
     def _avoid_others(self, enemies):
         avoid_vector = pg.math.Vector2(0, 0)
         for other_enemy in enemies:
-            if other_enemy is not self and abs(self.__position.x - other_enemy.__position.x) < 100:
-                distance = self.__position.distance_to(other_enemy.__position)
-                if distance < 50:
-                    avoid_vector += (self.__position - other_enemy.__position).normalize()
+            if isinstance(other_enemy, Cthulu):
+                if other_enemy is not self and abs(self.__position.x - other_enemy.__position.x) < 100:
+                    distance = self.__position.distance_to(other_enemy.__position)
+                    if distance < 50:
+                        avoid_vector += (self.__position - other_enemy.__position).normalize()
 
         if avoid_vector.length() > 0:
             self.__direction += avoid_vector.normalize() * 0.5

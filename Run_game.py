@@ -9,7 +9,7 @@ from UI import HealthBar, ManaBar, Inventory
 from Slime import Slime
 from Minotaur import Minotaur
 from Cthulu import Cthulu
-from Magic import FireBreath
+from Magic import FireBreath, ThunderStrike
 from Shop import Shop
 import random
 
@@ -73,6 +73,7 @@ class RunGame:
         self.camera.add(dash_effect)
         self.shop = Shop(self.player)
 
+
     def main_menu(self):
         self.__screen.fill((0, 0, 0))
         self.__screen.blit(self.__background, (0, 0))
@@ -97,21 +98,23 @@ class RunGame:
             self.health_bar.draw(self.__screen, self.player.health)
             self.mana_bar.draw(self.__screen, self.player.mana)
             return None
-        for entity in self.camera:
-            if isinstance(entity, DashEffect):
-                if self.__dash:
-                    entity.rect = self.__before_dash_pos
-                    entity.finish = False
-                    self.__dash = False
-            elif isinstance(entity, Explosion) or isinstance(entity, FireBreatheEffect):
-                if entity.finish:
-                    finish_effect.append(entity)
-            entity.draw(self.__screen, self.camera)
+        for bullet in self.bullets:
+            bullet.draw(self.__screen, self.camera)
+        self.player.draw(self.__screen, self.camera)
+        for enemy in self.enemies:
+            enemy.draw(self.__screen, self.camera)
         self.FireBreath.draw(self.__screen, self.camera)
         # delete this loop if game is lag
-        for entity in self.camera:
-            if isinstance(entity, (Explosion, DashEffect, FireBreatheEffect)):
-                entity.draw(self.__screen, self.camera)
+        for effect in self.effects:
+            if isinstance(effect, DashEffect):
+                if self.__dash:
+                    effect.rect = self.__before_dash_pos
+                    effect.finish = False
+                    self.__dash = False
+            else:
+                if effect.finish:
+                    finish_effect.append(effect)
+            effect.draw(self.__screen, self.camera)
 
         remove_set = set(finish_effect)
         self.enemies = [b for b in self.enemies if b not in remove_set]
@@ -151,6 +154,7 @@ class RunGame:
 
         """enemies event"""
         self.FireBreath.hit_enemy(self.enemies,self.player, self.effects, self.camera)
+
         dead_enemies = []
         for enemy in self.enemies:
             enemy.move(self.player, self.enemies)
@@ -187,11 +191,15 @@ class RunGame:
             self.set_level(self.level_name)
         elif level == 1:
             self.level_name = 1
-            for i in range(1):
+            for i in range(2):
                 spawn_x, spawn_y = self.random_spawn()
                 new_enemy = Cthulu(spawn_x, spawn_y, health=5)
                 new_enemy.rect.topleft = (spawn_x, spawn_y)
                 self.enemies.append(new_enemy)
+                # new_enemy2 = Slime(spawn_x, spawn_y, health=5)
+                # new_enemy2.rect.topleft = (spawn_x, spawn_y)
+                # self.enemies.append(new_enemy2)
+
             self.camera.add(*self.enemies)
             self.set_level(self.level_name)
 
@@ -209,7 +217,7 @@ class RunGame:
             self.level_name = 3
             for i in range(3):
                 spawn_x, spawn_y = self.random_spawn()
-                new_enemy = Minotaur(spawn_x, spawn_y, health=5)
+                new_enemy = Slime(spawn_x, spawn_y, health=5)
                 new_enemy.rect.topleft = (spawn_x, spawn_y)
                 self.enemies.append(new_enemy)
             self.camera.add(*self.enemies)
@@ -261,6 +269,8 @@ class RunGame:
                         self.player.drink_potion('health_potion')
                     if event.key == pg.K_2:
                         self.player.drink_potion('mana_potion')
+                    if event.key == pg.K_r and self.player.unlock_thunder_strike:
+                        ThunderStrike.hit_enemy(self.enemies, self.player, self.effects, self.camera)
 
                 if event.type == pg.MOUSEBUTTONDOWN:
                     if event.button == pg.BUTTON_LEFT and self.__start_game:
@@ -299,6 +309,7 @@ class RunGame:
                         self.player.move("LEFT")
                     if key[pg.K_d] and self.player.wall_collision("RIGHT", self.__border["RIGHT"]):
                         self.player.move("RIGHT")
+
                     if key[pg.K_q] and self.player.unlock_fire_breathe:
                         self.FireBreath.activate = True
                         self.FireBreath.set_position(self.player.rect, self.player.left_right)
@@ -309,9 +320,8 @@ class RunGame:
 
             pg.display.flip()
             clock.tick(Config.get('FPS'))
-            end_time = pg.time.get_ticks()
-            if end_time - start_time > 17:
-                print(f"Frame time: {end_time - start_time} ms")
+            fps = clock.get_fps()
+            print(f"FPS: {fps:.2f}")
 
     pg.quit()
 

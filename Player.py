@@ -16,6 +16,7 @@ class Player(Entity):
         self.health_potion = 0
         self.mana_potion = 0
         self.unlock_fire_breathe = False
+        self.unlock_thunder_strike = False
 
         self.__atk_frames = []
         self.__atk_frames_index = 0
@@ -90,7 +91,7 @@ class Player(Entity):
         return False
 
     def wall_collision(self, direction, wall):
-        print(self.rect.x, self.rect.y)
+        # print(self.rect.x, self.rect.y)
         if direction == "LEFT":
             if wall < self.rect.x:
                 return True
