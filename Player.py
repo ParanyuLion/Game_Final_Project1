@@ -1,6 +1,7 @@
 import pygame as pg
 # from game_config import Config
 from entity import Entity
+import time
 
 
 class Player(Entity):
@@ -39,6 +40,33 @@ class Player(Entity):
         self.atk_state = False
         self.walk_state = False
         self.idle_state = True
+        self.last_activate = {
+            'CLICK': -99999,
+            '1': -99999,
+            '2': -99999,
+            'Q': -99999,
+            'R': -99999,
+            'SPACE': -99999,
+        }
+        self.cooldown_durations = {
+            'CLICK': 200,
+            '1': 500,
+            '2': 500,
+            'Q': 1,
+            'R': 500,
+            'SPACE': 1000,
+
+        }
+
+    def can_use_skill(self, key):
+        now = pg.time.get_ticks()
+        return now - self.last_activate.get(key) >= self.cooldown_durations.get(key)
+
+    def use_skill(self, key):
+        if self.can_use_skill(key):
+            self.last_activate[key] = pg.time.get_ticks()
+            return True
+        return False
 
     def __load_frames(self, num_frames, num_movement):
         sheet_width, sheet_height = self.image.get_size()

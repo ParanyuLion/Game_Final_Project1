@@ -5,7 +5,7 @@ from background import Background as Bgd
 from game_config import Config
 from bullet import Bullet
 from Effects import Explosion, DashEffect, FireBreatheEffect
-from UI import HealthBar, ManaBar, Inventory
+from UI import HealthBar, ManaBar, Inventory, InteractUI
 from Slime import Slime
 from Minotaur import Minotaur
 from Cthulu import Cthulu
@@ -58,11 +58,10 @@ class RunGame:
         self.effects = []
         self.health_bar = HealthBar(20, 20, 450, 35, self.player.health)
         self.mana_bar = ManaBar(20, 63, 450, 35, self.player.mana)
-        self.inventory = Inventory(500, 570,100, 100, self.player)
+        self.inventory = Inventory(500, 580, self.player, self.FireBreath)
         self.camera = Camera(Config.get('WIN_WIDTH'), Config.get('WIN_HEIGHT'))
         self.camera.add(self.player, *self.enemies, *self.bullets, *self.effects, self.FireBreath)
         self.player.draw(self.__screen, self.camera)
-        self.__last_shot_time = 0
         self.__dash_time = 0
         self.__at_door = False
         self.__dash = False
@@ -124,7 +123,10 @@ class RunGame:
 
         self.health_bar.draw(self.__screen, self.player.health)
         self.mana_bar.draw(self.__screen, self.player.mana)
-        self.inventory.draw(self.__screen, self.player)
+        self.inventory.draw(self.__screen)
+
+        if self.__complete_level and self.__at_door:
+            InteractUI.draw_interact_door(self.__screen)
         # self.camera.draw(self.__screen)
 
     def entities_events(self):
@@ -191,7 +193,7 @@ class RunGame:
             self.set_level(self.level_name)
         elif level == 1:
             self.level_name = 1
-            for i in range(2):
+            for i in range(1):
                 spawn_x, spawn_y = self.random_spawn()
                 new_enemy = Cthulu(spawn_x, spawn_y, health=5)
                 new_enemy.rect.topleft = (spawn_x, spawn_y)
@@ -252,7 +254,7 @@ class RunGame:
                     # if event.key == pg.K_ESCAPE:
                     #     self.__start_game = False
                     now = pg.time.get_ticks()
-                    if event.key == pg.K_SPACE and now - self.__dash_time > self.player.dash_cooldown and self.level_name != 'shop':
+                    if event.key == pg.K_SPACE and self.player.use_skill('SPACE') and self.level_name != 'shop':
                         self.__before_dash_pos = self.player.rect.copy()
                         self.player.dash(self.__border)
                         self.__dash = True
@@ -265,17 +267,18 @@ class RunGame:
                         elif self.__complete_level and self.__at_door:
                             self.load_level('shop')
                             self.shop.toggle_shop()
-                    if event.key == pg.K_1:
+                    if event.key == pg.K_1 and self.player.use_skill('1'):
                         self.player.drink_potion('health_potion')
-                    if event.key == pg.K_2:
+                    if event.key == pg.K_2 and self.player.use_skill('2'):
                         self.player.drink_potion('mana_potion')
-                    if event.key == pg.K_r and self.player.unlock_thunder_strike:
+                    if event.key == pg.K_r and self.player.unlock_thunder_strike and self.player.use_skill("R"):
                         ThunderStrike.hit_enemy(self.enemies, self.player, self.effects, self.camera)
 
                 if event.type == pg.MOUSEBUTTONDOWN:
+                    """Shooting Bullet"""
                     if event.button == pg.BUTTON_LEFT and self.__start_game:
                         now = pg.time.get_ticks()
-                        if now - self.__last_shot_time > self.player.atk_speed * 4:
+                        if self.player.use_skill("CLICK"):
                             mouse_pos = pg.mouse.get_pos()
                             mouse_pos_world = (mouse_pos[0] + self.camera.camera_rect.x,
                                                mouse_pos[1] + self.camera.camera_rect.y)

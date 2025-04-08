@@ -79,19 +79,20 @@ class ManaBar:
 
 
 class Inventory:
-    def __init__(self, x, y, width, height, player):
+    def __init__(self, x, y, player, fire_breathe):
         self.player = player
+        self.fire_breathe = fire_breathe
         self.x = x
         self.y = y
-        self.width = width
-        self.height = height
-        self.border = height // 8
         self.font_size = 20
         self.font = pg.font.SysFont('calibri', self.font_size, bold=True)
         self.item_size = (70, 70)
         self.inventory_slot = pg.transform.scale(
             pg.image.load('Game_Final_Project1/picture/InventorySlot.png').convert_alpha(), (80, 80))
-        self.list_item = [{'key': '1',
+        self.list_item = [{'key': 'CLICK',
+                           'img': pg.transform.scale(pg.image.load("Game_Final_Project1/picture/MagicIcon/ShootingIcon.png").convert_alpha(),
+                                                     self.item_size), 'value': None},
+                          {'key': '1',
                            'img': pg.transform.scale(pg.image.load("Game_Final_Project1/picture/Potion/HealPotion.png"),
                                                      self.item_size), 'value': 'heal_potion'},
                           {'key': '2',
@@ -111,6 +112,7 @@ class Inventory:
                                self.item_size), 'value': None},
                           ]
         self.__num_slots = len(self.list_item)
+        self.__bg_rect = pg.Rect(x-50, y-50, self.__num_slots * 80,  80)
 
     def get_value(self, value):
         if value == 'heal_potion':
@@ -120,11 +122,14 @@ class Inventory:
         if value == 'fire_breathe':
             return self.player.unlock_fire_breathe
         if value == 'thunder_strike':
-            return self.player.unlock_fire_breathe
+            return self.player.unlock_thunder_strike
         else:
             return True
 
-    def draw(self, screen, player):
+    def draw(self, screen):
+        pg.draw.rect(screen, (44, 44, 44), (self.x-5, self.y-5, self.__num_slots * 80 + 10, 120), border_radius=10)
+        pg.draw.rect(screen, (112, 112, 112), (self.x - 5, self.y - 5, self.__num_slots * 80 + 10, 120), width=2,
+                     border_radius=10)
         slot_width, slot_height = self.inventory_slot.get_size()
         total_width = self.__num_slots * slot_width
         self.x = (Config.get('WIN_WIDTH') - total_width) // 2
@@ -154,7 +159,62 @@ class Inventory:
                     text = self.font.render(f"Locked", True, (255, 255, 255))
                     text_rect = text.get_rect(center=(self.x + i * 80 + slot_width / 2, self.y + slot_width / 2))
                     screen.blit(text, text_rect)
+
+            """overlay cooldown"""
+            key = item['key']
+            if key in self.player.last_activate:
+                now = pg.time.get_ticks()
+                last_used = self.player.last_activate[key]
+                duration = self.player.cooldown_durations.get(key, 0)
+                time_since_used = now - last_used
+
+                if time_since_used < duration:
+                    cooldown_ratio = 1 - (time_since_used / duration)
+                    overlay = pg.Surface(self.item_size, pg.SRCALPHA)
+                    overlay.fill((0, 0, 0, 180))
+                    overlay_height = int(self.item_size[1] * cooldown_ratio)
+                    overlay_rect = pg.Rect(0, 0, self.item_size[0], overlay_height)
+                    if key != '1' and key != '2':
+                        screen.blit(overlay.subsurface(overlay_rect), (
+                            self.x + i * 80 + (slot_width - self.item_size[0]) / 2,
+                            self.y + (slot_width - self.item_size[1]) / 2 + (self.item_size[1] - overlay_height)
+                        ))
+                    elif key == '1' and self.player.health_potion > 0:
+                        screen.blit(overlay.subsurface(overlay_rect), (
+                            self.x + i * 80 + (slot_width - self.item_size[0]) / 2,
+                            self.y + (slot_width - self.item_size[1]) / 2 + (self.item_size[1] - overlay_height)
+                        ))
+                    elif key == '2' and self.player.mana_potion > 0:
+                        screen.blit(overlay.subsurface(overlay_rect), (
+                            self.x + i * 80 + (slot_width - self.item_size[0]) / 2,
+                            self.y + (slot_width - self.item_size[1]) / 2 + (self.item_size[1] - overlay_height)
+                        ))
+
+                elif key == 'Q' and self.fire_breathe.activate:
+                    overlay = pg.Surface(self.item_size, pg.SRCALPHA)
+                    overlay.fill((0, 0, 0, 180))
+                    overlay_height = int(self.item_size[1])
+                    overlay_rect = pg.Rect(0, 0, self.item_size[0], overlay_height)
+                    screen.blit(overlay.subsurface(overlay_rect), (
+                        self.x + i * 80 + (slot_width - self.item_size[0]) / 2,
+                        self.y + (slot_width - self.item_size[1]) / 2 + (self.item_size[1] - overlay_height)
+                    ))
             text = self.font.render(f"[{(item['key'])}]", True, (255, 255, 255))
             # screen.blit(text, (self.x + i * 80 + 29, self.y + 90))
             text_rect = text.get_rect(center=(self.x + i * 80 + slot_width / 2, self.y + 95))
             screen.blit(text, text_rect)
+
+
+class InteractUI:
+    @staticmethod
+    def draw_interact_door(screen):
+        x,y = Config.get('WIN_WIDTH')//2+30, Config.get('WIN_HEIGHT')//2-30
+        width, height = 150, 50
+        pg.draw.rect(screen, (44, 44, 44), (x,y, width, height), border_radius=5)
+        pg.draw.rect(screen, (112, 112, 112), (x-2,y-2, width+4, height+4), width=3,border_radius=5)
+        font = pg.font.SysFont('calibri', 20, bold=True)
+        text = font.render(f"Press E to enter", True, (255, 255, 255))
+        text_rect = text.get_rect(center=(x+width//2,y+height//2))
+        screen.blit(text, text_rect)
+
+

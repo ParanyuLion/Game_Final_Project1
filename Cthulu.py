@@ -54,7 +54,6 @@ class Cthulu(Enemy):
         self.last_attack_time = 0
         self.__position = pg.math.Vector2(x, y)
 
-
     def _load_frames(self, num_frames, num_movement):
         sheet_width, sheet_height = self.image.get_size()
         frame_width = sheet_width // num_frames
