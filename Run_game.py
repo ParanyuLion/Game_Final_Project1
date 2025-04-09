@@ -3,14 +3,17 @@ from Enemy import Enemy
 from Player import Player
 from background import Background as Bgd
 from game_config import Config
-from bullet import Bullet
+from bullet import Bullet, DemonBullet
 from Effects import Explosion, DashEffect, FireBreatheEffect
 from UI import HealthBar, ManaBar, Inventory, InteractUI, Gold
+from Shop import Shop
+from Magic import FireBreath, ThunderStrike
+
 from Slime import Slime
 from Minotaur import Minotaur
 from Cthulu import Cthulu
-from Magic import FireBreath, ThunderStrike
-from Shop import Shop
+from Demon import Demon
+
 import random
 
 
@@ -146,13 +149,20 @@ class RunGame:
             if (self.__border["RIGHT"] + self.bullet_size[0] * 2.5 > bullet.rect.centerx > self.__border["LEFT"] and
                     self.__border["DOWN"] + self.bullet_size[1] * 3.5 > bullet.rect.centery > self.__border["UP"]):
                 bullet.update()
-                for enemy in self.enemies:
-                    if enemy.check_alive() and enemy.get_damage(bullet, self.player.damage):
-                        # if bullet in self.bullets:
+                if isinstance(bullet, DemonBullet):
+                    if self.player.get_shoot(bullet):
                         explosion = Explosion(bullet.rect.x, bullet.rect.y)
                         self.effects.append(explosion)
                         self.camera.add(explosion)
                         remove_bullets.append(bullet)
+                else:
+                    for enemy in self.enemies:
+                        if enemy.check_alive() and enemy.get_damage(bullet, self.player.damage):
+                            # if bullet in self.bullets:
+                            explosion = Explosion(bullet.rect.x, bullet.rect.y)
+                            self.effects.append(explosion)
+                            self.camera.add(explosion)
+                            remove_bullets.append(bullet)
             else:
                 remove_bullets.append(bullet)
         remove_set = set(remove_bullets)
@@ -166,7 +176,9 @@ class RunGame:
         dead_enemies = []
         for enemy in self.enemies:
             enemy.move(self.player, self.enemies)
-            if enemy.hit_player(self.player):
+            if isinstance(enemy, Demon):
+                enemy.hit_player(self.player, bullets=self.bullets, camera=self.camera)
+            elif enemy.hit_player(self.player):
                 pass
             if enemy.already_dead:
                 dead_enemies.append(enemy)
@@ -199,9 +211,9 @@ class RunGame:
             self.set_level(self.level_name)
         elif level == 1:
             self.level_name = 1
-            for i in range(1):
+            for i in range(2):
                 spawn_x, spawn_y = self.random_spawn()
-                new_enemy = Cthulu(spawn_x, spawn_y, health=5)
+                new_enemy = Demon(spawn_x, spawn_y, health=5, level=self.level_name)
                 new_enemy.rect.topleft = (spawn_x, spawn_y)
                 self.enemies.append(new_enemy)
                 # new_enemy2 = Slime(spawn_x, spawn_y, health=5)

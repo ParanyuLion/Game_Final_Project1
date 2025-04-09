@@ -222,3 +222,8 @@ class Player(Entity):
             self.mana += 20
             if self.mana > self.max_mana:
                 self.mana = self.max_mana
+
+    def get_shoot(self, bullet):
+        if self.rect.colliderect(bullet):
+            self.health -= bullet.damage
+            return True
