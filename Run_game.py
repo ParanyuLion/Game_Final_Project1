@@ -5,7 +5,7 @@ from background import Background as Bgd
 from game_config import Config
 from bullet import Bullet
 from Effects import Explosion, DashEffect, FireBreatheEffect
-from UI import HealthBar, ManaBar, Inventory, InteractUI
+from UI import HealthBar, ManaBar, Inventory, InteractUI, Gold
 from Slime import Slime
 from Minotaur import Minotaur
 from Cthulu import Cthulu
@@ -56,9 +56,13 @@ class RunGame:
         self.bullet_size = (20, 20)
         self.enemies = []
         self.effects = []
+
         self.health_bar = HealthBar(20, 20, 450, 35, self.player.health)
         self.mana_bar = ManaBar(20, 63, 450, 35, self.player.mana)
         self.inventory = Inventory(500, 580, self.player, self.FireBreath)
+        self.shop = Shop(self.player)
+        self.show_gold = Gold(70,130, self.player)
+
         self.camera = Camera(Config.get('WIN_WIDTH'), Config.get('WIN_HEIGHT'))
         self.camera.add(self.player, *self.enemies, *self.bullets, *self.effects, self.FireBreath)
         self.player.draw(self.__screen, self.camera)
@@ -70,7 +74,7 @@ class RunGame:
         dash_effect = DashEffect(self.player.rect.centerx, self.player.rect.centery)
         self.effects.append(dash_effect)
         self.camera.add(dash_effect)
-        self.shop = Shop(self.player)
+
 
 
     def main_menu(self):
@@ -96,6 +100,7 @@ class RunGame:
             self.shop.draw(self.__screen)
             self.health_bar.draw(self.__screen, self.player.health)
             self.mana_bar.draw(self.__screen, self.player.mana)
+            self.show_gold.draw(self.__screen, 160, 130)
             return None
         for bullet in self.bullets:
             bullet.draw(self.__screen, self.camera)
@@ -124,6 +129,7 @@ class RunGame:
         self.health_bar.draw(self.__screen, self.player.health)
         self.mana_bar.draw(self.__screen, self.player.mana)
         self.inventory.draw(self.__screen)
+        self.show_gold.draw(self.__screen)
 
         if self.__complete_level and self.__at_door:
             InteractUI.draw_interact_door(self.__screen)

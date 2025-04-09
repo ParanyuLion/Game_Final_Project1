@@ -1,8 +1,10 @@
 import pygame as pg
+from game_config import Config
 
 
 class Shop:
     def __init__(self, player):
+        self.purchase_messages = []
         self.player = player
         self.size = (70,70)
         self.items = [
@@ -55,13 +57,14 @@ class Shop:
     def buy_item(self, index):
         item = self.items[index]
         if self.player.gold >= item["price"] and item["amount"] > 0:
+            self.purchase_messages.append(PurchaseMessage(f"Purchased {item['name']}!"))
             self.player.gold -= item["price"]
             item["effect"]()
-            print(f"Bought {item['name']}!")
             item["amount"] -= 1
-
+        elif item["amount"] <= 0:
+            self.purchase_messages.append(PurchaseMessage("Out of Stock!", duration=1000))
         else:
-            print("Not enough gold!")
+            self.purchase_messages.append(PurchaseMessage("Not enough gold!", duration=1000))
 
     def draw(self, screen):
         if self.shop_open:
@@ -71,8 +74,8 @@ class Shop:
             screen.blit(shop_bg, (100, 100))
             # pg.draw.rect(screen, (50, 50, 50), (100, 100, 1080, 520))
 
-            gold_text = self.font.render(f"Gold: {self.player.gold}", True, (255, 255, 0))
-            screen.blit(gold_text, (120, 110))
+            # gold_text = self.font.render(f"Gold: {self.player.gold}", True, (255, 255, 0))
+            # screen.blit(gold_text, (120, 110))
             for i, item in enumerate(self.items):
                 if i < len(self.items) // 2:
                     screen.blit(item["image"], (170, 150 + i * 150))
@@ -103,6 +106,19 @@ class Shop:
                         buy_text = self.font.render("Sold", True, (255, 255, 255))
                         screen.blit(buy_text, (self.buttons[i].x + 25, self.buttons[i].y + 5))
 
+            font = pg.font.SysFont("calibri", 24, bold=True)
+            messages_to_keep = []
+            for i, msg in enumerate(self.purchase_messages):
+                alpha = msg.get_alpha()
+                if alpha > 0:
+                    text_surface = font.render(msg.text, True, (255, 255, 255))
+                    text_surface.set_alpha(alpha)
+                    text_rect = text_surface.get_rect(center=(Config.get('WIN_WIDTH')//2, 120-i*30))
+                    screen.blit(text_surface, text_rect)
+                    messages_to_keep.append(msg)
+
+            self.purchase_messages = messages_to_keep
+
     def toggle_shop(self):
         self.shop_open = not self.shop_open
 
@@ -111,3 +127,20 @@ class Shop:
             for i, button in enumerate(self.buttons):
                 if button.collidepoint(event.pos):
                     self.buy_item(i)
+
+
+class PurchaseMessage:
+    def __init__(self, text, duration=2000):
+        self.text = text
+        self.start_time = pg.time.get_ticks()
+        self.duration = duration
+
+    def get_alpha(self):
+        now = pg.time.get_ticks()
+        elapsed = now - self.start_time
+        if elapsed >= self.duration:
+            return 0
+        return max(0, 255 - int((elapsed / self.duration) * 255))
+
+    def is_expired(self):
+        return self.get_alpha() <= 0

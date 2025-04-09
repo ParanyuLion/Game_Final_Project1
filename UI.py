@@ -78,6 +78,30 @@ class ManaBar:
         screen.blit(text, text_rect)
 
 
+class Gold:
+    def __init__(self, x, y, player):
+        self.__x = x
+        self.__y = y
+        self.__player = player
+        self.__font_size = 25
+        self.__font = pg.font.SysFont('calibri', self.__font_size, bold=True)
+        self.__img = pg.transform.scale(
+            pg.image.load('Game_Final_Project1/picture/Coin.png').convert_alpha(), (40, 40))
+        self.__img_size = self.__img.get_size()
+
+    def draw(self, screen, x=None, y=None):
+        if x is None and y is None:
+            screen.blit(self.__img, (self.__x-self.__img_size[0], self.__y-self.__img_size[1]//2))
+            text = self.__font.render(f"{self.__player.gold}", True, (255, 255, 255))
+            text_rect = text.get_rect(topleft=(self.__x, self.__y-self.__img_size[1]//3))
+            screen.blit(text, text_rect)
+        else:
+            screen.blit(self.__img, (x - self.__img_size[0], y - self.__img_size[1] // 2))
+            text = self.__font.render(f"{self.__player.gold}", True, (255, 255, 255))
+            text_rect = text.get_rect(topleft=(x, y - self.__img_size[1] // 3))
+            screen.blit(text, text_rect)
+
+
 class Inventory:
     def __init__(self, x, y, player, fire_breathe):
         self.player = player
@@ -216,5 +240,7 @@ class InteractUI:
         text = font.render(f"Press E to enter", True, (255, 255, 255))
         text_rect = text.get_rect(center=(x+width//2,y+height//2))
         screen.blit(text, text_rect)
+
+
 
 
