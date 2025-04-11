@@ -1,10 +1,11 @@
 import pygame as pg
+import random
 from Enemy import Enemy
 from Player import Player
 from background import Background as Bgd
 from game_config import Config
-from bullet import Bullet, DemonBullet
-from Effects import Explosion, DashEffect, FireBreatheEffect
+from bullet import Bullet, DemonBullet, CthuluBullet
+from Effects import Explosion, DashEffect, FireBreatheEffect, CthuluExplosion
 from UI import HealthBar, ManaBar, Inventory, InteractUI, Gold
 from Shop import Shop
 from Magic import FireBreath, ThunderStrike
@@ -14,7 +15,7 @@ from Minotaur import Minotaur
 from Cthulu import Cthulu
 from Demon import Demon
 
-import random
+
 
 
 class Camera(pg.sprite.Group):
@@ -151,7 +152,13 @@ class RunGame:
                 bullet.update()
                 if isinstance(bullet, DemonBullet):
                     if self.player.get_shoot(bullet):
-                        explosion = Explosion(bullet.rect.x, bullet.rect.y)
+                        explosion = Explosion(bullet.rect.centerx, bullet.rect.centery)
+                        self.effects.append(explosion)
+                        self.camera.add(explosion)
+                        remove_bullets.append(bullet)
+                elif isinstance(bullet, CthuluBullet):
+                    if self.player.get_shoot(bullet):
+                        explosion = CthuluExplosion(bullet.rect.centerx, bullet.rect.centery)
                         self.effects.append(explosion)
                         self.camera.add(explosion)
                         remove_bullets.append(bullet)
@@ -159,7 +166,7 @@ class RunGame:
                     for enemy in self.enemies:
                         if enemy.check_alive() and enemy.get_damage(bullet, self.player.damage):
                             # if bullet in self.bullets:
-                            explosion = Explosion(bullet.rect.x, bullet.rect.y)
+                            explosion = Explosion(bullet.rect.centerx, bullet.rect.centery)
                             self.effects.append(explosion)
                             self.camera.add(explosion)
                             remove_bullets.append(bullet)
@@ -176,7 +183,7 @@ class RunGame:
         dead_enemies = []
         for enemy in self.enemies:
             enemy.move(self.player, self.enemies)
-            if isinstance(enemy, Demon):
+            if isinstance(enemy, Demon) or isinstance(enemy, Cthulu):
                 enemy.hit_player(self.player, bullets=self.bullets, camera=self.camera)
             elif enemy.hit_player(self.player):
                 pass
@@ -211,9 +218,9 @@ class RunGame:
             self.set_level(self.level_name)
         elif level == 1:
             self.level_name = 1
-            for i in range(2):
+            for i in range(1):
                 spawn_x, spawn_y = self.random_spawn()
-                new_enemy = Demon(spawn_x, spawn_y, health=5, level=self.level_name)
+                new_enemy = Cthulu(spawn_x, spawn_y, health=5)
                 new_enemy.rect.topleft = (spawn_x, spawn_y)
                 self.enemies.append(new_enemy)
                 # new_enemy2 = Slime(spawn_x, spawn_y, health=5)
@@ -237,7 +244,7 @@ class RunGame:
             self.level_name = 3
             for i in range(3):
                 spawn_x, spawn_y = self.random_spawn()
-                new_enemy = Slime(spawn_x, spawn_y, health=5)
+                new_enemy = Demon(spawn_x, spawn_y, health=5, level=self.level_name)
                 new_enemy.rect.topleft = (spawn_x, spawn_y)
                 self.enemies.append(new_enemy)
             self.camera.add(*self.enemies)
@@ -296,7 +303,7 @@ class RunGame:
                     """Shooting Bullet"""
                     if event.button == pg.BUTTON_LEFT and self.__start_game:
                         now = pg.time.get_ticks()
-                        if self.player.use_skill("CLICK"):
+                        if self.player.use_skill("CLICK") and not self.player.drink_state:
                             mouse_pos = pg.mouse.get_pos()
                             mouse_pos_world = (mouse_pos[0] + self.camera.camera_rect.x,
                                                mouse_pos[1] + self.camera.camera_rect.y)

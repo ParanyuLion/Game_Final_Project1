@@ -1,6 +1,6 @@
 import pygame as pg
 from background import Background as Bgd
-from bullet import DemonBullet
+from bullet import DemonBullet, CthuluBullet
 from UI import HealthBar
 from Enemy import Enemy
 
@@ -39,12 +39,12 @@ class Demon(Enemy):
         self.__atk_frame_speed = self.__atk_speed // 8
         self.health = health
         self.__camera = camera
-        self.__speed = 2
+        self.__speed = 4
         self.__damage = damage
         self.__direction = pg.math.Vector2()
         self.__velocity = pg.math.Vector2()
         self.__max_health = health
-        self.health_bar = HealthBar(self.rect.x, self.rect.y, self.image.get_size()[0] // 2, 15, self.__max_health)
+        self.health_bar = HealthBar(self.rect.x, self.rect.y, self.image.get_size()[0] // 1.2, 15, self.__max_health)
         self.last_attack_time = 0
         self.__position = pg.math.Vector2(x, y)
         self.__current_level = level
@@ -146,8 +146,8 @@ class Demon(Enemy):
                         self.__direction = (player_vector - enemy_vector).normalize()
                         self.__player_in_range = False
                         self.__close_to_player = False
-                    elif (distance < 400 and (self.__border['LEFT']+20 <= self.rect.x <= self.__border['RIGHT']-20) and
-                          (self.__border['UP']+20 <= self.rect.y <= self.__border['DOWN']-20)):
+                    elif (distance < 450 and (self.__border['LEFT']+5 <= self.rect.x <= self.__border['RIGHT']-5) and
+                          (self.__border['UP']+5 <= self.rect.y <= self.__border['DOWN']-5)):
                         self.__direction = (-player_vector + enemy_vector).normalize()
                         self.__close_to_player = True
                     else:
@@ -193,14 +193,14 @@ class Demon(Enemy):
                     camera.add(bullet)
                     self.last_attack_time = current_time
                     self.__move_state = False
-                    return True
+                    return False
             self.__move_state = True
             return False
 
     def draw(self, screen, camera):
         if self.check_alive():
             bar_x = camera.apply(self).centerx - self.health_bar.width // 2
-            bar_y = camera.apply(self).top
+            bar_y = camera.apply(self).top-20
             self.health_bar.draw(screen, self.health, bar_x, bar_y)
             if self.__atk_state:
                 self._atk_animation(screen, camera)

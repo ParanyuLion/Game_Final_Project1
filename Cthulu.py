@@ -1,6 +1,6 @@
 import pygame as pg
 from UI import HealthBar
-from entity import Entity
+from bullet import CthuluBullet
 from Enemy import Enemy
 
 
@@ -43,6 +43,9 @@ class Cthulu(Enemy):
         self.__atk_speed = 600
         self.__atk_frame_speed = self.__atk_speed // 9
         self.health = health
+        self.__range_atk_count = 0
+        self.__range_atk_cooldown = 2500
+        self.__last_range_atk = 0
 
         self.__speed = 2
         self.__damage = damage
@@ -53,6 +56,8 @@ class Cthulu(Enemy):
         # self.last_move_rect = self.rect.copy()
         self.last_attack_time = 0
         self.__position = pg.math.Vector2(x, y)
+        self.__player_in_range = False
+        self.__distance = 0
 
     def _load_frames(self, num_frames, num_movement):
         sheet_width, sheet_height = self.image.get_size()
@@ -132,8 +137,8 @@ class Cthulu(Enemy):
                         self.image = pg.transform.flip(self.__atk_frames1[self.__atk_frames_index], True, False)
 
                 if self.__atk_frames_index == len(self.__atk_frames1) - 1:
-                    self.__attack_animation_set = 2
-                    self.__atk_frames_index = -1
+                    # self.__attack_animation_set = 2
+                    self.__atk_frames_index = 0
                     self.__move_state = True
             else:
 
@@ -145,8 +150,8 @@ class Cthulu(Enemy):
                         self.image = pg.transform.flip(self.__atk_frames2[self.__atk_frames_index], True, False)
 
                 if self.__atk_frames_index == len(self.__atk_frames2) - 1:
-                    self.__attack_animation_set = 1
-                    self.__atk_frames_index = -1
+                    # self.__attack_animation_set = 2
+                    self.__atk_frames_index = 0
                     self.__move_state = True
                 # print("atk", self.__atk_frames_index)
         screen.blit(self.image, camera.apply(self))
@@ -167,9 +172,9 @@ class Cthulu(Enemy):
                     self._walk_animation()
                     player_vector = pg.math.Vector2(player.rect.center)
                     enemy_vector = pg.math.Vector2(self.rect.center)
-                    distance = enemy_vector.distance_to(player_vector)
+                    self.__distance = enemy_vector.distance_to(player_vector)
 
-                    if distance > 0:
+                    if self.__distance > 0:
                         self.__direction = (player_vector - enemy_vector).normalize()
                     else:
                         self.__direction = pg.math.Vector2()
@@ -196,7 +201,7 @@ class Cthulu(Enemy):
             self.health -= damage
             if self.health == self.__max_health // 2 and self.__frames != self.__fly_frames:
                 self.__frames = self.__fly_frames
-                self.__speed = 4
+                self.__speed = 8
             return True
 
     def check_alive(self):
@@ -204,22 +209,56 @@ class Cthulu(Enemy):
             return True
         return False
 
+    def __atk_algorithm(self, player):
 
-    def hit_player(self, player):
+        now = pg.time.get_ticks()
+        if player.drink_state:
+            self.__attack_animation_set = 2
+            return None
+        if self.__distance < 250:
+            self.__attack_animation_set = 1
+            return None
+        if now - self.__last_range_atk > self.__range_atk_cooldown:
+            if self.__range_atk_count >= 3:
+                self.__last_range_atk = now
+                self.__range_atk_count = 0
+                self.__attack_animation_set = 1
+            else:
+                self.__attack_animation_set = 2
+
+        else:
+            self.__attack_animation_set = 1
+
+    def hit_player(self, player, bullets, camera):
         if self.check_alive():
-            current_time = pg.time.get_ticks()
-            enemy_hitbox = self.rect.inflate(-self.rect.width * 0.7, -self.rect.height * 0.7)
-            player_hitbox = player.rect.inflate(-player.rect.width * 0.7, -player.rect.height * 0.7)
-            if enemy_hitbox.colliderect(player_hitbox):
+            self.__atk_algorithm(player)
+            if self.__attack_animation_set == 1:
+                current_time = pg.time.get_ticks()
+                enemy_hitbox = self.rect.inflate(-self.rect.width * 0.7, -self.rect.height * 0.7)
+                player_hitbox = player.rect.inflate(-player.rect.width * 0.7, -player.rect.height * 0.7)
+                if enemy_hitbox.colliderect(player_hitbox):
+                    self.__atk_state = True
+                    if current_time - self.last_attack_time > self.__atk_speed:
+                        print("hit")
+                        player.health -= self.__damage
+                        self.last_attack_time = current_time
+                        self.__move_state = False
+                        return False
+                self.__move_state = True
+                return False
+            else:
+                current_time = pg.time.get_ticks()
                 self.__atk_state = True
                 if current_time - self.last_attack_time > self.__atk_speed:
-                    print("hit")
-                    player.health -= self.__damage
+                    bullet = CthuluBullet(self.rect.centerx, self.rect.centery, player, (4, 4), damage=self.__damage)
+                    bullets.append(bullet)
+                    camera.add(bullet)
                     self.last_attack_time = current_time
                     self.__move_state = False
-                    return True
-            self.__move_state = True
-            return False
+                    self.__range_atk_count += 1
+                    return False
+
+
 
     def draw(self, screen, camera):
         if self.check_alive():

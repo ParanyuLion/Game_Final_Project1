@@ -5,6 +5,7 @@ import time
 
 
 class Player(Entity):
+
     def __init__(self, x, y, health=100):
         super().__init__("Game_Final_Project1/picture/AnimationSheet_Character.png", x, y)
         self.max_health = health
@@ -14,8 +15,8 @@ class Player(Entity):
         self.gold = 500
         self.speed = 7  # initial is 2
         self.damage = 1
-        self.health_potion = 0
-        self.mana_potion = 0
+        self.health_potion = 5
+        self.mana_potion = 5
         self.unlock_fire_breathe = False
         self.unlock_thunder_strike = False
 
@@ -50,20 +51,31 @@ class Player(Entity):
         }
         self.cooldown_durations = {
             'CLICK': 200,
-            '1': 500,
-            '2': 500,
+            '1': 2500,
+            '2': 2500,
             'Q': 1,
             'R': 500,
             'SPACE': 1000,
 
         }
 
+        self.potion_images = {
+            "health_potion": pg.transform.scale(pg.image.load("Game_Final_Project1/picture/Potion/HealPotion.png"),
+                                                (40, 40)),
+            "mana_potion": pg.transform.scale(pg.image.load("Game_Final_Project1/picture/Potion/ManaPotion.png"),
+                                              (40, 40)),
+        }
+        self.drink_state = False
+        self.drink_start_time = 0
+        self.drink_duration = 600  # เวลาแสดงผลดื่ม potion (ms)
+        self.current_potion_img = None
+
     def can_use_skill(self, key):
         now = pg.time.get_ticks()
         return now - self.last_activate.get(key) >= self.cooldown_durations.get(key)
 
     def use_skill(self, key):
-        if self.can_use_skill(key):
+        if self.can_use_skill(key) and not self.drink_state:
             self.last_activate[key] = pg.time.get_ticks()
             return True
         return False
@@ -143,25 +155,25 @@ class Player(Entity):
         self.last_move_rect = self.rect.copy()
         self.walk_state = True
         self.idle_state = False
-
-        if direction == "UP":
-            self.rect.y -= self.speed
-            if not self.atk_state:
-                self.move_direction = "UP"
-        if direction == "LEFT":
-            self.rect.x -= self.speed
-            if not self.atk_state:
-                self.move_direction = "LEFT"
-                self.left_right = "LEFT"
-        if direction == "RIGHT":
-            self.rect.x += self.speed
-            if not self.atk_state:
-                self.move_direction = "RIGHT"
-                self.left_right = "RIGHT"
-        if direction == "DOWN":
-            self.rect.y += self.speed
-            if not self.atk_state:
-                self.move_direction = "DOWN"
+        if not self.drink_state:
+            if direction == "UP":
+                self.rect.y -= self.speed
+                if not self.atk_state:
+                    self.move_direction = "UP"
+            if direction == "LEFT":
+                self.rect.x -= self.speed
+                if not self.atk_state:
+                    self.move_direction = "LEFT"
+                    self.left_right = "LEFT"
+            if direction == "RIGHT":
+                self.rect.x += self.speed
+                if not self.atk_state:
+                    self.move_direction = "RIGHT"
+                    self.left_right = "RIGHT"
+            if direction == "DOWN":
+                self.rect.y += self.speed
+                if not self.atk_state:
+                    self.move_direction = "DOWN"
 
     def attack(self):
         self.atk_state = True
@@ -198,12 +210,20 @@ class Player(Entity):
                 self.rect.y = border[self.move_direction]
 
     def draw(self, screen, camera):
-        """attack animation"""
         if self.atk_state:
             self.atk_animation(screen, camera)
         else:
-            """normal animation"""
             screen.blit(self.image, camera.apply(self))
+
+        if self.drink_state:
+            now = pg.time.get_ticks()
+            if now - self.drink_start_time < self.drink_duration:
+                if self.current_potion_img:
+                    img_rect = self.current_potion_img.get_rect(center=camera.apply(self).center)
+                    screen.blit(self.current_potion_img, img_rect)
+            else:
+                self.drink_state = False
+                self.current_potion_img = None
 
     def get_size(self):
         return self.image.get_size()
@@ -212,16 +232,23 @@ class Player(Entity):
         self.left_right = direction
 
     def drink_potion(self, potion):
-        if potion == 'health_potion' and self.health_potion > 0:
+        now = pg.time.get_ticks()
+        if not self.drink_state and potion == 'health_potion' and self.health_potion > 0:
             self.health_potion -= 1
             self.health += 20
             if self.health > self.max_health:
                 self.health = self.max_health
-        elif potion == 'mana_potion' and self.mana_potion > 0:
+            self.drink_state = True
+            self.drink_start_time = now
+            self.current_potion_img = self.potion_images["health_potion"]
+        elif not self.drink_state and potion == 'mana_potion' and self.mana_potion > 0:
             self.mana_potion -= 1
             self.mana += 20
             if self.mana > self.max_mana:
                 self.mana = self.max_mana
+            self.drink_state = True
+            self.drink_start_time = now
+            self.current_potion_img = self.potion_images["mana_potion"]
 
     def get_shoot(self, bullet):
         if self.rect.colliderect(bullet):
