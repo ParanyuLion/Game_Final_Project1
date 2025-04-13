@@ -3,6 +3,7 @@ from background import Background as Bgd
 from bullet import DemonBullet, CthuluBullet
 from UI import HealthBar
 from Enemy import Enemy
+from SoundManager import SoundManager
 
 
 class Demon(Enemy):
@@ -16,7 +17,7 @@ class Demon(Enemy):
         self.gold_drop = 500
         self.__atk_frames_index = 0
         self.__dead_frames_index = 0
-        self.__dead_frames_speed = 200
+        self.__dead_frames_speed = 100
         if Demon._cached_frames is None:
             Demon._cached_frames = self._load_frames(4, 1)
 
@@ -175,6 +176,8 @@ class Demon(Enemy):
         enemy_hitbox = self.rect.inflate(-self.rect.width * 0.5, -self.rect.height * 0.5)
         if enemy_hitbox.colliderect(bullet.rect):
             self.health -= damage
+            if self.health <= 0 and not self.already_dead:
+                SoundManager.get_instance().play_sound("Dead")
             return True
 
     def check_alive(self):
@@ -191,6 +194,7 @@ class Demon(Enemy):
                     bullet = DemonBullet(self.rect.centerx, self.rect.centery, player, (20, 20), damage=self.__damage)
                     bullets.append(bullet)
                     camera.add(bullet)
+                    SoundManager.get_instance().play_sound("DemonShoot")
                     self.last_attack_time = current_time
                     self.__move_state = False
                     return False

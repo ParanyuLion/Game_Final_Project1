@@ -1,5 +1,6 @@
 import pygame as pg
 from game_config import Config
+from SoundManager import SoundManager
 
 
 class Shop:
@@ -10,22 +11,22 @@ class Shop:
         self.items = [
             {"name": "Health Potion", "price": 10, "effect": self.increase_health_potion,
              "image": pg.transform.scale(pg.image.load("Game_Final_Project1/picture/Potion/HealPotion.png"), self.size),
-             "amount": 10},
+             "amount": 10, "buff": None},
             {"name": "Speed Potion", "price": 200, "effect": self.increase_speed,
              "image": pg.transform.scale(pg.image.load("Game_Final_Project1/picture/Potion/SpeedPotion.png"), self.size),
-             "amount": 2},
+             "amount": 2, "buff": "Speed Increase!"},
             {"name": "Mana Potion", "price": 100, "effect": self.increase_mana_potion,
              "image": pg.transform.scale(pg.image.load("Game_Final_Project1/picture/Potion/ManaPotion.png"), self.size),
-             "amount": 10},
+             "amount": 10, "buff": None},
             {"name": "Thunder Strike", "price": 250, "effect": self.unlock_thunder_strike,
              "image": pg.transform.scale(pg.image.load("Game_Final_Project1/picture/MagicIcon/ThunderStrikeIcon.png"), self.size),
-             "amount": 1},
+             "amount": 1, "buff": None},
             {"name": "Fire Breath", "price": 200, "effect": self.unlock_fire_breathe,
              "image": pg.transform.scale(pg.image.load("Game_Final_Project1/picture/MagicIcon/FireBreathIcon.png"), self.size),
-             "amount": 1},
+             "amount": 1, "buff": None},
             {"name": "Attack Potion", "price": 300, "effect": self.increase_damage,
              "image": pg.transform.scale(pg.image.load("Game_Final_Project1/picture/Potion/AttackPotion.png"), self.size),
-             "amount": 2},
+             "amount": 2, "buff": "Attack Damage Increase!"},
         ]
         self.font = pg.font.Font(None, 36)
         self.shop_open = False
@@ -35,6 +36,8 @@ class Shop:
                 self.buttons.append(pg.Rect(370, 200 + i * 150, 100, 40))
             else:
                 self.buttons.append(pg.Rect(370 + 500, 200 + (i-len(self.items)//2) * 150, 100, 40))
+        self.next_level_button = pg.Rect(540, 560, 200, 50)
+        self.on_next_level_clicked = None
 
     def increase_health_potion(self):
         self.player.health_potion += 1
@@ -46,7 +49,7 @@ class Shop:
         self.player.mana_potion += 1
 
     def increase_damage(self):
-        self.player.damage += 5
+        self.player.damage += 1
 
     def unlock_fire_breathe(self):
         self.player.unlock_fire_breathe = True
@@ -57,14 +60,21 @@ class Shop:
     def buy_item(self, index):
         item = self.items[index]
         if self.player.gold >= item["price"] and item["amount"] > 0:
+            if item["buff"] is not None:
+                self.purchase_messages.append(PurchaseMessage(f"{item["buff"]}"))
             self.purchase_messages.append(PurchaseMessage(f"Purchased {item['name']}!"))
             self.player.gold -= item["price"]
             item["effect"]()
             item["amount"] -= 1
+            SoundManager.get_instance().play_sound("Buy")
+
         elif item["amount"] <= 0:
             self.purchase_messages.append(PurchaseMessage("Out of Stock!", duration=1000))
+            SoundManager.get_instance().play_sound("CantBuy")
         else:
             self.purchase_messages.append(PurchaseMessage("Not enough gold!", duration=1000))
+            SoundManager.get_instance().play_sound("CantBuy")
+
 
     def draw(self, screen):
         if self.shop_open:
@@ -84,11 +94,11 @@ class Shop:
                     screen.blit(text, (260, 150 + i * 150))
 
                     if item["amount"] > 0:
-                        pg.draw.rect(screen, (0, 200, 0), self.buttons[i])
+                        pg.draw.rect(screen, (0, 200, 0), self.buttons[i], border_radius=5)
                         buy_text = self.font.render("Buy", True, (255, 255, 255))
                         screen.blit(buy_text, (self.buttons[i].x + 25, self.buttons[i].y + 5))
                     else:
-                        pg.draw.rect(screen, (200, 0, 0), self.buttons[i])
+                        pg.draw.rect(screen, (200, 0, 0), self.buttons[i], border_radius=5)
                         buy_text = self.font.render("Sold", True, (255, 255, 255))
                         screen.blit(buy_text, (self.buttons[i].x + 25, self.buttons[i].y + 5))
                 else:
@@ -98,11 +108,11 @@ class Shop:
                     screen.blit(text, (260 + 500, 150 + (i-len(self.items)//2) * 150))
 
                     if item["amount"] > 0:
-                        pg.draw.rect(screen, (0, 200, 0), self.buttons[i])
+                        pg.draw.rect(screen, (0, 200, 0), self.buttons[i], border_radius=5)
                         buy_text = self.font.render("Buy", True, (255, 255, 255))
                         screen.blit(buy_text, (self.buttons[i].x + 25, self.buttons[i].y + 5))
                     else:
-                        pg.draw.rect(screen, (200, 0, 0), self.buttons[i])
+                        pg.draw.rect(screen, (200, 0, 0), self.buttons[i], border_radius=5)
                         buy_text = self.font.render("Sold", True, (255, 255, 255))
                         screen.blit(buy_text, (self.buttons[i].x + 25, self.buttons[i].y + 5))
 
@@ -119,11 +129,19 @@ class Shop:
 
             self.purchase_messages = messages_to_keep
 
+            pg.draw.rect(screen, (70, 70, 70), self.next_level_button, border_radius=8)
+            next_text = self.font.render("Next Level", True, (255, 255, 255))
+            text_rect = next_text.get_rect(center=self.next_level_button.center)
+            screen.blit(next_text, text_rect)
+
     def toggle_shop(self):
         self.shop_open = not self.shop_open
 
     def handle_event(self, event):
         if event.type == pg.MOUSEBUTTONDOWN and self.shop_open:
+            if self.next_level_button.collidepoint(event.pos):
+                if self.on_next_level_clicked:
+                    self.on_next_level_clicked()
             for i, button in enumerate(self.buttons):
                 if button.collidepoint(event.pos):
                     self.buy_item(i)

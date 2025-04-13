@@ -4,6 +4,7 @@ from Enemy import Enemy
 from Player import Player
 from background import Background as Bgd
 from game_config import Config
+from SoundManager import SoundManager
 from bullet import Bullet, DemonBullet, CthuluBullet
 from Effects import Explosion, DashEffect, FireBreatheEffect, CthuluExplosion
 from UI import HealthBar, ManaBar, Inventory, InteractUI, Gold
@@ -65,6 +66,7 @@ class RunGame:
         self.mana_bar = ManaBar(20, 63, 450, 35, self.player.mana)
         self.inventory = Inventory(500, 580, self.player, self.FireBreath)
         self.shop = Shop(self.player)
+        self.shop.on_next_level_clicked = self.go_to_next_level
         self.show_gold = Gold(70,130, self.player)
 
         self.camera = Camera(Config.get('WIN_WIDTH'), Config.get('WIN_HEIGHT'))
@@ -78,6 +80,8 @@ class RunGame:
         dash_effect = DashEffect(self.player.rect.centerx, self.player.rect.centery)
         self.effects.append(dash_effect)
         self.camera.add(dash_effect)
+        # self.sound = SoundManager.get_instance()
+        SoundManager.get_instance().play_music("bgm")
 
 
 
@@ -152,12 +156,14 @@ class RunGame:
                 bullet.update()
                 if isinstance(bullet, DemonBullet):
                     if self.player.get_shoot(bullet):
+                        SoundManager.get_instance().play_sound("DemonBulletHit")
                         explosion = Explosion(bullet.rect.centerx, bullet.rect.centery)
                         self.effects.append(explosion)
                         self.camera.add(explosion)
                         remove_bullets.append(bullet)
                 elif isinstance(bullet, CthuluBullet):
                     if self.player.get_shoot(bullet):
+                        SoundManager.get_instance().play_sound("CthuluBulletHit")
                         explosion = CthuluExplosion(bullet.rect.centerx, bullet.rect.centery)
                         self.effects.append(explosion)
                         self.camera.add(explosion)
@@ -166,10 +172,12 @@ class RunGame:
                     for enemy in self.enemies:
                         if enemy.check_alive() and enemy.get_damage(bullet, self.player.damage):
                             # if bullet in self.bullets:
+                            SoundManager.get_instance().play_sound("PlayerBulletHit")
                             explosion = Explosion(bullet.rect.centerx, bullet.rect.centery)
                             self.effects.append(explosion)
                             self.camera.add(explosion)
                             remove_bullets.append(bullet)
+
             else:
                 remove_bullets.append(bullet)
         remove_set = set(remove_bullets)
@@ -182,11 +190,13 @@ class RunGame:
 
         dead_enemies = []
         for enemy in self.enemies:
+
             enemy.move(self.player, self.enemies)
             if isinstance(enemy, Demon) or isinstance(enemy, Cthulu):
                 enemy.hit_player(self.player, bullets=self.bullets, camera=self.camera)
             elif enemy.hit_player(self.player):
                 pass
+
             if enemy.already_dead:
                 dead_enemies.append(enemy)
         remove_set = set(dead_enemies)
@@ -211,6 +221,12 @@ class RunGame:
         self.__border = Bgd.get(name, 'border')
         self.player.rect.center = Bgd.get(name, 'spawn')
 
+    def go_to_next_level(self):
+        self.__level += 1
+        self.load_level(self.__level)
+        self.shop.toggle_shop()
+        SoundManager.get_instance().play_sound("DoorClose")
+
     def load_level(self, level):
         self.enemies.clear()
         if level == 'shop':
@@ -219,6 +235,8 @@ class RunGame:
         elif level == 1:
             self.level_name = 1
             for i in range(1):
+                pg.mixer.music.stop()
+                SoundManager.get_instance().play_music("CthuluTheme")
                 spawn_x, spawn_y = self.random_spawn()
                 new_enemy = Cthulu(spawn_x, spawn_y, health=5)
                 new_enemy.rect.topleft = (spawn_x, spawn_y)
@@ -286,10 +304,12 @@ class RunGame:
                         self.__dash_time = now
                     if event.key == pg.K_e:
                         if self.level_name == 'shop':
+                            SoundManager.get_instance().play_sound("DoorOpen")
                             self.__level += 1
                             self.load_level(self.__level)
                             self.shop.toggle_shop()
                         elif self.__complete_level and self.__at_door:
+                            SoundManager.get_instance().play_sound("DoorClose")
                             self.load_level('shop')
                             self.shop.toggle_shop()
                     if event.key == pg.K_1 and self.player.use_skill('1'):
@@ -303,7 +323,7 @@ class RunGame:
                     """Shooting Bullet"""
                     if event.button == pg.BUTTON_LEFT and self.__start_game:
                         now = pg.time.get_ticks()
-                        if self.player.use_skill("CLICK") and not self.player.drink_state:
+                        if self.player.use_skill("CLICK") and not self.player.drink_state and self.level_name != 'shop':
                             mouse_pos = pg.mouse.get_pos()
                             mouse_pos_world = (mouse_pos[0] + self.camera.camera_rect.x,
                                                mouse_pos[1] + self.camera.camera_rect.y)
@@ -312,12 +332,14 @@ class RunGame:
                             else:
                                 self.player.set_left_right("RIGHT")
                             self.player.attack()
+
                             new_bullet = Bullet(self.player.rect.centerx, self.player.rect.centery, mouse_pos_world,
                                                 self.bullet_size)
                             self.bullets.append(new_bullet)
                             self.__last_shot_time = now
                             self.camera.add(new_bullet, *self.bullets)
                     elif event.button == pg.BUTTON_LEFT and not self.__start_game:
+                        SoundManager.get_instance().play_sound("Hover")
                         self.__level += 1
                         self.__start_game = True
                         self.load_level(self.__level)
@@ -328,7 +350,7 @@ class RunGame:
                 self.entities_events()
                 key = pg.key.get_pressed()
                 # print(self.player.player_rect.y, self.player.player_rect.x)
-                if self.level_name != 'shop':
+                if self.level_name != 'shop' and not self.player.drink_state:
                     if key[pg.K_w] and self.player.wall_collision("UP", self.__border["UP"]):
                         self.player.move("UP")
                     if key[pg.K_s] and self.player.wall_collision("DOWN", self.__border["DOWN"]):

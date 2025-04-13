@@ -1,6 +1,7 @@
 import pygame as pg
 # from game_config import Config
 from entity import Entity
+from SoundManager import SoundManager
 import time
 
 
@@ -37,6 +38,9 @@ class Player(Entity):
         self.__dash_speed = 120
         self.dash_cooldown = 1000
 
+        self.last_walk_sound = 0
+        self.__walk_sound_cooldown = 300
+
         self.atk_speed = 30
         self.atk_state = False
         self.walk_state = False
@@ -50,11 +54,11 @@ class Player(Entity):
             'SPACE': -99999,
         }
         self.cooldown_durations = {
-            'CLICK': 200,
+            'CLICK': 250,
             '1': 2500,
             '2': 2500,
             'Q': 1,
-            'R': 500,
+            'R': 2000,
             'SPACE': 1000,
 
         }
@@ -67,7 +71,7 @@ class Player(Entity):
         }
         self.drink_state = False
         self.drink_start_time = 0
-        self.drink_duration = 600  # เวลาแสดงผลดื่ม potion (ms)
+        self.drink_duration = 600
         self.current_potion_img = None
 
     def can_use_skill(self, key):
@@ -155,32 +159,38 @@ class Player(Entity):
         self.last_move_rect = self.rect.copy()
         self.walk_state = True
         self.idle_state = False
-        if not self.drink_state:
-            if direction == "UP":
-                self.rect.y -= self.speed
-                if not self.atk_state:
-                    self.move_direction = "UP"
-            if direction == "LEFT":
-                self.rect.x -= self.speed
-                if not self.atk_state:
-                    self.move_direction = "LEFT"
-                    self.left_right = "LEFT"
-            if direction == "RIGHT":
-                self.rect.x += self.speed
-                if not self.atk_state:
-                    self.move_direction = "RIGHT"
-                    self.left_right = "RIGHT"
-            if direction == "DOWN":
-                self.rect.y += self.speed
-                if not self.atk_state:
-                    self.move_direction = "DOWN"
+        now = pg.time.get_ticks()
+        if now - self.last_walk_sound > self.__walk_sound_cooldown:
+            SoundManager.get_instance().play_sound("PlayerMove")
+            self.last_walk_sound = now
+
+        if direction == "UP":
+            self.rect.y -= self.speed
+            if not self.atk_state:
+                self.move_direction = "UP"
+        if direction == "LEFT":
+            self.rect.x -= self.speed
+            if not self.atk_state:
+                self.move_direction = "LEFT"
+                self.left_right = "LEFT"
+        if direction == "RIGHT":
+            self.rect.x += self.speed
+            if not self.atk_state:
+                self.move_direction = "RIGHT"
+                self.left_right = "RIGHT"
+        if direction == "DOWN":
+            self.rect.y += self.speed
+            if not self.atk_state:
+                self.move_direction = "DOWN"
 
     def attack(self):
+        SoundManager.get_instance().play_sound("PlayerAttack")
         self.atk_state = True
 
     def dash(self, border):
         predict_rect = self.rect.copy()
         self.last_move_rect = self.rect.copy()
+        SoundManager.get_instance().play_sound("PlayerDash")
         if self.move_direction == "UP":
             predict_rect.y -= self.__dash_speed
             if predict_rect.y > border[self.move_direction]:
@@ -233,6 +243,7 @@ class Player(Entity):
 
     def drink_potion(self, potion):
         now = pg.time.get_ticks()
+        SoundManager.get_instance().play_sound("UseItem")
         if not self.drink_state and potion == 'health_potion' and self.health_potion > 0:
             self.health_potion -= 1
             self.health += 20

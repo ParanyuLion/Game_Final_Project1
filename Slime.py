@@ -1,6 +1,6 @@
 import pygame as pg
 from UI import HealthBar
-from entity import Entity
+from SoundManager import SoundManager
 from Enemy import Enemy
 
 
@@ -158,6 +158,8 @@ class Slime(Enemy):
     def get_damage(self, bullet, damage):
         if self.rect.colliderect(bullet.rect):
             self.health -= damage
+            if self.health <= 0 and not self.already_dead:
+                SoundManager.get_instance().play_sound("Dead")
             return True
 
     def check_alive(self):
@@ -173,6 +175,7 @@ class Slime(Enemy):
                 self.__atk_state = True
 
                 if current_time - self.last_attack_time > self.__atk_speed:
+                    SoundManager.get_instance().play_sound("SlimeAttack")
                     player.health -= self.__damage
                     self.last_attack_time = current_time
                     self.__move_state = False

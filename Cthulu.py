@@ -2,12 +2,16 @@ import pygame as pg
 from UI import HealthBar
 from bullet import CthuluBullet
 from Enemy import Enemy
+from SoundManager import SoundManager
 
 
 class Cthulu(Enemy):
     _cached_frames = None
-    _atk_frames1 = []
-    _atk_frames2 = []
+    _atk_frames1_left = []
+    _atk_frames1_right = []
+
+    _atk_frames2_left = []
+    _atk_frames2_right = []
     _dead_frames = []
     _fly_frames = []
 
@@ -27,8 +31,10 @@ class Cthulu(Enemy):
             Cthulu._cached_frames = self._load_frames(15, 7)
 
         self.__frames = Cthulu._cached_frames
-        self.__atk_frames1 = Cthulu._atk_frames1
-        self.__atk_frames2 = Cthulu._atk_frames2
+        self.__atk_frames1_left = Cthulu._atk_frames1_left
+        self.__atk_frames1_right = Cthulu._atk_frames1_right
+        self.__atk_frames2_left = Cthulu._atk_frames2_left
+        self.__atk_frames2_right = Cthulu._atk_frames2_right
         self.__dead_frames = Cthulu._dead_frames
         self.__fly_frames = Cthulu._fly_frames
         self.__last_update = 0
@@ -49,6 +55,7 @@ class Cthulu(Enemy):
 
         self.__speed = 2
         self.__damage = damage
+        self.__range_damage = int(self.__damage / 1.5)
         self.__direction = pg.math.Vector2()
         self.__velocity = pg.math.Vector2()
         self.__max_health = health
@@ -77,15 +84,18 @@ class Cthulu(Enemy):
                 self.image.subsurface(pg.Rect(i * frame_width, 2 * frame_height, frame_width, frame_height)), (w, h))
             Cthulu._fly_frames.append(frame)
         """load melee attack animation"""
-        for i in range(9):
-            atk_frame = pg.transform.scale(
+        for i in range(9):  # melee attack
+            frame = pg.transform.scale(
                 self.image.subsurface(pg.Rect(i * frame_width, 4 * frame_height, frame_width, frame_height)), (w, h))
-            Cthulu._atk_frames1.append(atk_frame)
+            Cthulu._atk_frames1_left.append(frame)
+            Cthulu._atk_frames1_right.append(pg.transform.flip(frame, True, False))
+
         """load range attack animation"""
-        for i in range(7):
-            atk_frame = pg.transform.scale(
+        for i in range(7):  # range attack
+            frame = pg.transform.scale(
                 self.image.subsurface(pg.Rect(i * frame_width, 3 * frame_height, frame_width, frame_height)), (w, h))
-            Cthulu._atk_frames2.append(atk_frame)
+            Cthulu._atk_frames2_left.append(frame)
+            Cthulu._atk_frames2_right.append(pg.transform.flip(frame, True, False))
         """load dead animation"""
         for i in range(11):
             dead_frame = pg.transform.scale(
@@ -129,27 +139,25 @@ class Cthulu(Enemy):
             self.__last_update = now
             if self.__attack_animation_set == 1:
 
-                self.__atk_frames_index = (self.__atk_frames_index + 1) % len(self.__atk_frames1)
+                self.__atk_frames_index = (self.__atk_frames_index + 1) % len(self.__atk_frames1_left)
                 if self.__atk_state:
                     if self.__left_right == "LEFT":
-                        self.image = self.__atk_frames1[self.__atk_frames_index]
+                        self.image = self.__atk_frames1_left[self.__atk_frames_index]
                     else:
-                        self.image = pg.transform.flip(self.__atk_frames1[self.__atk_frames_index], True, False)
-
-                if self.__atk_frames_index == len(self.__atk_frames1) - 1:
+                        self.image = self.__atk_frames1_right[self.__atk_frames_index]
+                if self.__atk_frames_index == len(self.__atk_frames1_left) - 1:
                     # self.__attack_animation_set = 2
                     self.__atk_frames_index = 0
                     self.__move_state = True
             else:
 
-                self.__atk_frames_index = (self.__atk_frames_index + 1) % len(self.__atk_frames2)
+                self.__atk_frames_index = (self.__atk_frames_index + 1) % len(self.__atk_frames2_left)
                 if self.__atk_state:
                     if self.__left_right == "LEFT":
-                        self.image = self.__atk_frames2[self.__atk_frames_index]
+                        self.image = self.__atk_frames2_left[self.__atk_frames_index]
                     else:
-                        self.image = pg.transform.flip(self.__atk_frames2[self.__atk_frames_index], True, False)
-
-                if self.__atk_frames_index == len(self.__atk_frames2) - 1:
+                        self.image = self.__atk_frames2_right[self.__atk_frames_index]
+                if self.__atk_frames_index == len(self.__atk_frames2_left) - 1:
                     # self.__attack_animation_set = 2
                     self.__atk_frames_index = 0
                     self.__move_state = True
@@ -196,10 +204,13 @@ class Cthulu(Enemy):
             self.__direction += avoid_vector.normalize() * 0.5
 
     def get_damage(self, bullet, damage):
-        enemy_hitbox = self.rect.inflate(-self.rect.width * 0.7, -self.rect.height * 0.7)
+        enemy_hitbox = self.rect.inflate(-self.rect.width * 0.7, -self.rect.height * 0.5)
         if enemy_hitbox.colliderect(bullet.rect):
             self.health -= damage
+            if self.health <= 0 and not self.already_dead:
+                SoundManager.get_instance().play_sound("Dead")
             if self.health == self.__max_health // 2 and self.__frames != self.__fly_frames:
+                SoundManager.get_instance().play_sound("CthuluChangePhase")
                 self.__frames = self.__fly_frames
                 self.__speed = 8
             return True
@@ -239,7 +250,7 @@ class Cthulu(Enemy):
                 if enemy_hitbox.colliderect(player_hitbox):
                     self.__atk_state = True
                     if current_time - self.last_attack_time > self.__atk_speed:
-                        print("hit")
+                        SoundManager.get_instance().play_sound("CthuluAtk")
                         player.health -= self.__damage
                         self.last_attack_time = current_time
                         self.__move_state = False
@@ -250,9 +261,10 @@ class Cthulu(Enemy):
                 current_time = pg.time.get_ticks()
                 self.__atk_state = True
                 if current_time - self.last_attack_time > self.__atk_speed:
-                    bullet = CthuluBullet(self.rect.centerx, self.rect.centery, player, (4, 4), damage=self.__damage)
+                    bullet = CthuluBullet(self.rect.centerx, self.rect.centery, player, (4, 4), damage=self.__range_damage)
                     bullets.append(bullet)
                     camera.add(bullet)
+                    SoundManager.get_instance().play_sound("CthuluShoot")
                     self.last_attack_time = current_time
                     self.__move_state = False
                     self.__range_atk_count += 1

@@ -1,6 +1,7 @@
 import pygame as pg
 from entity import Entity
 from Effects import FireBreatheEffect
+from SoundManager import SoundManager
 
 
 class FireBreath(Entity):
@@ -30,6 +31,10 @@ class FireBreath(Entity):
         self.direction = "RIGHT"
         self.rect = self.rect.inflate((-self.rect.width * 0.5, self.rect.height * 0.4))
 
+        self.__last_sound = 0
+        self.__sound_cooldown = 500
+        self.is_playing = False
+
     def set_position(self, player_rect, direction):
         flame_width, flame_height = self.image.get_size()
         self.direction = direction
@@ -57,6 +62,7 @@ class FireBreath(Entity):
         mana_use = 2
         now = pg.time.get_ticks()
         if now - self.last_hit > self.__frame_speed * 2 and self.activate:
+
             hit_list = [enemy for enemy in enemies if
                         self.rect.colliderect(enemy.rect.inflate((-self.rect.width, -self.rect.height)))]
             for enemy in hit_list:
@@ -66,6 +72,12 @@ class FireBreath(Entity):
                 enemy.health -= mana_use
             player.mana -= 1
             self.last_hit = now
+        if now - self.__last_sound > self.__sound_cooldown and self.activate:
+            SoundManager.get_instance().play_sound("FireBreathe")
+            self.__last_sound = now
+
+
+
 
     def __run_animation(self):
         now = pg.time.get_ticks()
@@ -77,6 +89,7 @@ class FireBreath(Entity):
 
     def draw(self, screen, camera):
         if self.activate:
+
             self.__run_animation()
             screen.blit(self.image, camera.apply(self))
 
@@ -120,6 +133,7 @@ class ThunderStrike(Entity):
         mana_use = 20
         if len(enemies) > 0:
             player.mana -= mana_use
+        SoundManager.get_instance().play_sound("ThunderStrike")
         for enemy in enemies:
             enemy.health -= 1
             effect = ThunderStrike(enemy.rect.centerx + 256, enemy.rect.bottom - 250)

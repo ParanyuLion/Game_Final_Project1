@@ -1,6 +1,6 @@
 import pygame as pg
 from UI import HealthBar
-from entity import Entity
+from SoundManager import SoundManager
 from Enemy import Enemy
 
 
@@ -193,6 +193,8 @@ class Minotaur(Enemy):
         enemy_hitbox = self.rect.inflate(-self.rect.width * 0.7, -self.rect.height * 0.7)
         if enemy_hitbox.colliderect(bullet.rect):
             self.health -= damage
+            if self.health <= 0 and not self.already_dead:
+                SoundManager.get_instance().play_sound("Dead")
             if self.health == self.__max_health//2 and not self.__change_phase:
                 self.__change_phase = True
                 self.__speed *= 2
@@ -212,7 +214,7 @@ class Minotaur(Enemy):
             if enemy_hitbox.colliderect(player_hitbox):
                 self.__atk_state = True
                 if current_time - self.last_attack_time > self.__atk_speed:
-                    print("hit")
+                    SoundManager.get_instance().play_sound("MinotaurAtk")
                     player.health -= self.__damage
                     self.last_attack_time = current_time
                     self.__move_state = False
