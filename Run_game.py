@@ -42,7 +42,7 @@ class RunGame:
         pg.display.set_caption('Game')
         self.__screen = pg.display.set_mode((Config.get('WIN_WIDTH'), Config.get('WIN_HEIGHT')))
         self.__screen.fill(Config.get('BG_COLOR'))
-        self.__start_game = False
+        self.__game_state = "menu"
         self.__running = True
 
         """background attribute"""
@@ -80,6 +80,12 @@ class RunGame:
         dash_effect = DashEffect(self.player.rect.centerx, self.player.rect.centery)
         self.effects.append(dash_effect)
         self.camera.add(dash_effect)
+        self.restart_button = pg.Rect(
+            Config.get('WIN_WIDTH') // 2 - 100,
+            Config.get('WIN_HEIGHT') // 2 + 60,
+            200,
+            50
+        )
         # self.sound = SoundManager.get_instance()
         SoundManager.get_instance().play_music("bgm")
 
@@ -96,6 +102,21 @@ class RunGame:
         # text = font.render(f"Press to Start", True, (255, 255, 255))
         # text_rect = text.get_rect(center=(Config.get('WIN_WIDTH') // 2, Config.get('WIN_HEIGHT') // 2))
         # self.__screen.blit(text, text_rect)
+
+    def game_over(self):
+
+        # font = pg.font.SysFont("calibri", 60, bold=True)
+        # text = font.render("GAME OVER", True, (255, 0, 0))
+        # text_rect = text.get_rect(center=(Config.get('WIN_WIDTH') // 2, Config.get('WIN_HEIGHT') // 2 - 40))
+        # self.__screen.blit(text, text_rect)
+        self.__background = Bgd.load_menu('GameOver')
+        self.__screen.blit(self.__background, (0, 0))
+
+        pg.draw.rect(self.__screen, (100, 100, 255), self.restart_button)
+        subfont = pg.font.SysFont("calibri", 30)
+        restart_text = subfont.render("Restart", True, (255, 255, 255))
+        restart_text_rect = restart_text.get_rect(center=self.restart_button.center)
+        self.__screen.blit(restart_text, restart_text_rect)
 
     def update_all(self):
         self.camera.update(self.player)
@@ -146,7 +167,11 @@ class RunGame:
     def entities_events(self):
         """players event"""
         self.__at_door = self.player.door_collision(Bgd.get(self.level_name, 'door'))
-
+        if self.player.health <= 0:
+            pg.mixer.music.stop()
+            SoundManager.get_instance().play_music("game_over_music")
+            SoundManager.get_instance().play_sound("game_over_sound")
+            self.__game_state = "game_over"
         """"bullets event"""
         remove_bullets = []
         for bullet in self.bullets:
@@ -215,6 +240,22 @@ class RunGame:
         spawn_x = spawn['x']
         spawn_y = spawn['y']
         return random.randint(spawn_x[0], spawn_x[1]), random.randint(spawn_y[0], spawn_y[1])
+
+    def restart_game(self):
+        self.player.reset_game()
+        self.shop.reset_game()
+        SoundManager.get_instance().play_music("bgm")
+        self.__level = 1
+        self.load_level(self.__level)
+        self.bullets.clear()
+        self.effects.clear()
+        dash_effect = DashEffect(self.player.rect.centerx, self.player.rect.centery)
+        self.effects.append(dash_effect)
+        self.camera.add(dash_effect)
+        self.__complete_level = False
+        self.__at_door = False
+        self.__game_state = "playing"
+
 
     def set_level(self, name):
         self.__background = Bgd.load_bg(name)
@@ -321,7 +362,7 @@ class RunGame:
 
                 if event.type == pg.MOUSEBUTTONDOWN:
                     """Shooting Bullet"""
-                    if event.button == pg.BUTTON_LEFT and self.__start_game:
+                    if event.button == pg.BUTTON_LEFT and self.__game_state == "playing":
                         now = pg.time.get_ticks()
                         if self.player.use_skill("CLICK") and not self.player.drink_state and self.level_name != 'shop':
                             mouse_pos = pg.mouse.get_pos()
@@ -338,14 +379,17 @@ class RunGame:
                             self.bullets.append(new_bullet)
                             self.__last_shot_time = now
                             self.camera.add(new_bullet, *self.bullets)
-                    elif event.button == pg.BUTTON_LEFT and not self.__start_game:
+                    elif event.button == pg.BUTTON_LEFT and self.__game_state == "menu":
                         SoundManager.get_instance().play_sound("Hover")
-                        self.__level += 1
-                        self.__start_game = True
-                        self.load_level(self.__level)
+                        self.restart_game()
+                    elif event.button == pg.BUTTON_LEFT and self.__game_state == "game_over":
+                        if self.restart_button.collidepoint(event.pos):
+                            SoundManager.get_instance().play_sound("Hover")
+                            self.restart_game()
                     if self.level_name == 'shop':
                         self.shop.handle_event(event)
-            if self.__start_game:
+            """game state"""
+            if self.__game_state == "playing":
                 self.update_all()
                 self.entities_events()
                 key = pg.key.get_pressed()
@@ -365,8 +409,10 @@ class RunGame:
                         self.FireBreath.set_position(self.player.rect, self.player.left_right)
                     else:
                         self.FireBreath.activate = False
-            else:
+            elif self.__game_state == "menu":
                 self.main_menu()
+            elif self.__game_state == "game_over":
+                self.game_over()
 
             pg.display.flip()
             clock.tick(Config.get('FPS'))

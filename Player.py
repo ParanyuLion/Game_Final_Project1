@@ -265,3 +265,14 @@ class Player(Entity):
         if self.rect.colliderect(bullet):
             self.health -= bullet.damage
             return True
+
+    def reset_game(self):
+        self.health = 100
+        self.mana = 100
+        self.gold = 500
+        self.speed = 7  # initial is 2
+        self.damage = 1
+        self.health_potion = 5
+        self.mana_potion = 5
+        self.unlock_fire_breathe = False
+        self.unlock_thunder_strike = False

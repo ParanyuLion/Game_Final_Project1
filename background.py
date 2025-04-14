@@ -25,6 +25,8 @@ class Background:
                  'enemy_spawn': {'x': (500, 1900), 'y': (330, 800)}},
         'MainMenu': {'image': "Game_Final_Project1/picture/background/menu.png",
                      'border': {"LEFT": 9999, "RIGHT": 9999, "UP": 9999, "DOWN": 9999}},
+        'GameOver': {'image': "Game_Final_Project1/picture/background/game_over_bg.png",
+                     'border': {"LEFT": 9999, "RIGHT": 9999, "UP": 9999, "DOWN": 9999}},
         'shop': {'image': "Game_Final_Project1/picture/background/shop_bg.png",
                  'door': {'x': (0, 9999), 'y': (0, 9999)},
                  'border': {"LEFT": 9999, "RIGHT": 9999, "UP": 9999, "DOWN": 9999}, 'spawn': (500, 500)},
@@ -46,5 +48,9 @@ class Background:
     def load_menu(cls, name):
         bg = pg.image.load(Background.get(name, 'image'))
         w, h = bg.get_size()
+        if name == 'GameOver':
+            return pg.transform.scale(bg, (w * 1, h * 1))
         return pg.transform.scale(bg, (w * 4.7, h * 4.7))
+
+
 

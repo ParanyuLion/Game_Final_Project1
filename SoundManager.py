@@ -20,6 +20,10 @@ class SoundManager:
         self.sounds = {
             "bgm": {"type": "music", "path": "Game_Final_Project1/Sound/bg_music.wav"},
             "CthuluTheme": {"type": "music", "path": "Game_Final_Project1/Sound/CthuluTheme.mp3"},
+            "game_over_music": {"type": "music", "path": "Game_Final_Project1/Sound/game_over_music.mp3"},
+            "game_over_sound": {"type": "effect", "sound": pg.mixer.Sound("Game_Final_Project1/Sound/game_over_sound.mp3"),
+                           "volume": 1},
+
 
             "PlayerMove": {"type": "effect", "sound": pg.mixer.Sound("Game_Final_Project1/Sound/PlayerMove.wav"),
                            "volume": 0.3},
@@ -46,6 +50,10 @@ class SoundManager:
                           "volume": 1},
             "Hover": {"type": "effect", "sound": pg.mixer.Sound("Game_Final_Project1/Sound/Hover.wav"),
                           "volume": 1},
+            "AtkBuff": {"type": "effect", "sound": pg.mixer.Sound("Game_Final_Project1/Sound/AtkBuff.wav"),
+                          "volume": 0.7},
+            "SpeedBuff": {"type": "effect", "sound": pg.mixer.Sound("Game_Final_Project1/Sound/SpeedBuff.wav"),
+                      "volume": 0.5},
 
             "Dead": {"type": "effect", "sound": pg.mixer.Sound("Game_Final_Project1/Sound/Dead.wav"),
                      "volume": 0.6},
