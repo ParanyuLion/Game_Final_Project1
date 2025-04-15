@@ -1,0 +1,123 @@
+# 1.Project Overview
+This is an endless 2D action-adventure game by using Pygame to develop.
+Players need to complete multiple levels, shooting enemies, using skills, collecting gold, and buying items from the shop.
+Enemies will be stronger when level is higher. 
+Players can use money that they get from shooting enemies to buy a weapon or upgrade it to make it easier to kill enemies.
+
+# 2.Project Review
+This game is 2D action game that has gameplay like “Soul Knight” .This game also has enemies and boss that hard to defeat and have combat moves that depends on player action
+
+# 3.Programming Development
+## 3.1 Game Concept
+Players must clear all levels by fighting enemies and defeating a boss that can predict the player's movement.
+-Movement: walking, dashing
+-Combat system: Shooting, Using magic skills, and special abilities
+-Enemies: Different enemies types that have different behaviours
+-Shop and power-ups: Can buy items from shops or collect items to 
+enhance a gameplay
+-Stat tracking: tracking death count, score, time, money, and shooting accuracy
+
+## 3.2  Object-Oriented Programming Implementation
+
+### 1.Class Player:
+-Represents the main character.
+
+-Handles movement, attack animation, dash, collision, potion use, skill cooldown, and rendering.
+
+### 2.Class Enemy: 
+-Abstract class for all enemies.
+
+### 3.Class Demon(Enemy): 
+-A ranged enemy that shoots bullets toward the player.
+
+### 4.Class Cthulu(Enemy):
+-Boss enemy with both melee and ranged attacks.
+
+### 5.Class Slime(Enemy):
+-Normal enemy that has only melee attack.
+
+### 6.Class Minotaur(Enemy):
+-Enemy that has only melee attacks but it will be stronger when hp is low.
+
+### 7.Class Explosion:
+-Displays explosion animation when a bullet hits.
+
+### 8.Class CthuluExplosion(Explosion):
+-CthuluExplosion inherits from Explosion and overrides animation frames.
+
+### 9.Class Bullet, Class DemonBullet, Class CthuluBullet:
+-Represents bullets from player and enemies.
+
+### 10.Class Shop:
+-UI for purchasing items between levels.
+
+### 11.Class PurchaseMessage:
+-Represents temporary floating messages when purchasing items in shop (e.g., "Purchased", "Not enough gold").
+
+### 12.SoundManager (Singleton):
+-Central manager for all sound and music in the game.
+
+### 13.HealthBar:
+-Renders health bars for players and enemies.
+
+### 14.Background:
+-Loads and provides access to map layout, doors, and level border.
+
+### 15.Camera:
+-Handles camera tracking, centering on the player.
+
+### 16.Run_game:
+-Main game loop controller.
+-Handles initialization, event processing, game states, and level transitions.
+
+## 3.3 Algorithms Involved
+-Collision: if players collide with enemies, players will lose HP
+-Enemies behaviour: enemies will track the player location then move in a straight line to the player(using Pythagorean theorem).
+-Boss behaviour: Boss will track the player's behaviour.
+For example: 
+-if players use skills that they can’t move for a while the boss will use skill to attack players
+-Event Driven: Keypress handling movement and attack
+-Randomization: enemies randomly spawn
+
+# 4.Statistical Data (Prop Stats)
+## 4.1 Data Features
+1.Player movements: distance that move, dash used
+2.Death count: count player’s death in a whole game
+3.Time: Time that spent in level and a whole game
+4.Enemy interact: Enemies that defeated, amount of attack that hit them
+5.Score: level that complete, scores
+
+## 4.2 Data Recording Method
+The data will be stored in the CSV file.
+
+## 4.3 Data Analysis Report
+-Use graph to show death count, scores, and enemy interact compare to time taken
+-Use table to show numbers of items that player collected and player movement
+
+|                               | Why is it good to have this data? What can it be used for                      | How will you obtain 50 values of this feature data | Which variable and which class will you collect this from?            | How will you display this feature data (via summarization statistics or via graph)? |
+|-------------------------------|--------------------------------------------------------------------------------|----------------------------------------------------|-----------------------------------------------------------------------|-------------------------------------------------------------------------------------|
+| Player movements              | To know that distance in levels is short or long to reach new level            | Collect total movement every 30 seconds            | movement_count variable in Player class                               | Using histogram                                                                     |
+| Survived time                 | To balance a difficult level of the game                                       | Collect duration time when player die              | survived_time variable in RunGame class                               | Using histogram                                                                     |
+| Enemy defeated every 1 minute | To balance a game and know that enemy should be stronger or not                | Collect total enemy defeated every 1 minute        | enemy_defeated variable in RunGame class                              | Using histogram                                                                     |
+| Score every 1 minute          | To balance a game and can compare score with other players                     | Collect score that player get every 1 minute       | score variable in RunGame class                                       | Using histogram                                                                     |
+| Item that player buy          | To make items in game have balance and know what items should be adjust        | Collect when player buy items                      | bought_list in shop class                                             | Using histogram                                                                     |
+| Enemy type that defeated      | To balance a game and know that  which type of enemy should be stronger or not | Collect when enemy get defeated                    | enemy_defeated_type in RunGame class                                  | Using histogram                                                                     |
+| Time that use in level        | To balance a time that use in level                                            | Collect when player complete each level            | level_completed dict in RunGame class. key is level and value is time | Using histogram                                                                     |
+| Level that player complete    | To know that which level is hard                                               | Collect when player complete each level            | level_completed dict in RunGame class. key is level and value is time | Using histogram                                                                     |
+
+## Table
+
+| Play Times | Level complete | Mean of enemy defeated every 1 minutes | Mean of score every 1 minutes | Amount Item that player buy in that round | Survived time | Mean of  player movement every 30 minutes |
+|------------|----------------|----------------------------------------|-------------------------------|-------------------------------------------|---------------|-------------------------------------------|
+| 1          |                |                                        |                               |                                           |               |                                           |
+| 2          |                |                                        |                               |                                           |               |                                           |
+
+## Graphs
+|         | Feature Name                        | Graph Objective                                       | Graph Type | X-axis                       | Y-axis                            |
+|---------|-------------------------------------|-------------------------------------------------------|------------|------------------------------|-----------------------------------|
+| Graph 1 | Type of enemy that defeated portion | To show that player defeated what enemy the most      | Pie chart  | None                         | None                              |
+| Graph 2 | Enemy Defeated Per minute           | To analyze the trend of enemy defeat rate over time   | Histogram  | Time (1 minute intervals)    | Number of Enemies Defeated        |
+| Graph 3 | Level that player complete          | To show how far players progressed in the game        | Line graph | levels                       | Frequency of player that complete |
+| Graph 4 | Score  that get in 1  minute        | To show that how much score do player get in 1 minute | Box plot   | Score  that get in 1  minute | None                              |
+| Graph 5 | Items Purchased by Players          | To show that which items purchased by Players         | Bar Graph  | Items that player purchased  | frequency                         |
+

@@ -20,7 +20,8 @@ class Player(Entity):
         self.mana_potion = 5
         self.unlock_fire_breathe = False
         self.unlock_thunder_strike = False
-
+        self.fire_breathe_damage = int(round(self.damage*1.25))
+        self.thunder_strike_damage = int(round(self.damage * 1.75))
         self.__atk_frames = []
         self.__atk_frames_index = 0
 

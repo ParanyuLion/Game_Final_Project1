@@ -17,8 +17,6 @@ from Cthulu import Cthulu
 from Demon import Demon
 
 
-
-
 class Camera(pg.sprite.Group):
     def __init__(self, width, height):
         super().__init__()
@@ -67,7 +65,7 @@ class RunGame:
         self.inventory = Inventory(500, 580, self.player, self.FireBreath)
         self.shop = Shop(self.player)
         self.shop.on_next_level_clicked = self.go_to_next_level
-        self.show_gold = Gold(70,130, self.player)
+        self.show_gold = Gold(70, 130, self.player)
 
         self.camera = Camera(Config.get('WIN_WIDTH'), Config.get('WIN_HEIGHT'))
         self.camera.add(self.player, *self.enemies, *self.bullets, *self.effects, self.FireBreath)
@@ -80,16 +78,8 @@ class RunGame:
         dash_effect = DashEffect(self.player.rect.centerx, self.player.rect.centery)
         self.effects.append(dash_effect)
         self.camera.add(dash_effect)
-        self.restart_button = pg.Rect(
-            Config.get('WIN_WIDTH') // 2 - 100,
-            Config.get('WIN_HEIGHT') // 2 + 60,
-            200,
-            50
-        )
-        # self.sound = SoundManager.get_instance()
+        self.__restart_button = pg.Rect(Config.get('WIN_WIDTH') // 2 - 125, Config.get('WIN_HEIGHT') // 2 + 40, 250, 80)
         SoundManager.get_instance().play_music("bgm")
-
-
 
     def main_menu(self):
         self.__screen.fill((0, 0, 0))
@@ -97,25 +87,16 @@ class RunGame:
         text = pg.image.load("Game_Final_Project1/picture/background/start_game_text.png")
         text.set_colorkey((0, 0, 0))
         self.__screen.blit(text, (0, 0))
-        # font_size = 50
-        # font = pg.font.SysFont('comicsansms', font_size, bold=True)
-        # text = font.render(f"Press to Start", True, (255, 255, 255))
-        # text_rect = text.get_rect(center=(Config.get('WIN_WIDTH') // 2, Config.get('WIN_HEIGHT') // 2))
-        # self.__screen.blit(text, text_rect)
 
     def game_over(self):
-
-        # font = pg.font.SysFont("calibri", 60, bold=True)
-        # text = font.render("GAME OVER", True, (255, 0, 0))
-        # text_rect = text.get_rect(center=(Config.get('WIN_WIDTH') // 2, Config.get('WIN_HEIGHT') // 2 - 40))
-        # self.__screen.blit(text, text_rect)
         self.__background = Bgd.load_menu('GameOver')
         self.__screen.blit(self.__background, (0, 0))
+        pg.draw.rect(self.__screen, (44, 44, 44), self.__restart_button, border_radius=8)
+        pg.draw.rect(self.__screen, (112, 112, 112), self.__restart_button, border_radius=8, width=5)
 
-        pg.draw.rect(self.__screen, (100, 100, 255), self.restart_button)
-        subfont = pg.font.SysFont("calibri", 30)
-        restart_text = subfont.render("Restart", True, (255, 255, 255))
-        restart_text_rect = restart_text.get_rect(center=self.restart_button.center)
+        subfont = pg.font.SysFont("calibri", 55, bold=True)
+        restart_text = subfont.render("RESTART", True, (255, 255, 255))
+        restart_text_rect = restart_text.get_rect(center=self.__restart_button.center)
         self.__screen.blit(restart_text, restart_text_rect)
 
     def update_all(self):
@@ -125,7 +106,7 @@ class RunGame:
         # self.player.draw(self.__screen, self.camera)
         finish_effect = []
         if self.level_name == 'shop':
-            self.__screen.blit(self.__background, (0,0))
+            self.__screen.blit(self.__background, (0, 0))
             self.shop.draw(self.__screen)
             self.health_bar.draw(self.__screen, self.player.health)
             self.mana_bar.draw(self.__screen, self.player.mana)
@@ -211,7 +192,7 @@ class RunGame:
             self.camera.remove(bullet)
 
         """enemies event"""
-        self.FireBreath.hit_enemy(self.enemies,self.player, self.effects, self.camera)
+        self.FireBreath.hit_enemy(self.enemies, self.player, self.effects, self.camera)
 
         dead_enemies = []
         for enemy in self.enemies:
@@ -255,7 +236,6 @@ class RunGame:
         self.__complete_level = False
         self.__at_door = False
         self.__game_state = "playing"
-
 
     def set_level(self, name):
         self.__background = Bgd.load_bg(name)
@@ -357,7 +337,8 @@ class RunGame:
                         self.player.drink_potion('health_potion')
                     if event.key == pg.K_2 and self.player.use_skill('2'):
                         self.player.drink_potion('mana_potion')
-                    if event.key == pg.K_r and self.player.unlock_thunder_strike and self.player.use_skill("R"):
+                    if (event.key == pg.K_r and self.player.unlock_thunder_strike and self.player.use_skill("R")
+                            and ThunderStrike.check_mana(self.player.mana)):
                         ThunderStrike.hit_enemy(self.enemies, self.player, self.effects, self.camera)
 
                 if event.type == pg.MOUSEBUTTONDOWN:
@@ -383,7 +364,7 @@ class RunGame:
                         SoundManager.get_instance().play_sound("Hover")
                         self.restart_game()
                     elif event.button == pg.BUTTON_LEFT and self.__game_state == "game_over":
-                        if self.restart_button.collidepoint(event.pos):
+                        if self.__restart_button.collidepoint(event.pos):
                             SoundManager.get_instance().play_sound("Hover")
                             self.restart_game()
                     if self.level_name == 'shop':
@@ -404,7 +385,7 @@ class RunGame:
                     if key[pg.K_d] and self.player.wall_collision("RIGHT", self.__border["RIGHT"]):
                         self.player.move("RIGHT")
 
-                    if key[pg.K_q] and self.player.unlock_fire_breathe:
+                    if key[pg.K_q] and self.player.unlock_fire_breathe and self.FireBreath.check_mana(self.player.mana):
                         self.FireBreath.activate = True
                         self.FireBreath.set_position(self.player.rect, self.player.left_right)
                     else:
