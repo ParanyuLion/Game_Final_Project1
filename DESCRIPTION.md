@@ -121,3 +121,31 @@ The data will be stored in the CSV file.
 | Graph 4 | Score  that get in 1  minute        | To show that how much score do player get in 1 minute | Box plot   | Score  that get in 1  minute | None                              |
 | Graph 5 | Items Purchased by Players          | To show that which items purchased by Players         | Bar Graph  | Items that player purchased  | frequency                         |
 
+# 5. Project Timeline
+| Week         | Task                                                                                                                 |
+|--------------|----------------------------------------------------------------------------------------------------------------------|
+| 1 (10 March) | Proposal submission / Project initiation                                                                             |
+| 2 (17 March) | Full proposal submission / implemented the shooting system, enemy movement, player movement, and  player animations. |
+| 3 (24 March) | Implemented the level system, boss mechanics, various type of enemy                                                  |
+| 4 (31 March) | Graphics and Audio Implementation / UI/UX implementations                                                            |
+| 5 (7 April)  | Improve enemy behaviour / testing and debugs                                                                         |
+| 6 (14 April) | Submission week (Draft) / Improve game balance                                                                       |
+
+| 26 March-2 April  | Implement shop/ Implement Magic spells                                        |
+|-------------------|-------------------------------------------------------------------------------|
+| 3 April-9 April   | Graphics and Audio Implementation / UI/UX implementations                     |
+| 10 April-16 April | Improve enemy behaviour / testing and debugs / finish all gameplay for a game |
+| 17 April-23 April | Balancing a game / Collecting data                                            |
+| 24 April-11 May   | Data analysis and report                                                      |
+
+List 50% of the tasks that you expect to complete by 16 April.
+All game feature should be finish  
+List 75% of the tasks that you expect to complete by 23 April.
+Balancing a game and collect data
+List the remaining 25%
+Data analysis and report
+
+# 6. Document version
+Version: 4.0
+Date: 31 March 2025
+
