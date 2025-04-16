@@ -70,6 +70,9 @@ enhance a gameplay
 -Main game loop controller.
 -Handles initialization, event processing, game states, and level transitions.
 
+## UML Diagram
+<img src="UML.png" alt="UML"/>
+
 ## 3.3 Algorithms Involved
 -Collision: if players collide with enemies, players will lose HP
 -Enemies behaviour: enemies will track the player location then move in a straight line to the player(using Pythagorean theorem).
