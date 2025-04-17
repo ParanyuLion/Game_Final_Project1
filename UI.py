@@ -1,5 +1,6 @@
 import pygame as pg
 from Player import Player
+from SoundManager import SoundManager
 from game_config import Config
 
 
@@ -240,7 +241,6 @@ class InteractUI:
         text = font.render(f"Press E to enter", True, (255, 255, 255))
         text_rect = text.get_rect(center=(x+width//2,y+height//2))
         screen.blit(text, text_rect)
-
 
 
 

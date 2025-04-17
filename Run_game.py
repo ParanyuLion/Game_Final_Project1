@@ -66,7 +66,6 @@ class RunGame:
         self.shop = Shop(self.player)
         self.shop.on_next_level_clicked = self.go_to_next_level
         self.show_gold = Gold(70, 130, self.player)
-
         self.camera = Camera(Config.get('WIN_WIDTH'), Config.get('WIN_HEIGHT'))
         self.camera.add(self.player, *self.enemies, *self.bullets, *self.effects, self.FireBreath)
         self.player.draw(self.__screen, self.camera)
@@ -81,12 +80,51 @@ class RunGame:
         self.__restart_button = pg.Rect(Config.get('WIN_WIDTH') // 2 - 125, Config.get('WIN_HEIGHT') // 2 + 40, 250, 80)
         SoundManager.get_instance().play_music("bgm")
 
+        """settings attribute"""
+        self.__effect_plus = pg.Rect(850, 250, 40, 40)
+        self.__effect_minus = pg.Rect(800, 250, 40, 40)
+        self.__music_plus = pg.Rect(850, 350, 40, 40)
+        self.__music_minus = pg.Rect(800, 350, 40, 40)
+        self.__gear_img = pg.transform.scale(pg.image.load("Game_Final_Project1/picture/gear.jpg"), (60, 60))
+        self.__gear_button = self.__gear_img.get_rect(topleft=(Config.get('WIN_WIDTH') - 80, 20))
+        self.__back_button = pg.Rect(500, 450, 150, 50)
+
+    def settings_menu(self):
+        self.__screen.fill((30, 30, 30))
+        font = pg.font.SysFont("calibri", 40, bold=True)
+        title = font.render("Settings", True, (255, 255, 255))
+        self.__screen.blit(title, (Config.get('WIN_WIDTH') // 2 - 80, 100))
+
+        effect_text = font.render(f"Effects Volume: {int(SoundManager.get_instance().effect_volume * 100)}", True,
+                                  (255, 255, 255))
+        music_text = font.render(f"Music Volume: {int(SoundManager.get_instance().music_volume * 100)}", True,
+                                 (255, 255, 255))
+        plus = font.render("+", True,(255, 255, 255))
+        minus = font.render("-", True, (255, 255, 255))
+        self.__screen.blit(effect_text, (400, 250))
+        self.__screen.blit(music_text, (400, 350))
+
+        pg.draw.rect(self.__screen, (100, 100, 255), self.__effect_plus)
+        pg.draw.rect(self.__screen, (100, 100, 255), self.__effect_minus)
+        pg.draw.rect(self.__screen, (100, 255, 100), self.__music_plus)
+        pg.draw.rect(self.__screen, (100, 255, 100), self.__music_minus)
+        pg.draw.rect(self.__screen, (180, 0, 0), self.__back_button)
+
+        self.__screen.blit(plus, (self.__effect_plus.x + 5, self.__effect_plus.y + 5))
+        self.__screen.blit(plus, (self.__effect_plus.x + 5, self.__music_plus.y + 5))
+        self.__screen.blit(minus, (self.__effect_minus.x + 5, self.__effect_minus.y + 5))
+        self.__screen.blit(minus, (self.__effect_minus.x + 5, self.__music_minus.y + 5))
+
+        back_text = font.render("BACK", True, (255, 255, 255))
+        self.__screen.blit(back_text, (self.__back_button.x + 10, self.__back_button.y + 5))
+
     def main_menu(self):
         self.__screen.fill((0, 0, 0))
         self.__screen.blit(self.__background, (0, 0))
         text = pg.image.load("Game_Final_Project1/picture/background/start_game_text.png")
         text.set_colorkey((0, 0, 0))
         self.__screen.blit(text, (0, 0))
+        self.__screen.blit(self.__gear_img, self.__gear_button)
 
     def game_over(self):
         self.__background = Bgd.load_menu('GameOver')
@@ -104,6 +142,7 @@ class RunGame:
         self.__screen.fill(Config.get('BG_COLOR'))
         self.__screen.blit(self.__background, (-self.camera.camera_rect.x, -self.camera.camera_rect.y))
         # self.player.draw(self.__screen, self.camera)
+
         finish_effect = []
         if self.level_name == 'shop':
             self.__screen.blit(self.__background, (0, 0))
@@ -225,7 +264,8 @@ class RunGame:
     def restart_game(self):
         self.player.reset_game()
         self.shop.reset_game()
-        SoundManager.get_instance().play_music("bgm")
+        # SoundManager.get_instance().play_music("bgm")
+        SoundManager.get_instance().play_music("CthuluTheme")
         self.__level = 1
         self.load_level(self.__level)
         self.bullets.clear()
@@ -248,63 +288,57 @@ class RunGame:
         self.shop.toggle_shop()
         SoundManager.get_instance().play_sound("DoorClose")
 
-    def load_level(self, level):
-        self.enemies.clear()
-        if level == 'shop':
-            self.level_name = 'shop'
-            self.set_level(self.level_name)
-        elif level == 1:
-            self.level_name = 1
+    def __level_generator(self, level):
+
+        if level % 7 == 0:
+            self.level_name = 4
             for i in range(1):
-                pg.mixer.music.stop()
-                SoundManager.get_instance().play_music("CthuluTheme")
+                # pg.mixer.music.stop()
+                # SoundManager.get_instance().play_music("CthuluTheme")
                 spawn_x, spawn_y = self.random_spawn()
-                new_enemy = Cthulu(spawn_x, spawn_y, health=5)
-                new_enemy.rect.topleft = (spawn_x, spawn_y)
-                self.enemies.append(new_enemy)
-                # new_enemy2 = Slime(spawn_x, spawn_y, health=5)
-                # new_enemy2.rect.topleft = (spawn_x, spawn_y)
-                # self.enemies.append(new_enemy2)
-
-            self.camera.add(*self.enemies)
-            self.set_level(self.level_name)
-
-        elif level == 2:
-            self.level_name = 2
-            for i in range(2):
-                spawn_x, spawn_y = self.random_spawn()
-                new_enemy = Minotaur(spawn_x, spawn_y, health=5)
+                new_enemy = Cthulu(spawn_x, spawn_y, health=5*level)
                 new_enemy.rect.topleft = (spawn_x, spawn_y)
                 self.enemies.append(new_enemy)
             self.camera.add(*self.enemies)
             self.set_level(self.level_name)
 
-        elif level == 3:
+        elif level % 5 == 0:
             self.level_name = 3
             for i in range(3):
                 spawn_x, spawn_y = self.random_spawn()
-                new_enemy = Demon(spawn_x, spawn_y, health=5, level=self.level_name)
+                new_enemy = Demon(spawn_x, spawn_y, health=int(level*1.25), level=self.level_name)
                 new_enemy.rect.topleft = (spawn_x, spawn_y)
                 self.enemies.append(new_enemy)
             self.camera.add(*self.enemies)
             self.set_level(self.level_name)
 
-        elif level == 4:
-            self.level_name = 4
-            for i in range(4):
+        elif level % 3 == 0:
+            self.level_name = 2
+            for i in range(3):
                 spawn_x, spawn_y = self.random_spawn()
-                new_enemy = Slime(spawn_x, spawn_y, health=5)
+                new_enemy = Minotaur(spawn_x, spawn_y, health=3*level)
                 new_enemy.rect.topleft = (spawn_x, spawn_y)
                 self.enemies.append(new_enemy)
             self.camera.add(*self.enemies)
             self.set_level(self.level_name)
 
         else:
-            self.level_name = 2
-            for i in range(self.__level):
-                self.enemies.append(Slime(x=random.randint(0, 1000), y=random.randint(0, 620), health=5))
+            self.level_name = 1
+            for i in range(level):
+                spawn_x, spawn_y = self.random_spawn()
+                new_enemy = Slime(spawn_x, spawn_y, health=5+level)
+                new_enemy.rect.topleft = (spawn_x, spawn_y)
+                self.enemies.append(new_enemy)
             self.camera.add(*self.enemies)
             self.set_level(self.level_name)
+
+    def load_level(self, level):
+        self.enemies.clear()
+        if level == 'shop':
+            self.level_name = 'shop'
+            self.set_level(self.level_name)
+        else:
+            self.__level_generator(level)
 
     def run_loop(self):
         clock = pg.time.Clock()
@@ -361,12 +395,31 @@ class RunGame:
                             self.__last_shot_time = now
                             self.camera.add(new_bullet, *self.bullets)
                     elif event.button == pg.BUTTON_LEFT and self.__game_state == "menu":
-                        SoundManager.get_instance().play_sound("Hover")
-                        self.restart_game()
+                        if self.__gear_button.collidepoint(event.pos):
+                            self.__game_state = "settings"
+                        else:
+                            SoundManager.get_instance().play_sound("Hover")
+                            self.restart_game()
                     elif event.button == pg.BUTTON_LEFT and self.__game_state == "game_over":
                         if self.__restart_button.collidepoint(event.pos):
                             SoundManager.get_instance().play_sound("Hover")
                             self.restart_game()
+                    elif self.__game_state == "settings":
+                        if self.__effect_plus.collidepoint(event.pos):
+                            SoundManager.get_instance().set_effect_volume(
+                                min(1.0, SoundManager.get_instance().effect_volume + 0.1))
+                        elif self.__effect_minus.collidepoint(event.pos):
+                            SoundManager.get_instance().set_effect_volume(
+                                max(0.0, SoundManager.get_instance().effect_volume - 0.1))
+                        elif self.__music_plus.collidepoint(event.pos):
+                            SoundManager.get_instance().set_music_volume(
+                                min(1.0, SoundManager.get_instance().music_volume + 0.1))
+                        elif self.__music_minus.collidepoint(event.pos):
+                            SoundManager.get_instance().set_music_volume(
+                                max(0.0, SoundManager.get_instance().music_volume - 0.1))
+                        elif self.__back_button.collidepoint(event.pos):
+                            self.__game_state = "menu"
+                            self.__game_state = "menu"
                     if self.level_name == 'shop':
                         self.shop.handle_event(event)
             """game state"""
@@ -394,6 +447,8 @@ class RunGame:
                 self.main_menu()
             elif self.__game_state == "game_over":
                 self.game_over()
+            elif self.__game_state == "settings":
+                self.settings_menu()
 
             pg.display.flip()
             clock.tick(Config.get('FPS'))

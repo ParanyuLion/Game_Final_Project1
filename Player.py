@@ -11,8 +11,8 @@ class Player(Entity):
         super().__init__("Game_Final_Project1/picture/AnimationSheet_Character.png", x, y)
         self.max_health = health
         self.health = health
-        self.max_mana = 100
-        self.mana = 100
+        self.max_mana = 1000
+        self.mana = 1000
         self.gold = 500
         self.speed = 7  # initial is 2
         self.damage = 1
@@ -55,7 +55,7 @@ class Player(Entity):
             'SPACE': -99999,
         }
         self.cooldown_durations = {
-            'CLICK': 250,
+            'CLICK': 220,
             '1': 2500,
             '2': 2500,
             'Q': 1,
@@ -269,9 +269,9 @@ class Player(Entity):
 
     def reset_game(self):
         self.health = 100
-        self.mana = 100
+        self.mana = 1000
         self.gold = 500
-        self.speed = 7  # initial is 2
+        self.speed = 5  # initial is 2
         self.damage = 1
         self.health_potion = 5
         self.mana_potion = 5

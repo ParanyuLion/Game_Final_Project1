@@ -11,7 +11,7 @@ class Demon(Enemy):
     _atk_frames = []
     _dead_frames = []
 
-    def __init__(self, x, y, health=100, damage=20, img="Game_Final_Project1/picture/enemy/Demon/FLYING.png", level=1,
+    def __init__(self, x, y, health=100, damage=10, img="Game_Final_Project1/picture/enemy/Demon/FLYING.png", level=1,
                  bullets=None, camera=None):
         super().__init__(x, y, health=health, damage=damage, img=img)
         self.gold_drop = 500
