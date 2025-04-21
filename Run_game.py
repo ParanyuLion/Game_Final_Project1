@@ -7,10 +7,10 @@ from game_config import Config
 from SoundManager import SoundManager
 from bullet import Bullet, DemonBullet, CthuluBullet
 from Effects import Explosion, DashEffect, FireBreatheEffect, CthuluExplosion
-from UI import HealthBar, ManaBar, Inventory, InteractUI, Gold
+from UI import HealthBar, ManaBar, Inventory, InteractUI, Gold, Score
 from Shop import Shop
 from Magic import FireBreath, ThunderStrike
-
+from StatTracker import StatTracker
 from Slime import Slime
 from Minotaur import Minotaur
 from Cthulu import Cthulu
@@ -35,12 +35,13 @@ class Camera(pg.sprite.Group):
 
 class RunGame:
     def __init__(self):
-        """set up game"""
+        """set up game attributes"""
         pg.init()
         pg.display.set_caption('Game')
         self.__screen = pg.display.set_mode((Config.get('WIN_WIDTH'), Config.get('WIN_HEIGHT')))
         self.__screen.fill(Config.get('BG_COLOR'))
         self.__game_state = "menu"
+        self.__previous_game_state = self.__game_state
         self.__running = True
 
         """background attribute"""
@@ -50,9 +51,10 @@ class RunGame:
         self.__border = Bgd.get(self.level_name, 'border')
         self.__level = 0
         self.__complete_level = False
+        self.__start_level_time = 0
+
         """entities attribute"""
         spawn_point = Bgd.get(1, 'spawn')
-
         self.player = Player(spawn_point[0], spawn_point[1])
         self.FireBreath = FireBreath(self.player.rect.x, self.player.rect.y)
         self.bullets = []
@@ -60,40 +62,47 @@ class RunGame:
         self.enemies = []
         self.effects = []
 
+        """UI attributes"""
         self.health_bar = HealthBar(20, 20, 450, 35, self.player.health)
         self.mana_bar = ManaBar(20, 63, 450, 35, self.player.mana)
         self.inventory = Inventory(500, 580, self.player, self.FireBreath)
+        self.score = Score(37, 150, self.player)
         self.shop = Shop(self.player)
         self.shop.on_next_level_clicked = self.go_to_next_level
         self.show_gold = Gold(70, 130, self.player)
+        self.__restart_button = pg.Rect(Config.get('WIN_WIDTH') // 2 - 125, Config.get('WIN_HEIGHT') // 2 + 40, 250, 80)
+
+        """settings attributes"""
+        self.__effect_plus = pg.Rect(880, 220, 40, 40)
+        self.__effect_minus = pg.Rect(830, 220, 40, 40)
+        self.__music_plus = pg.Rect(880, 375, 40, 40)
+        self.__music_minus = pg.Rect(830, 375, 40, 40)
+        self.__gear_img = pg.transform.scale(pg.image.load("Game_Final_Project1/picture/gear.png").convert_alpha(),
+                                             (80, 80))
+        self.__gear_button = self.__gear_img.get_rect(topleft=(Config.get('WIN_WIDTH') - 100, 20))
+        self.__back_button = pg.Rect(500, 450, 150, 50)
+
+        """other attributes"""
         self.camera = Camera(Config.get('WIN_WIDTH'), Config.get('WIN_HEIGHT'))
         self.camera.add(self.player, *self.enemies, *self.bullets, *self.effects, self.FireBreath)
-        self.player.draw(self.__screen, self.camera)
         self.__dash_time = 0
         self.__at_door = False
         self.__dash = False
         self.__before_dash_pos = self.player.rect
-        # self.count = 0
         dash_effect = DashEffect(self.player.rect.centerx, self.player.rect.centery)
         self.effects.append(dash_effect)
         self.camera.add(dash_effect)
-        self.__restart_button = pg.Rect(Config.get('WIN_WIDTH') // 2 - 125, Config.get('WIN_HEIGHT') // 2 + 40, 250, 80)
+
+        self.__last_update_data = 0
+        self.__minutes = 1
+        self.__score_per_min = 0
+        self.__enemy_dead_per_min = 0
         SoundManager.get_instance().play_music("bgm")
 
-        """settings attribute"""
-        self.__effect_plus = pg.Rect(850, 250, 40, 40)
-        self.__effect_minus = pg.Rect(800, 250, 40, 40)
-        self.__music_plus = pg.Rect(850, 350, 40, 40)
-        self.__music_minus = pg.Rect(800, 350, 40, 40)
-        self.__gear_img = pg.transform.scale(pg.image.load("Game_Final_Project1/picture/gear.jpg"), (60, 60))
-        self.__gear_button = self.__gear_img.get_rect(topleft=(Config.get('WIN_WIDTH') - 80, 20))
-        self.__back_button = pg.Rect(500, 450, 150, 50)
-
     def settings_menu(self):
-        self.__screen.fill((30, 30, 30))
+        self.__screen.fill((0, 0, 0))
+        self.__screen.blit(Bgd.load_menu('setting'), (0, 0))
         font = pg.font.SysFont("calibri", 40, bold=True)
-        title = font.render("Settings", True, (255, 255, 255))
-        self.__screen.blit(title, (Config.get('WIN_WIDTH') // 2 - 80, 100))
 
         effect_text = font.render(f"Effects Volume: {int(SoundManager.get_instance().effect_volume * 100)}", True,
                                   (255, 255, 255))
@@ -101,8 +110,8 @@ class RunGame:
                                  (255, 255, 255))
         plus = font.render("+", True,(255, 255, 255))
         minus = font.render("-", True, (255, 255, 255))
-        self.__screen.blit(effect_text, (400, 250))
-        self.__screen.blit(music_text, (400, 350))
+        self.__screen.blit(effect_text, (450, 220))
+        self.__screen.blit(music_text, (450, 375))
 
         pg.draw.rect(self.__screen, (100, 100, 255), self.__effect_plus)
         pg.draw.rect(self.__screen, (100, 100, 255), self.__effect_minus)
@@ -126,7 +135,10 @@ class RunGame:
         self.__screen.blit(text, (0, 0))
         self.__screen.blit(self.__gear_img, self.__gear_button)
 
+
     def game_over(self):
+
+
         self.__background = Bgd.load_menu('GameOver')
         self.__screen.blit(self.__background, (0, 0))
         pg.draw.rect(self.__screen, (44, 44, 44), self.__restart_button, border_radius=8)
@@ -136,6 +148,7 @@ class RunGame:
         restart_text = subfont.render("RESTART", True, (255, 255, 255))
         restart_text_rect = restart_text.get_rect(center=self.__restart_button.center)
         self.__screen.blit(restart_text, restart_text_rect)
+        self.__screen.blit(self.__gear_img, self.__gear_button)
 
     def update_all(self):
         self.camera.update(self.player)
@@ -179,10 +192,13 @@ class RunGame:
         self.mana_bar.draw(self.__screen, self.player.mana)
         self.inventory.draw(self.__screen)
         self.show_gold.draw(self.__screen)
+        self.score.draw(self.__screen)
 
         if self.__complete_level and self.__at_door:
             InteractUI.draw_interact_door(self.__screen)
         # self.camera.draw(self.__screen)
+        self.__screen.blit(self.__gear_img, self.__gear_button)
+
 
     def entities_events(self):
         """players event"""
@@ -243,11 +259,15 @@ class RunGame:
                 pass
 
             if enemy.already_dead:
+                StatTracker.get_instance().log("enemy_defeated", value=f"{enemy.__class__.__name__}")
                 dead_enemies.append(enemy)
         remove_set = set(dead_enemies)
         self.enemies = [b for b in self.enemies if b not in remove_set]
         for enemy in dead_enemies:
             self.player.gold += enemy.gold_drop
+            self.player.score += enemy.score
+            self.__enemy_dead_per_min += 1
+            self.__score_per_min += enemy.score
             self.camera.remove(enemy)
             enemy.kill()
         if len(self.enemies) == 0:
@@ -262,6 +282,10 @@ class RunGame:
         return random.randint(spawn_x[0], spawn_x[1]), random.randint(spawn_y[0], spawn_y[1])
 
     def restart_game(self):
+        self.update_data_per_minute()
+        self.__score_per_min = 0
+        self.__enemy_dead_per_min = 0
+        self.__minutes = 1
         self.player.reset_game()
         self.shop.reset_game()
         # SoundManager.get_instance().play_music("bgm")
@@ -275,6 +299,7 @@ class RunGame:
         self.camera.add(dash_effect)
         self.__complete_level = False
         self.__at_door = False
+        self.__previous_game_state = "playing"
         self.__game_state = "playing"
 
     def set_level(self, name):
@@ -296,7 +321,7 @@ class RunGame:
                 # pg.mixer.music.stop()
                 # SoundManager.get_instance().play_music("CthuluTheme")
                 spawn_x, spawn_y = self.random_spawn()
-                new_enemy = Cthulu(spawn_x, spawn_y, health=5*level)
+                new_enemy = Cthulu(spawn_x, spawn_y, health=7*level)
                 new_enemy.rect.topleft = (spawn_x, spawn_y)
                 self.enemies.append(new_enemy)
             self.camera.add(*self.enemies)
@@ -304,7 +329,10 @@ class RunGame:
 
         elif level % 5 == 0:
             self.level_name = 3
-            for i in range(3):
+            spawn_num = level//5
+            if spawn_num > 5:
+                spawn_num = 5
+            for i in range(spawn_num):
                 spawn_x, spawn_y = self.random_spawn()
                 new_enemy = Demon(spawn_x, spawn_y, health=int(level*1.25), level=self.level_name)
                 new_enemy.rect.topleft = (spawn_x, spawn_y)
@@ -314,7 +342,7 @@ class RunGame:
 
         elif level % 3 == 0:
             self.level_name = 2
-            for i in range(3):
+            for i in range(level//3):
                 spawn_x, spawn_y = self.random_spawn()
                 new_enemy = Minotaur(spawn_x, spawn_y, health=3*level)
                 new_enemy.rect.topleft = (spawn_x, spawn_y)
@@ -338,16 +366,35 @@ class RunGame:
             self.level_name = 'shop'
             self.set_level(self.level_name)
         else:
+            self.__start_level_time = pg.time.get_ticks()
             self.__level_generator(level)
+
+    def update_data_per_minute(self):
+        if self.__level != 0:
+            StatTracker.get_instance().log(event_type="game_stats_per_min", minutes=self.__minutes,level=self.__level,
+                                           enemy_dead=self.__enemy_dead_per_min,
+                                           score=self.__score_per_min, distance=self.player.distance_per_min/10)
+            self.__score_per_min = 0
+            self.__enemy_dead_per_min = 0
+            self.player.distance_per_min = 0
+            self.__minutes += 1
 
     def run_loop(self):
         clock = pg.time.Clock()
         while self.__running:
-            start_time = pg.time.get_ticks()
+            if self.__game_state == 'playing':
+                now = pg.time.get_ticks()
+                if now - self.__last_update_data >= 60000:
+                    self.update_data_per_minute()
+                    self.__last_update_data = now
+
+            # start_time = pg.time.get_ticks()
             for event in pg.event.get():
                 if event.type == pg.QUIT:
+                    if self.__game_state != 'main_menu':
+                        self.update_data_per_minute()
                     self.__running = False
-                if event.type == pg.KEYDOWN:
+                if event.type == pg.KEYDOWN and self.__game_state == 'playing':
                     # pause game
                     # if event.key == pg.K_ESCAPE:
                     #     self.__start_game = False
@@ -359,6 +406,8 @@ class RunGame:
                         self.__dash_time = now
                     if event.key == pg.K_e:
                         if self.level_name == 'shop':
+                            StatTracker.get_instance().log("level_complete", value=self.__level,
+                                                           time_used=(now-self.__start_level_time)/1000)
                             SoundManager.get_instance().play_sound("DoorOpen")
                             self.__level += 1
                             self.load_level(self.__level)
@@ -376,10 +425,16 @@ class RunGame:
                         ThunderStrike.hit_enemy(self.enemies, self.player, self.effects, self.camera)
 
                 if event.type == pg.MOUSEBUTTONDOWN:
-                    """Shooting Bullet"""
-                    if event.button == pg.BUTTON_LEFT and self.__game_state == "playing":
+                    """Click Event"""
+                    if event.button == pg.BUTTON_LEFT:
                         now = pg.time.get_ticks()
-                        if self.player.use_skill("CLICK") and not self.player.drink_state and self.level_name != 'shop':
+                        if self.__gear_button.collidepoint(event.pos) and self.__game_state != "settings":
+                            SoundManager.get_instance().play_sound("Hover")
+                            self.__previous_game_state = self.__game_state
+                            self.__game_state = "settings"
+                        # """Shooting Event"""
+                        elif (self.player.use_skill("CLICK") and not self.player.drink_state
+                              and self.level_name != 'shop' and self.__game_state == 'playing'):
                             mouse_pos = pg.mouse.get_pos()
                             mouse_pos_world = (mouse_pos[0] + self.camera.camera_rect.x,
                                                mouse_pos[1] + self.camera.camera_rect.y)
@@ -394,8 +449,29 @@ class RunGame:
                             self.bullets.append(new_bullet)
                             self.__last_shot_time = now
                             self.camera.add(new_bullet, *self.bullets)
+                    if self.__game_state == "settings":
+                        if self.__effect_plus.collidepoint(event.pos):
+                            SoundManager.get_instance().play_sound("Hover")
+                            SoundManager.get_instance().set_effect_volume(
+                                min(1.0, SoundManager.get_instance().effect_volume + 0.1))
+                        elif self.__effect_minus.collidepoint(event.pos):
+                            SoundManager.get_instance().play_sound("Hover")
+                            SoundManager.get_instance().set_effect_volume(
+                                max(0.0, SoundManager.get_instance().effect_volume - 0.1))
+                        elif self.__music_plus.collidepoint(event.pos):
+                            SoundManager.get_instance().play_sound("Hover")
+                            SoundManager.get_instance().set_music_volume(
+                                min(1.0, SoundManager.get_instance().music_volume + 0.1))
+                        elif self.__music_minus.collidepoint(event.pos):
+                            SoundManager.get_instance().play_sound("Hover")
+                            SoundManager.get_instance().set_music_volume(
+                                max(0.0, SoundManager.get_instance().music_volume - 0.1))
+                        elif self.__back_button.collidepoint(event.pos):
+                            SoundManager.get_instance().play_sound("Hover")
+                            self.__game_state = self.__previous_game_state
                     elif event.button == pg.BUTTON_LEFT and self.__game_state == "menu":
                         if self.__gear_button.collidepoint(event.pos):
+                            self.__previous_game_state = self.__game_state
                             self.__game_state = "settings"
                         else:
                             SoundManager.get_instance().play_sound("Hover")
@@ -404,22 +480,7 @@ class RunGame:
                         if self.__restart_button.collidepoint(event.pos):
                             SoundManager.get_instance().play_sound("Hover")
                             self.restart_game()
-                    elif self.__game_state == "settings":
-                        if self.__effect_plus.collidepoint(event.pos):
-                            SoundManager.get_instance().set_effect_volume(
-                                min(1.0, SoundManager.get_instance().effect_volume + 0.1))
-                        elif self.__effect_minus.collidepoint(event.pos):
-                            SoundManager.get_instance().set_effect_volume(
-                                max(0.0, SoundManager.get_instance().effect_volume - 0.1))
-                        elif self.__music_plus.collidepoint(event.pos):
-                            SoundManager.get_instance().set_music_volume(
-                                min(1.0, SoundManager.get_instance().music_volume + 0.1))
-                        elif self.__music_minus.collidepoint(event.pos):
-                            SoundManager.get_instance().set_music_volume(
-                                max(0.0, SoundManager.get_instance().music_volume - 0.1))
-                        elif self.__back_button.collidepoint(event.pos):
-                            self.__game_state = "menu"
-                            self.__game_state = "menu"
+
                     if self.level_name == 'shop':
                         self.shop.handle_event(event)
             """game state"""

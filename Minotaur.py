@@ -13,7 +13,7 @@ class Minotaur(Enemy):
     def __init__(self, x, y, health=100, damage=20, img="Game_Final_Project1/picture/enemy/Minotaur - Sprite Sheet.png"):
         super().__init__(x, y, health=health, damage=damage, img=img)
         self.gold_drop = 100
-
+        self.score = 25
         # self.__atk_frames1 = []
         # self.__atk_frames2 = []
         self.__atk_frames_index = 0
@@ -195,10 +195,10 @@ class Minotaur(Enemy):
             self.health -= damage
             if self.health <= 0 and not self.already_dead:
                 SoundManager.get_instance().play_sound("Dead")
-            if self.health == self.__max_health//2 and not self.__change_phase:
+            if self.health <= self.__max_health//2 and not self.__change_phase:
                 self.__change_phase = True
-                self.__speed *= 2
-                self.__damage = int(1.5* self.__damage)
+                self.__speed *= 2.8
+                self.__damage = int(1.5 * self.__damage)
             return True
 
     def check_alive(self):

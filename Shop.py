@@ -1,6 +1,7 @@
 import pygame as pg
 from game_config import Config
 from SoundManager import SoundManager
+from  StatTracker import StatTracker
 
 
 class Shop:
@@ -46,6 +47,7 @@ class Shop:
     def increase_health_potion(self):
         self.player.health_potion += 1
 
+
     def increase_speed(self):
         self.player.speed += 1
         SoundManager.get_instance().play_sound("SpeedBuff")
@@ -74,6 +76,7 @@ class Shop:
             self.player.gold -= item["price"]
             item["effect"]()
             item["amount"] -= 1
+            StatTracker.get_instance().log("item_bought", value=f"{item['name']}")
             SoundManager.get_instance().play_sound("Buy")
 
         elif item["amount"] <= 0:

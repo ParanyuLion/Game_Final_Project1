@@ -9,10 +9,10 @@ class Slime(Enemy):
     _atk_frames = []
     _dead_frames = []
 
-    def __init__(self,x,y, health=10, damage=2, img="Game_Final_Project1/picture/enemy/slime-Sheet.png"):
+    def __init__(self,x,y, health=10, damage=10, img="Game_Final_Project1/picture/enemy/slime-Sheet.png"):
         super().__init__(x, y, health=health, damage=damage, img=img)
         self.gold_drop = 50
-
+        self.score = 10
         # self.__atk_frames = []
         self.__atk_frames_index = 0
         # self.__dead_frames = []
@@ -38,7 +38,7 @@ class Slime(Enemy):
         self.__atk_frame_speed = self.__atk_speed//8
         self.health = health
 
-        self.__speed = 1.5
+        self.__speed = 2
         self.__damage = damage
         self.__direction = pg.math.Vector2()
         self.__velocity = pg.math.Vector2()

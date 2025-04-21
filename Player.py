@@ -11,10 +11,11 @@ class Player(Entity):
         super().__init__("Game_Final_Project1/picture/AnimationSheet_Character.png", x, y)
         self.max_health = health
         self.health = health
-        self.max_mana = 1000
-        self.mana = 1000
+        self.score = 0
+        self.max_mana = 100
+        self.mana = 100
         self.gold = 500
-        self.speed = 7  # initial is 2
+        self.speed = 5
         self.damage = 1
         self.health_potion = 5
         self.mana_potion = 5
@@ -38,7 +39,7 @@ class Player(Entity):
 
         self.__dash_speed = 120
         self.dash_cooldown = 1000
-
+        self.distance_per_min = 0
         self.last_walk_sound = 0
         self.__walk_sound_cooldown = 300
 
@@ -164,23 +165,26 @@ class Player(Entity):
         if now - self.last_walk_sound > self.__walk_sound_cooldown:
             SoundManager.get_instance().play_sound("PlayerMove")
             self.last_walk_sound = now
-
         if direction == "UP":
             self.rect.y -= self.speed
+            self.distance_per_min += self.speed
             if not self.atk_state:
                 self.move_direction = "UP"
         if direction == "LEFT":
             self.rect.x -= self.speed
+            self.distance_per_min += self.speed
             if not self.atk_state:
                 self.move_direction = "LEFT"
                 self.left_right = "LEFT"
         if direction == "RIGHT":
             self.rect.x += self.speed
+            self.distance_per_min += self.speed
             if not self.atk_state:
                 self.move_direction = "RIGHT"
                 self.left_right = "RIGHT"
         if direction == "DOWN":
             self.rect.y += self.speed
+            self.distance_per_min += self.speed
             if not self.atk_state:
                 self.move_direction = "DOWN"
 
@@ -190,7 +194,7 @@ class Player(Entity):
 
     def dash(self, border):
         predict_rect = self.rect.copy()
-        self.last_move_rect = self.rect.copy()
+        # self.last_move_rect = self.rect.copy()
         SoundManager.get_instance().play_sound("PlayerDash")
         if self.move_direction == "UP":
             predict_rect.y -= self.__dash_speed
@@ -269,9 +273,9 @@ class Player(Entity):
 
     def reset_game(self):
         self.health = 100
-        self.mana = 1000
+        self.mana = 100
         self.gold = 500
-        self.speed = 5  # initial is 2
+        self.speed = 5
         self.damage = 1
         self.health_potion = 5
         self.mana_potion = 5

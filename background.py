@@ -30,6 +30,9 @@ class Background:
         'shop': {'image': "Game_Final_Project1/picture/background/shop_bg.png",
                  'door': {'x': (0, 9999), 'y': (0, 9999)},
                  'border': {"LEFT": 9999, "RIGHT": 9999, "UP": 9999, "DOWN": 9999}, 'spawn': (500, 500)},
+        'setting': {'image': "Game_Final_Project1/picture/background/setting_bg.png",
+                 'door': {'x': (0, 9999), 'y': (0, 9999)},
+                 'border': {"LEFT": 9999, "RIGHT": 9999, "UP": 9999, "DOWN": 9999}, 'spawn': (500, 500)},
     }
 
     @classmethod
@@ -49,5 +52,7 @@ class Background:
         bg = pg.image.load(Background.get(name, 'image'))
         w, h = bg.get_size()
         if name == 'GameOver':
+            return pg.transform.scale(bg, (w * 1, h * 1))
+        elif name == 'setting':
             return pg.transform.scale(bg, (w * 1, h * 1))
         return pg.transform.scale(bg, (w * 4.7, h * 4.7))

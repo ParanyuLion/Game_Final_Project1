@@ -9,7 +9,6 @@ class Cthulu(Enemy):
     _cached_frames = None
     _atk_frames1_left = []
     _atk_frames1_right = []
-
     _atk_frames2_left = []
     _atk_frames2_right = []
     _dead_frames = []
@@ -18,7 +17,7 @@ class Cthulu(Enemy):
     def __init__(self, x, y, health=100, damage=20, img="Game_Final_Project1/picture/enemy/cthulu_SpriteSheet.png"):
         super().__init__(x, y, health=health, damage=damage, img=img)
         self.gold_drop = 500
-
+        self.score = 100
         # self.__atk_frames1 = []
         # self.__atk_frames2 = []
         # self.__fly_frames = []
@@ -209,7 +208,7 @@ class Cthulu(Enemy):
             self.health -= damage
             if self.health <= 0 and not self.already_dead:
                 SoundManager.get_instance().play_sound("Dead")
-            if self.health == self.__max_health // 2 and self.__frames != self.__fly_frames:
+            if self.health <= self.__max_health // 2 and self.__frames != self.__fly_frames:
                 SoundManager.get_instance().play_sound("CthuluChangePhase")
                 self.__frames = self.__fly_frames
                 self.__speed = 8

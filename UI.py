@@ -103,6 +103,20 @@ class Gold:
             screen.blit(text, text_rect)
 
 
+class Score:
+    def __init__(self, x, y, player):
+        self.__x = x
+        self.__y = y
+        self.__player = player
+        self.__font_size = 25
+        self.__font = pg.font.SysFont('calibri', self.__font_size, bold=True)
+
+    def draw(self, screen):
+        text = self.__font.render(f"SCORE: {self.__player.score}", True, (255, 255, 255))
+        text_rect = text.get_rect(topleft=(self.__x, self.__y))
+        screen.blit(text, text_rect)
+
+
 class Inventory:
     def __init__(self, x, y, player, fire_breathe):
         self.player = player
