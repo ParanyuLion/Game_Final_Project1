@@ -25,7 +25,7 @@ class Background:
              'enemy_spawn': {'x': (500, 1900), 'y': (330, 800)}},
         'MainMenu': {'image': "picture/background/menu.png",
                      'border': {"LEFT": 9999, "RIGHT": 9999, "UP": 9999, "DOWN": 9999}},
-        'GameOver': {'image': "Game_Final_Project1/picture/background/game_over_bg.png",
+        'GameOver': {'image': "picture/background/game_over_bg.png",
                      'border': {"LEFT": 9999, "RIGHT": 9999, "UP": 9999, "DOWN": 9999}},
         'shop': {'image': "picture/background/shop_bg.png",
                  'door': {'x': (0, 9999), 'y': (0, 9999)},
