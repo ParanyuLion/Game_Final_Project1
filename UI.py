@@ -87,7 +87,7 @@ class Gold:
         self.__font_size = 25
         self.__font = pg.font.SysFont('calibri', self.__font_size, bold=True)
         self.__img = pg.transform.scale(
-            pg.image.load('Game_Final_Project1/picture/Coin.png').convert_alpha(), (40, 40))
+            pg.image.load('picture/Coin.png').convert_alpha(), (40, 40))
         self.__img_size = self.__img.get_size()
 
     def draw(self, screen, x=None, y=None):
@@ -127,27 +127,27 @@ class Inventory:
         self.font = pg.font.SysFont('calibri', self.font_size, bold=True)
         self.item_size = (70, 70)
         self.inventory_slot = pg.transform.scale(
-            pg.image.load('Game_Final_Project1/picture/InventorySlot.png').convert_alpha(), (80, 80))
+            pg.image.load('picture/InventorySlot.png').convert_alpha(), (80, 80))
         self.list_item = [{'key': 'CLICK',
-                           'img': pg.transform.scale(pg.image.load("Game_Final_Project1/picture/MagicIcon/ShootingIcon.png").convert_alpha(),
+                           'img': pg.transform.scale(pg.image.load("picture/MagicIcon/ShootingIcon.png").convert_alpha(),
                                                      self.item_size), 'value': None},
                           {'key': '1',
-                           'img': pg.transform.scale(pg.image.load("Game_Final_Project1/picture/Potion/HealPotion.png"),
+                           'img': pg.transform.scale(pg.image.load("picture/Potion/HealPotion.png"),
                                                      self.item_size), 'value': 'heal_potion'},
                           {'key': '2',
-                           'img': pg.transform.scale(pg.image.load("Game_Final_Project1/picture/Potion/ManaPotion.png"),
+                           'img': pg.transform.scale(pg.image.load("picture/Potion/ManaPotion.png"),
                                                      self.item_size), 'value': 'mana_potion'},
                           {'key': 'Q',
                            'img': pg.transform.scale(
-                               pg.image.load("Game_Final_Project1/picture/MagicIcon/FireBreathIcon.png"),
+                               pg.image.load("picture/MagicIcon/FireBreathIcon.png"),
                                self.item_size), 'value': 'fire_breathe'},
                           {'key': 'R',
                            'img': pg.transform.scale(
-                               pg.image.load("Game_Final_Project1/picture/MagicIcon/ThunderStrikeIcon.png"),
+                               pg.image.load("picture/MagicIcon/ThunderStrikeIcon.png"),
                                self.item_size), 'value': 'thunder_strike'},
                           {'key': 'SPACE',
                            'img': pg.transform.scale(
-                               pg.image.load("Game_Final_Project1/picture/dash/DashIcon.png").convert_alpha(),
+                               pg.image.load("picture/dash/DashIcon.png").convert_alpha(),
                                self.item_size), 'value': None},
                           ]
         self.__num_slots = len(self.list_item)

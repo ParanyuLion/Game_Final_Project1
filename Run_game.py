@@ -77,7 +77,7 @@ class RunGame:
         self.__effect_minus = pg.Rect(830, 220, 40, 40)
         self.__music_plus = pg.Rect(880, 375, 40, 40)
         self.__music_minus = pg.Rect(830, 375, 40, 40)
-        self.__gear_img = pg.transform.scale(pg.image.load("Game_Final_Project1/picture/gear.png").convert_alpha(),
+        self.__gear_img = pg.transform.scale(pg.image.load("picture/gear.png").convert_alpha(),
                                              (80, 80))
         self.__gear_button = self.__gear_img.get_rect(topleft=(Config.get('WIN_WIDTH') - 100, 20))
         self.__back_button = pg.Rect(500, 450, 150, 50)
@@ -130,7 +130,7 @@ class RunGame:
     def main_menu(self):
         self.__screen.fill((0, 0, 0))
         self.__screen.blit(self.__background, (0, 0))
-        text = pg.image.load("Game_Final_Project1/picture/background/start_game_text.png")
+        text = pg.image.load("picture/background/start_game_text.png")
         text.set_colorkey((0, 0, 0))
         self.__screen.blit(text, (0, 0))
         self.__screen.blit(self.__gear_img, self.__gear_button)

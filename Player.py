@@ -8,7 +8,7 @@ import time
 class Player(Entity):
 
     def __init__(self, x, y, health=100):
-        super().__init__("Game_Final_Project1/picture/AnimationSheet_Character.png", x, y)
+        super().__init__("picture/AnimationSheet_Character.png", x, y)
         self.max_health = health
         self.health = health
         self.score = 0
@@ -66,9 +66,9 @@ class Player(Entity):
         }
 
         self.potion_images = {
-            "health_potion": pg.transform.scale(pg.image.load("Game_Final_Project1/picture/Potion/HealPotion.png"),
+            "health_potion": pg.transform.scale(pg.image.load("picture/Potion/HealPotion.png"),
                                                 (40, 40)),
-            "mana_potion": pg.transform.scale(pg.image.load("Game_Final_Project1/picture/Potion/ManaPotion.png"),
+            "mana_potion": pg.transform.scale(pg.image.load("picture/Potion/ManaPotion.png"),
                                               (40, 40)),
         }
         self.drink_state = False

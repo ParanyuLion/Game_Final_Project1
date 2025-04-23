@@ -5,7 +5,7 @@ from entity import Entity
 class Explosion(Entity):
     _cached_frames = None
 
-    def __init__(self, x, y, img="Game_Final_Project1/picture/explosion.png"):
+    def __init__(self, x, y, img="picture/explosion.png"):
         super().__init__(img, x, y)
         if Explosion._cached_frames is None:
             Explosion._cached_frames = self.__load_frames(7, 1)
@@ -51,7 +51,7 @@ class Explosion(Entity):
 class CthuluExplosion(Entity):
     _cached_frames = None
 
-    def __init__(self, x, y, img="Game_Final_Project1/picture/CthuluBullet.png"):
+    def __init__(self, x, y, img="picture/CthuluBullet.png"):
         super().__init__(img,x, y)
         if CthuluExplosion._cached_frames is None:
             CthuluExplosion._cached_frames = self.__load_frames(16, 1)
@@ -99,13 +99,13 @@ class CthuluExplosion(Entity):
 
 
 class DashEffect(Entity):
-    def __init__(self, x, y, img="Game_Final_Project1/picture/dash/FX001_01.png"):
+    def __init__(self, x, y, img="picture/dash/FX001_01.png"):
         super().__init__(img, x, y)
-        image1 = pg.image.load("Game_Final_Project1/picture/dash/FX001_01.png").convert_alpha()
-        image2 = pg.image.load("Game_Final_Project1/picture/dash/FX001_02.png").convert_alpha()
-        image3 = pg.image.load("Game_Final_Project1/picture/dash/FX001_03.png").convert_alpha()
-        image4 = pg.image.load("Game_Final_Project1/picture/dash/FX001_04.png").convert_alpha()
-        image5 = pg.image.load("Game_Final_Project1/picture/dash/FX001_05.png").convert_alpha()
+        image1 = pg.image.load("picture/dash/FX001_01.png").convert_alpha()
+        image2 = pg.image.load("picture/dash/FX001_02.png").convert_alpha()
+        image3 = pg.image.load("picture/dash/FX001_03.png").convert_alpha()
+        image4 = pg.image.load("picture/dash/FX001_04.png").convert_alpha()
+        image5 = pg.image.load("picture/dash/FX001_05.png").convert_alpha()
         self.__list_img = [image1, image2, image3, image4, image5]
         self.__frames = self.__load_frames()
         self.__last_update = 0

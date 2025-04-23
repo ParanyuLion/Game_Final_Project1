@@ -9,7 +9,7 @@ class FireBreath(Entity):
     _cached_frames_flipped = None
 
     def __init__(self, x, y):
-        super().__init__("Game_Final_Project1/picture/FireMagic/Fire Breath SpriteSheet.png", x, y)
+        super().__init__("picture/FireMagic/Fire Breath SpriteSheet.png", x, y)
         self.__speed = 20
 
         self.__frame_speed = 100

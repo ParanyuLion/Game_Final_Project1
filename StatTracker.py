@@ -16,16 +16,16 @@ class StatTracker:
             raise Exception("This class is a singleton!")
         StatTracker._instance = self
 
-        self.game_stats_per_min = Path('Game_Final_Project1/data_record/game_stats_per_min.csv')
+        self.game_stats_per_min = Path(r'data_record/game_stats_per_min.csv')
         self.game_stats_per_min_fields = ['minutes','level','enemy_defeated_per_min','score_per_min','distance_per_min']
 
-        self.item_bought = Path('Game_Final_Project1/data_record/item_bought.csv')
+        self.item_bought = Path(r'data_record/item_bought.csv')
         self.item_bought_fields = ['item_name']
 
-        self.enemy_defeated = Path('Game_Final_Project1/data_record/enemy_defeated.csv')
+        self.enemy_defeated = Path(r'data_record/enemy_defeated.csv')
         self.enemy_defeated_fields = ['enemy_type']
 
-        self.level_complete = Path('Game_Final_Project1/data_record/level_complete.csv')
+        self.level_complete = Path(r'data_record/level_complete.csv')
         self.level_complete_fields = ['level_complete', 'time_used']
 
         self._cached_rows = []  # For game_stats_per_min

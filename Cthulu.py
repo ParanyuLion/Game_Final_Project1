@@ -52,7 +52,7 @@ class Cthulu(Enemy):
         self.__range_atk_cooldown = 2500
         self.__last_range_atk = 0
 
-        self.__speed = 2
+        self.__speed = 3
         self.__damage = damage
         self.__range_damage = int(self.__damage / 1.5)
         self.__direction = pg.math.Vector2()
