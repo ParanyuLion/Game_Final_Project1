@@ -10,7 +10,7 @@ class Shop:
         self.player = player
         self.size = (70, 70)
         self.items = [
-            {"name": "Health Potion", "price": 10, "effect": self.increase_health_potion,
+            {"name": "Health Potion", "price": 100, "effect": self.increase_health_potion,
              "image": pg.transform.scale(pg.image.load("picture/Potion/HealPotion.png"), self.size),
              "amount": 10, "buff": None},
             {"name": "Speed Potion", "price": 200, "effect": self.increase_speed,
@@ -20,11 +20,11 @@ class Shop:
             {"name": "Mana Potion", "price": 100, "effect": self.increase_mana_potion,
              "image": pg.transform.scale(pg.image.load("picture/Potion/ManaPotion.png"), self.size),
              "amount": 10, "buff": None},
-            {"name": "Thunder Strike", "price": 250, "effect": self.unlock_thunder_strike,
+            {"name": "Thunder Strike", "price": 550, "effect": self.unlock_thunder_strike,
              "image": pg.transform.scale(pg.image.load("picture/MagicIcon/ThunderStrikeIcon.png"),
                                          self.size),
              "amount": 1, "buff": None},
-            {"name": "Fire Breath", "price": 200, "effect": self.unlock_fire_breathe,
+            {"name": "Fire Breath", "price": 500, "effect": self.unlock_fire_breathe,
              "image": pg.transform.scale(pg.image.load("picture/MagicIcon/FireBreathIcon.png"),
                                          self.size),
              "amount": 1, "buff": None},
@@ -56,6 +56,7 @@ class Shop:
         self.player.mana_potion += 1
 
     def increase_damage(self):
+        self.items[5]['price'] += 100
         self.player.damage += 1
         self.player.fire_breathe_damage = int(round(self.player.damage * 1.25))
         self.player.thunder_strike_damage = int(round(self.player.damage * 1.75))
@@ -89,7 +90,7 @@ class Shop:
     def reset_game(self):
         self.purchase_messages = []
         self.items = [
-            {"name": "Health Potion", "price": 10, "effect": self.increase_health_potion,
+            {"name": "Health Potion", "price": 100, "effect": self.increase_health_potion,
              "image": pg.transform.scale(pg.image.load("picture/Potion/HealPotion.png"), self.size),
              "amount": 10, "buff": None},
             {"name": "Speed Potion", "price": 200, "effect": self.increase_speed,
@@ -99,11 +100,11 @@ class Shop:
             {"name": "Mana Potion", "price": 100, "effect": self.increase_mana_potion,
              "image": pg.transform.scale(pg.image.load("picture/Potion/ManaPotion.png"), self.size),
              "amount": 10, "buff": None},
-            {"name": "Thunder Strike", "price": 250, "effect": self.unlock_thunder_strike,
+            {"name": "Thunder Strike", "price": 550, "effect": self.unlock_thunder_strike,
              "image": pg.transform.scale(pg.image.load("picture/MagicIcon/ThunderStrikeIcon.png"),
                                          self.size),
              "amount": 1, "buff": None},
-            {"name": "Fire Breath", "price": 200, "effect": self.unlock_fire_breathe,
+            {"name": "Fire Breath", "price": 500, "effect": self.unlock_fire_breathe,
              "image": pg.transform.scale(pg.image.load("picture/MagicIcon/FireBreathIcon.png"),
                                          self.size),
              "amount": 1, "buff": None},

@@ -10,3 +10,5 @@ minutes,level,enemy_defeated_per_min,score_per_min,distance_per_min
 1,1,1,10,5.0
 1,1,0,0,0.0
 1,1,0,0,0.0
+1,2,3,30,212.0
+1,8,12,280,1785.0

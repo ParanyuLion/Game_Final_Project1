@@ -103,7 +103,7 @@ class ThunderStrike(Entity):
     _cached_frames = None
 
     def __init__(self, x, y):
-        super().__init__("Game_Final_Project1/picture/ThunderMagic/ThunderStrike.png", x, y)
+        super().__init__("picture/ThunderMagic/ThunderStrike.png", x, y)
         self.__frame_speed = 40
         if ThunderStrike._cached_frames is None:
             ThunderStrike._cached_frames = self.__load_frames(13, 1)

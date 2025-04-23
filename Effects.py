@@ -146,7 +146,7 @@ class DashEffect(Entity):
 class FireBreatheEffect(Entity):
     _cached_frames = None
 
-    def __init__(self, x, y, img="Game_Final_Project1/picture/FireMagic/Fire Breath hit effect SpriteSheet.png"):
+    def __init__(self, x, y, img="picture/FireMagic/Fire Breath hit effect SpriteSheet.png"):
         super().__init__(img, x, y)
         if FireBreatheEffect._cached_frames is None:
             FireBreatheEffect._cached_frames = self.__load_frames(5, 1)

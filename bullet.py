@@ -108,7 +108,7 @@ class DemonBullet(Entity):
     _cached_frames = None
 
     def __init__(self, x, y, player, size, damage=10):
-        super().__init__("Game_Final_Project1/picture/DemonBullet.png",x, y)
+        super().__init__("picture/DemonBullet.png",x, y)
         self.damage = damage
         self.__speed = 15
         self.__size = size
@@ -162,7 +162,7 @@ class CthuluBullet(Entity):
     _cached_frames = None
 
     def __init__(self, x, y, player, size, damage=10):
-        super().__init__("Game_Final_Project1/picture/CthuluBullet.png", x, y)
+        super().__init__("picture/CthuluBullet.png", x, y)
         self.damage = damage
         self.__speed = 10
         self.__size = size

@@ -11,7 +11,7 @@ class Demon(Enemy):
     _atk_frames = []
     _dead_frames = []
 
-    def __init__(self, x, y, health=100, damage=10, img="Game_Final_Project1/picture/enemy/Demon/FLYING.png", level=1,
+    def __init__(self, x, y, health=100, damage=10, img="picture/enemy/Demon/FLYING.png", level=1,
                  bullets=None, camera=None):
         super().__init__(x, y, health=health, damage=damage, img=img)
         self.gold_drop = 100
@@ -59,19 +59,19 @@ class Demon(Enemy):
         w, h = frame_width * 2, frame_height * 2
         frames = []
         """load walk animation"""
-        walk_sheet = pg.image.load("Game_Final_Project1/picture/enemy/Demon/FLYING.png")
+        walk_sheet = pg.image.load("picture/enemy/Demon/FLYING.png")
         for i in range(4):
             frame = pg.transform.scale(
                 walk_sheet.subsurface(pg.Rect(i * frame_width, 0 * frame_height, frame_width, frame_height)), (w, h))
             frames.append(frame)
         """load range attack animation"""
-        atk_sheet = pg.image.load("Game_Final_Project1/picture/enemy/Demon/ATTACK.png")
+        atk_sheet = pg.image.load("picture/enemy/Demon/ATTACK.png")
         for i in range(8):
             atk_frame = pg.transform.scale(
                 atk_sheet.subsurface(pg.Rect(i * frame_width, 0 * frame_height, frame_width, frame_height)), (w, h))
             Demon._atk_frames.append(atk_frame)
         """load dead animation"""
-        dead_sheet = pg.image.load("Game_Final_Project1/picture/enemy/Demon/DEATH.png")
+        dead_sheet = pg.image.load("picture/enemy/Demon/DEATH.png")
         for i in range(6):
             dead_frame = pg.transform.scale(
                 dead_sheet.subsurface(pg.Rect(i * frame_width, 0 * frame_height, frame_width, frame_height)), (w, h))

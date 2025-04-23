@@ -23,7 +23,7 @@ cd Game_Final_Project1
 
 3. Create virtual environment
 ```
-python -m venv env
+python -m venv env ลบออก
 ```
 
 4. Activate virtual environment
