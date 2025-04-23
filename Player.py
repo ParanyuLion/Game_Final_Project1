@@ -43,10 +43,10 @@ class Player(Entity):
         self.last_walk_sound = 0
         self.__walk_sound_cooldown = 300
 
-        self.atk_speed = 30
-        self.atk_state = False
-        self.walk_state = False
-        self.idle_state = True
+        self.__atk_speed = 30
+        self.__atk_state = False
+        self.__walk_state = False
+        self.__idle_state = True
         self.last_activate = {
             'CLICK': -99999,
             '1': -99999,
@@ -65,23 +65,23 @@ class Player(Entity):
 
         }
 
-        self.potion_images = {
+        self.__potion_images = {
             "health_potion": pg.transform.scale(pg.image.load("picture/Potion/HealPotion.png"),
                                                 (40, 40)),
             "mana_potion": pg.transform.scale(pg.image.load("picture/Potion/ManaPotion.png"),
                                               (40, 40)),
         }
         self.drink_state = False
-        self.drink_start_time = 0
-        self.drink_duration = 600
-        self.current_potion_img = None
+        self.__drink_start_time = 0
+        self.__drink_duration = 600
+        self.__current_potion_img = None
 
-    def can_use_skill(self, key):
+    def __can_use_skill(self, key):
         now = pg.time.get_ticks()
         return now - self.last_activate.get(key) >= self.cooldown_durations.get(key)
 
     def use_skill(self, key):
-        if self.can_use_skill(key) and not self.drink_state:
+        if self.__can_use_skill(key) and not self.drink_state:
             self.last_activate[key] = pg.time.get_ticks()
             return True
         return False
@@ -104,7 +104,7 @@ class Player(Entity):
 
         return frames
 
-    def walk_animation(self):
+    def __walk_animation(self):
         now = pg.time.get_ticks()
         if now - self.__last_update > self.__frame_speed:
             self.__last_update = now
@@ -114,13 +114,13 @@ class Player(Entity):
             else:
                 self.image = pg.transform.flip(self.__frames[self.__frame_index], True, False)
 
-    def atk_animation(self, screen, camera):
+    def __atk_animation(self, screen, camera):
         for i in range(len(self.__atk_frames)):
             now = pg.time.get_ticks()
-            if now - self.__last_update > self.atk_speed:
+            if now - self.__last_update > self.__atk_speed:
                 self.__last_update = now
                 self.__atk_frames_index = (self.__atk_frames_index + 1) % len(self.__atk_frames)
-                if self.atk_state:
+                if self.__atk_state:
                     if self.left_right == "RIGHT":
                         self.image = self.__atk_frames[self.__atk_frames_index]
                     else:
@@ -128,7 +128,7 @@ class Player(Entity):
                     # print("atk", self.__atk_frames_index)
             screen.blit(self.image, camera.apply(self))
             if self.__atk_frames_index == 7:
-                self.atk_state = False
+                self.__atk_state = False
                 break
 
     def door_collision(self, door):
@@ -157,10 +157,10 @@ class Player(Entity):
 
     def move(self, direction):
         # print(self.__frame_index)
-        self.walk_animation()
+        self.__walk_animation()
         self.last_move_rect = self.rect.copy()
-        self.walk_state = True
-        self.idle_state = False
+        self.__walk_state = True
+        self.__idle_state = False
         now = pg.time.get_ticks()
         if now - self.last_walk_sound > self.__walk_sound_cooldown:
             SoundManager.get_instance().play_sound("PlayerMove")
@@ -168,29 +168,29 @@ class Player(Entity):
         if direction == "UP":
             self.rect.y -= self.speed
             self.distance_per_min += self.speed
-            if not self.atk_state:
+            if not self.__atk_state:
                 self.move_direction = "UP"
         if direction == "LEFT":
             self.rect.x -= self.speed
             self.distance_per_min += self.speed
-            if not self.atk_state:
+            if not self.__atk_state:
                 self.move_direction = "LEFT"
                 self.left_right = "LEFT"
         if direction == "RIGHT":
             self.rect.x += self.speed
             self.distance_per_min += self.speed
-            if not self.atk_state:
+            if not self.__atk_state:
                 self.move_direction = "RIGHT"
                 self.left_right = "RIGHT"
         if direction == "DOWN":
             self.rect.y += self.speed
             self.distance_per_min += self.speed
-            if not self.atk_state:
+            if not self.__atk_state:
                 self.move_direction = "DOWN"
 
     def attack(self):
         SoundManager.get_instance().play_sound("PlayerAttack")
-        self.atk_state = True
+        self.__atk_state = True
 
     def dash(self, border):
         predict_rect = self.rect.copy()
@@ -225,20 +225,20 @@ class Player(Entity):
                 self.rect.y = border[self.move_direction]
 
     def draw(self, screen, camera):
-        if self.atk_state:
-            self.atk_animation(screen, camera)
+        if self.__atk_state:
+            self.__atk_animation(screen, camera)
         else:
             screen.blit(self.image, camera.apply(self))
 
         if self.drink_state:
             now = pg.time.get_ticks()
-            if now - self.drink_start_time < self.drink_duration:
-                if self.current_potion_img:
-                    img_rect = self.current_potion_img.get_rect(center=camera.apply(self).center)
-                    screen.blit(self.current_potion_img, img_rect)
+            if now - self.__drink_start_time < self.__drink_duration:
+                if self.__current_potion_img:
+                    img_rect = self.__current_potion_img.get_rect(center=camera.apply(self).center)
+                    screen.blit(self.__current_potion_img, img_rect)
             else:
                 self.drink_state = False
-                self.current_potion_img = None
+                self.__current_potion_img = None
 
     def get_size(self):
         return self.image.get_size()
@@ -255,16 +255,16 @@ class Player(Entity):
             if self.health > self.max_health:
                 self.health = self.max_health
             self.drink_state = True
-            self.drink_start_time = now
-            self.current_potion_img = self.potion_images["health_potion"]
+            self.__drink_start_time = now
+            self.__current_potion_img = self.__potion_images["health_potion"]
         elif not self.drink_state and potion == 'mana_potion' and self.mana_potion > 0:
             self.mana_potion -= 1
             self.mana += 20
             if self.mana > self.max_mana:
                 self.mana = self.max_mana
             self.drink_state = True
-            self.drink_start_time = now
-            self.current_potion_img = self.potion_images["mana_potion"]
+            self.__drink_start_time = now
+            self.__current_potion_img = self.__potion_images["mana_potion"]
 
     def get_shoot(self, bullet):
         if self.rect.colliderect(bullet):
