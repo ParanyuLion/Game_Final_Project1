@@ -1,14 +1,14 @@
 import pygame as pg
 import random
-import matplotlib.pyplot as plt
 import pandas as pd
-from Enemy import Enemy
+import matplotlib.pyplot as plt
 from Player import Player
+from Camera import Camera
 from background import Background as Bgd
 from game_config import Config
 from SoundManager import SoundManager
 from bullet import Bullet, DemonBullet, CthuluBullet
-from Effects import Explosion, DashEffect, FireBreatheEffect, CthuluExplosion
+from Effects import Explosion, DashEffect, CthuluExplosion
 from UI import HealthBar, ManaBar, Inventory, InteractUI, Gold, Score
 from Shop import Shop
 from Magic import FireBreath, ThunderStrike
@@ -17,22 +17,7 @@ from Slime import Slime
 from Minotaur import Minotaur
 from Cthulu import Cthulu
 from Demon import Demon
-
-
-class Camera(pg.sprite.Group):
-    def __init__(self, width, height):
-        super().__init__()
-        self.camera_rect = pg.Rect(0, 0, width, height)
-        self.width = width
-        self.height = height
-
-    def apply(self, entity):
-        return entity.rect.move(-self.camera_rect.x, -self.camera_rect.y)
-
-    def update(self, target):
-        x = target.rect.centerx - Config.get('WIN_WIDTH') // 2
-        y = target.rect.centery - Config.get('WIN_HEIGHT') // 2
-        self.camera_rect.topleft = (x, y)
+from tk_show_graph import run_graph_window
 
 
 class RunGame:
@@ -45,14 +30,6 @@ class RunGame:
         self.__game_state = "menu"
         self.__previous_game_state = self.__game_state
         self.__running = True
-        self.pie_chart_img = pg.image.load(r"graph_output\pie_chart.png").convert()
-        self.line_graph_img = pg.image.load(r"graph_output\level_time_line_chart.png").convert()
-        self.histogram_img = pg.image.load(r"graph_output\item_bought_histogram.png").convert()
-        self.bar_img = pg.image.load(r"graph_output\enemy_defeat_bar.png").convert()
-        self.box_img = pg.image.load(r"graph_output\score_per_min_boxplot.png").convert()
-
-        self.__graph_generated = False
-        self.__stat_display_state = "Pie"
 
         """background attribute"""
         self.__level_name = 'MainMenu'
@@ -84,12 +61,25 @@ class RunGame:
         self.__stat_button = pg.Rect(Config.get('WIN_WIDTH') // 2 - 100, Config.get('WIN_HEIGHT') // 2 + 140, 200, 50)
 
         """stats display attribute"""
-        self.__pie_button = pg.Rect(50, 100, 150, 50)
-        self.__line_button = pg.Rect(50, 200, 150, 50)
-        self.__his_button = pg.Rect(50, 300, 150, 50)
-        self.__bar_button = pg.Rect(50, 400, 150, 50)
-        self.__box_button = pg.Rect(50, 500, 150, 50)
-        self.__table_button = pg.Rect(50, 600, 150, 50)
+        self.pie_chart_img = pg.image.load(r"graph_output\pie_chart.png").convert()
+        self.line_graph_img = pg.image.load(r"graph_output\level_time_line_chart.png").convert()
+        self.histogram_img = pg.image.load(r"graph_output\item_bought_histogram.png").convert()
+        self.bar_img = pg.image.load(r"graph_output\enemy_defeat_bar.png").convert()
+        self.box_img = pg.image.load(r"graph_output\score_per_min_boxplot.png").convert()
+
+        self.__graph_generated = False
+        self.__stat_display_state = "Pie"
+
+        button_x = 30
+        self.__pie_button = pg.Rect(button_x, 50, 270, 60)
+        self.__line_button = pg.Rect(button_x, 140, 270, 60)
+        self.__his_button = pg.Rect(button_x, 230, 270, 60)
+        self.__bar_button = pg.Rect(button_x, 320, 270, 60)
+        self.__box_button = pg.Rect(button_x, 410, 270, 60)
+        self.__table_button = pg.Rect(button_x, 500, 270, 60)
+
+        self.__stat_back_button = pg.Rect(button_x, 590, 270, 60)
+        self.__tk_button = pg.Rect(1000, 620, 260, 60)
 
         """settings attributes"""
         self.__effect_plus = pg.Rect(880, 220, 40, 40)
@@ -97,7 +87,7 @@ class RunGame:
         self.__music_plus = pg.Rect(880, 375, 40, 40)
         self.__music_minus = pg.Rect(830, 375, 40, 40)
         self.__gear_img = pg.transform.scale(pg.image.load("picture/gear.png").convert_alpha(),
-                                             (80, 80))
+                                             (60, 60))
         self.__gear_button = self.__gear_img.get_rect(topleft=(Config.get('WIN_WIDTH') - 100, 20))
         self.__back_button = pg.Rect(Config.get('WIN_WIDTH') // 2 - 75, Config.get('WIN_HEIGHT') // 2 + 140, 150, 50)
 
@@ -138,11 +128,11 @@ class RunGame:
         pg.draw.rect(self.__screen, (128, 25, 18), self.__music_minus, border_radius=7)
         pg.draw.rect(self.__screen, (180, 0, 0), self.__back_button, border_radius=7)
         """draw button border"""
-        pg.draw.rect(self.__screen, (0,0,0), self.__effect_plus, border_radius=7, width=4)
-        pg.draw.rect(self.__screen, (0,0,0), self.__effect_minus, border_radius=7, width=4)
-        pg.draw.rect(self.__screen, (0,0,0), self.__music_plus, border_radius=7, width=4)
-        pg.draw.rect(self.__screen, (0,0,0), self.__music_minus, border_radius=7, width=4)
-        pg.draw.rect(self.__screen, (0,0,0), self.__back_button, border_radius=7, width=4)
+        pg.draw.rect(self.__screen, (0, 0, 0), self.__effect_plus, border_radius=7, width=4)
+        pg.draw.rect(self.__screen, (0, 0, 0), self.__effect_minus, border_radius=7, width=4)
+        pg.draw.rect(self.__screen, (0, 0, 0), self.__music_plus, border_radius=7, width=4)
+        pg.draw.rect(self.__screen, (0, 0, 0), self.__music_minus, border_radius=7, width=4)
+        pg.draw.rect(self.__screen, (0, 0, 0), self.__back_button, border_radius=7, width=4)
         """plus and minus and text in button"""
         self.__screen.blit(plus, (self.__effect_plus.x + 10, self.__effect_plus.y + 1))
         self.__screen.blit(plus, (self.__effect_plus.x + 10, self.__music_plus.y + 1))
@@ -179,7 +169,7 @@ class RunGame:
         restart_text = subfont.render("RESTART", True, (255, 255, 255))
         restart_text_rect = restart_text.get_rect(center=self.__restart_button.center)
         score_text = subfont.render(f"SCORE: {self.__player.score}", True, (255, 255, 255))
-        score_text_rect = score_text.get_rect(center=(Config.get('WIN_WIDTH')//2,Config.get('WIN_HEIGHT')//2))
+        score_text_rect = score_text.get_rect(center=(Config.get('WIN_WIDTH') // 2, Config.get('WIN_HEIGHT') // 2))
 
         self.__screen.blit(score_text, score_text_rect)
         self.__screen.blit(restart_text, restart_text_rect)
@@ -199,45 +189,90 @@ class RunGame:
             self.generate_graph_image()
             pie_w, pie_h = self.pie_chart_img.get_size()
             self.pie_chart_img = pg.transform.smoothscale(pg.image.load(r"graph_output\pie_chart.png").convert(),
-                                                    (pie_w // 1, pie_h // 1))
+                                                          (pie_w * 1.1, pie_h * 1.1))
             line_w, line_h = self.line_graph_img.get_size()
-            self.line_graph_img = pg.transform.smoothscale(pg.image.load(r"graph_output\level_time_line_chart.png").convert(),
-                                                    (line_w // 1.25, line_h // 1.25))
+            self.line_graph_img = pg.transform.smoothscale(
+                pg.image.load(r"graph_output\level_time_line_chart.png").convert(),
+                (line_w // 1.2, line_h // 1.2))
             his_w, his_h = self.histogram_img.get_size()
-            self.histogram_img = pg.transform.smoothscale(pg.image.load(r"graph_output\item_bought_histogram.png").convert(),
-                                                    (his_w // 1.25, his_h // 1.25))
+            self.histogram_img = pg.transform.smoothscale(
+                pg.image.load(r"graph_output\item_bought_histogram.png").convert(),
+                (his_w // 1.2, his_h // 1.2))
             bar_w, bar_h = self.bar_img.get_size()
             self.bar_img = pg.transform.smoothscale(
                 pg.image.load(r"graph_output\enemy_defeat_bar.png").convert(),
-                (bar_w // 1.25, bar_h // 1.25))
+                (bar_w // 1.2, bar_h // 1.2))
 
             box_w, box_h = self.box_img.get_size()
             self.box_img = pg.transform.smoothscale(
-                pg.image.load(r"graph_output\score_per_min_boxplot.png").convert(),(box_w // 1.25, box_h // 1.25))
+                pg.image.load(r"graph_output\score_per_min_boxplot.png").convert(), (box_w // 1.2, box_h // 1.2))
 
         if self.__stat_display_state == "Pie":
-            self.__screen.blit(self.pie_chart_img, (300, 100))
+            self.__screen.blit(self.pie_chart_img, (450, 70))
         elif self.__stat_display_state == "Line":
-            self.__screen.blit(self.line_graph_img, (300, 100))
+            self.__screen.blit(self.line_graph_img, (350, 70))
         elif self.__stat_display_state == "His":
-            self.__screen.blit(self.histogram_img, (300, 100))
+            self.__screen.blit(self.histogram_img, (350, 70))
         elif self.__stat_display_state == "Bar":
-            self.__screen.blit(self.bar_img, (300, 100))
+            self.__screen.blit(self.bar_img, (400, 70))
         elif self.__stat_display_state == "Table":
             self.show_stat_table()
         elif self.__stat_display_state == "Box":
-            self.__screen.blit(self.box_img, (300, 100))
-        pg.draw.rect(self.__screen, (180, 0, 0), self.__back_button, border_radius=7)
+            self.__screen.blit(self.box_img, (450, 70))
+        pg.draw.rect(self.__screen, (180, 0, 0), self.__stat_back_button, border_radius=5)
+        pg.draw.rect(self.__screen, (180, 0, 0), self.__tk_button, border_radius=5)
 
-        pg.draw.rect(self.__screen, (180, 0, 0), self.__pie_button, border_radius=7)
-        pg.draw.rect(self.__screen, (180, 0, 0), self.__line_button, border_radius=7)
-        pg.draw.rect(self.__screen, (180, 0, 0), self.__bar_button, border_radius=7)
-        pg.draw.rect(self.__screen, (180, 0, 0), self.__box_button, border_radius=7)
-        pg.draw.rect(self.__screen, (180, 0, 0), self.__table_button, border_radius=7)
-        pg.draw.rect(self.__screen, (180, 0, 0), self.__his_button, border_radius=7)
-        font = pg.font.SysFont("calibri", 40, bold=True)
-        back_text = font.render("BACK", True, (255, 255, 255))
-        self.__screen.blit(back_text, (self.__back_button.x + 10, self.__back_button.y + 5))
+        menu_button_color = (50, 50, 50)
+        menu_border_button_color = (200, 200, 200)
+        pg.draw.rect(self.__screen, menu_button_color, self.__pie_button, border_radius=5)
+        pg.draw.rect(self.__screen, menu_button_color, self.__line_button, border_radius=5)
+        pg.draw.rect(self.__screen, menu_button_color, self.__bar_button, border_radius=5)
+        pg.draw.rect(self.__screen, menu_button_color, self.__box_button, border_radius=5)
+        pg.draw.rect(self.__screen, menu_button_color, self.__table_button, border_radius=5)
+        pg.draw.rect(self.__screen, menu_button_color, self.__his_button, border_radius=5)
+        pg.draw.rect(self.__screen, menu_button_color, self.__tk_button, border_radius=5)
+
+        pg.draw.rect(self.__screen, menu_border_button_color, self.__pie_button, border_radius=5, width=2)
+        pg.draw.rect(self.__screen, menu_border_button_color, self.__line_button, border_radius=5, width=2)
+        pg.draw.rect(self.__screen, menu_border_button_color, self.__bar_button, border_radius=5, width=2)
+        pg.draw.rect(self.__screen, menu_border_button_color, self.__box_button, border_radius=5, width=2)
+        pg.draw.rect(self.__screen, menu_border_button_color, self.__table_button, border_radius=5, width=2)
+        pg.draw.rect(self.__screen, menu_border_button_color, self.__his_button, border_radius=5, width=2)
+        pg.draw.rect(self.__screen, menu_border_button_color, self.__tk_button, border_radius=5, width=2)
+        back_font = pg.font.SysFont("calibri", 40, bold=True)
+        font = pg.font.SysFont("calibri", 25, bold=True)
+        back_text = back_font.render("BACK", True, (255, 255, 255))
+        back_text_rect = back_text.get_rect(center=self.__stat_back_button.center)
+
+        tk_text = font.render("Open in Tkinter", True, (255, 255, 255))
+        tk_text_rect = tk_text.get_rect(center=self.__tk_button.center)
+
+        pie_text = font.render("Enemy Defeated Portion", True, (255, 255, 255))
+        pie_text_rect = pie_text.get_rect(center=self.__pie_button.center)
+
+        line_text = font.render("Completed Level", True, (255, 255, 255))
+        line_text_rect = line_text.get_rect(center=self.__line_button.center)
+
+        bar_text = font.render("Enemy Defeated Per Min", True, (255, 255, 255))
+        bar_text_rect = bar_text.get_rect(center=self.__bar_button.center)
+
+        box_text = font.render("Score Per Min", True, (255, 255, 255))
+        box_text_rect = box_text.get_rect(center=self.__box_button.center)
+
+        table_text = font.render("Table", True, (255, 255, 255))
+        table_text_rect = table_text.get_rect(center=self.__table_button.center)
+
+        his_text = font.render("Item Bought", True, (255, 255, 255))
+        his_text_rect = his_text.get_rect(center=self.__his_button.center)
+
+        self.__screen.blit(back_text, back_text_rect)
+        self.__screen.blit(pie_text, pie_text_rect)
+        self.__screen.blit(line_text, line_text_rect)
+        self.__screen.blit(bar_text, bar_text_rect)
+        self.__screen.blit(box_text, box_text_rect)
+        self.__screen.blit(table_text, table_text_rect)
+        self.__screen.blit(his_text, his_text_rect)
+        self.__screen.blit(tk_text, tk_text_rect)
 
     def __update_all(self):
         self.__camera.update(self.__player)
@@ -467,33 +502,46 @@ class RunGame:
             self.__player.distance_per_min = 0
             self.__minutes += 1
 
-    def render_dataframe(self, df, x=100, y=100, font_size=28, row_height=35, col_spacing=200):
-        """
-        แสดงผล DataFrame บนหน้าจอ Pygame
-        :param df: pandas DataFrame
-        :param x: ตำแหน่งเริ่มต้นแกน x
-        :param y: ตำแหน่งเริ่มต้นแกน y
-        :param font_size: ขนาดฟอนต์
-        :param row_height: ระยะห่างระหว่างแถว
-        :param col_spacing: ระยะห่างระหว่างคอลัมน์
-        """
+    def render_dataframe(self, df, x=100, y=100, font_size=20, row_height=35):
         font = pg.font.SysFont("calibri", font_size, bold=True)
+        col_spacings = [90, 100, 250, 200, 200]
+        if col_spacings is None:
+            col_spacings = [60] + [180] * (len(df.columns) - 1)
+
+        col_positions = [x]
+        for space in col_spacings[:-1]:
+            col_positions.append(col_positions[-1] + space)
+
+        col_edges = col_positions + [col_positions[-1] + col_spacings[-1]]
+
+        total_width = col_edges[-1] - x
+        total_height = row_height * (len(df) + 1)
 
         # Header
         for col_index, col in enumerate(df.columns):
             text = font.render(str(col), True, (255, 255, 0))
-            self.__screen.blit(text, (x + col_index * col_spacing, y))
+            self.__screen.blit(text, (col_positions[col_index], y))
 
         # Data
         for row_index, (_, row) in enumerate(df.iterrows()):
             for col_index, cell in enumerate(row):
                 text = font.render(str(cell), True, (255, 255, 255))
-                self.__screen.blit(text, (x + col_index * col_spacing, y + (row_index + 1) * row_height))
+                self.__screen.blit(text, (col_positions[col_index], y + (row_index + 1) * row_height))
+
+        for i in range(len(df) + 2):
+            line_y = y + i * row_height
+            pg.draw.line(self.__screen, (100, 100, 100), (x, line_y), (x + total_width, line_y), 1)
+
+        for edge_x in col_edges:
+            pg.draw.line(self.__screen, (100, 100, 100), (edge_x, y), (edge_x, y + total_height), 1)
 
     def show_stat_table(self):
         df = pd.read_csv("data_record/game_stats_per_min.csv")
+        grouped_df = df.groupby("level").mean().reset_index()
+        grouped_df["level"] = grouped_df["level"].astype(int)
+        grouped_df = grouped_df.round(2)
         self.__screen.fill((30, 30, 30))
-        self.render_dataframe(df.tail(15), x=100, y=80)
+        self.render_dataframe(grouped_df.head(30), x=350, y=40)
 
     def generate_graph_image(self):
         def generate_pie_chart():
@@ -507,8 +555,6 @@ class RunGame:
 
             plt.savefig("graph_output/pie_chart.png", dpi=80)
             plt.close()
-
-            print("Pie chart generated.")
 
         def generate_line_chart():
             df = pd.read_csv("data_record/level_complete.csv")
@@ -530,7 +576,6 @@ class RunGame:
 
         def generate_histogram():
             df = pd.read_csv("data_record/item_bought.csv")
-
             item_counts = df['item_name'].value_counts()
 
             plt.figure(figsize=(10, 6))
@@ -551,18 +596,17 @@ class RunGame:
             grouped = df.groupby("minutes")["enemy_defeated_per_min"].mean()
 
             plt.figure(figsize=(8, 6))
-            grouped.plot(kind="bar", color="skyblue", edgecolor="black")
+            grouped.plot(kind="bar", color="lightcoral", edgecolor="black")
 
-            plt.xlabel("Minutes")
-            plt.ylabel("Average Enemy Defeated per Minute")
             plt.title("Average Enemy Defeated per Minute by Time")
+            plt.xlabel("Minutes")
+            plt.ylabel("Average Count")
+
             plt.xticks(rotation=0)
             plt.tight_layout()
 
             plt.savefig("graph_output/enemy_defeat_bar.png", dpi=100)
             plt.close()
-
-            print("Bar graph generated.")
 
         def generate_boxplot_score_per_min():
             df = pd.read_csv("data_record/game_stats_per_min.csv")
@@ -570,15 +614,13 @@ class RunGame:
             plt.figure(figsize=(6, 6))
             plt.boxplot(df["score_per_min"], vert=False, patch_artist=True, boxprops=dict(facecolor='lightgreen'))
 
-            plt.title("Boxplot of Score per Minute")
-            plt.ylabel("Score per Minute")
-            plt.grid(True, axis='y', linestyle='--', alpha=0.7)
+            plt.title("Score per Minute")
+            plt.xlabel("Score per Minute")
+            plt.grid(True, axis='y', linestyle='--', alpha=0.6)
 
             plt.tight_layout()
             plt.savefig("graph_output/score_per_min_boxplot.png", dpi=100)
             plt.close()
-
-            print("Boxplot generated.")
 
         self.__graph_generated = True
         generate_pie_chart()
@@ -638,7 +680,7 @@ class RunGame:
                             SoundManager.get_instance().play_sound("Hover")
                             self.__previous_game_state = self.__game_state
                             self.__game_state = "settings"
-                            """Shooting Event"""
+                        # """Shooting Event"""
                         elif (self.__player.use_skill("CLICK") and not self.__player.drink_state
                               and self.__level_name != 'shop' and self.__game_state == 'playing'):
                             mouse_pos = pg.mouse.get_pos()
@@ -655,7 +697,7 @@ class RunGame:
                             self.__bullets.append(new_bullet)
                             self.__last_shot_time = now
                             self.__camera.add(new_bullet, *self.__bullets)
-                        """setting state"""
+                    # """setting state"""
                     if self.__game_state == "settings":
                         if self.__effect_plus.collidepoint(event.pos):
                             SoundManager.get_instance().play_sound("Hover")
@@ -676,7 +718,7 @@ class RunGame:
                         elif self.__back_button.collidepoint(event.pos):
                             SoundManager.get_instance().play_sound("Hover")
                             self.__game_state = self.__previous_game_state
-                        """menu state"""
+                    # """menu state"""
                     elif event.button == pg.BUTTON_LEFT and self.__game_state == "menu":
                         if self.__stat_button.collidepoint(event.pos):
                             SoundManager.get_instance().play_sound("Hover")
@@ -688,7 +730,7 @@ class RunGame:
                         else:
                             SoundManager.get_instance().play_sound("Hover")
                             self.__restart_game()
-                        """game over state"""
+                    # """game over state"""
                     elif event.button == pg.BUTTON_LEFT and self.__game_state == "game_over":
                         if self.__stat_button.collidepoint(event.pos):
                             SoundManager.get_instance().play_sound("Hover")
@@ -697,13 +739,13 @@ class RunGame:
                         elif self.__restart_button.collidepoint(event.pos):
                             SoundManager.get_instance().play_sound("Hover")
                             self.__restart_game()
-                        """stat state"""
+                    # """stat state"""
                     elif event.button == pg.BUTTON_LEFT and self.__game_state == "stat":
-                        if self.__back_button.collidepoint(event.pos):
+                        if self.__stat_back_button.collidepoint(event.pos):
                             self.__graph_generated = False
                             SoundManager.get_instance().play_sound("Hover")
                             self.__game_state = self.__previous_game_state
-                        if self.__pie_button.collidepoint(event.pos):
+                        elif self.__pie_button.collidepoint(event.pos):
                             self.__stat_display_state = 'Pie'
                         elif self.__line_button.collidepoint(event.pos):
                             self.__stat_display_state = 'Line'
@@ -715,6 +757,8 @@ class RunGame:
                             self.__stat_display_state = 'His'
                         elif self.__box_button.collidepoint(event.pos):
                             self.__stat_display_state = 'Box'
+                        elif self.__tk_button.collidepoint(event.pos):
+                            run_graph_window()
                     if self.__level_name == 'shop':
                         self.__shop.handle_event(event)
             """game state"""

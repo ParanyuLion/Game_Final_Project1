@@ -21,12 +21,7 @@ git clone https://github.com/ParanyuLion/Game_Final_Project1.git
 cd Game_Final_Project1
 ```
 
-3. Create virtual environment
-```
-python -m venv env ลบออก
-```
-
-4. Activate virtual environment
+3. Activate virtual environment
 ```
 # Windows
 python -m venv venv
@@ -37,12 +32,12 @@ python3 -m venv venv
 source venv/bin/activate
 ```
 
-5. Install dependencies
+4. Install dependencies
 ```
 pip install -r requirements.txt
 ```
 
-6. Run the game
+5. Run the game
 ```
 python Run_game.py
 ```

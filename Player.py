@@ -272,6 +272,7 @@ class Player(Entity):
             return True
 
     def reset_game(self):
+        self.score = 0
         self.health = 100
         self.mana = 100
         self.gold = 500

@@ -19,10 +19,6 @@ class Background:
             'border': {"LEFT": 100, "RIGHT": 2306, "UP": 247, "DOWN": 914}, 'spawn': (186, 557),
             'door': {'x': (2257, 2348), 'y': (489, 643)},
             'enemy_spawn': {'x': (800, 2000), 'y': (330, 700)}},
-        10: {'image': "picture/background/dungeon_tile.png",
-             'border': {"LEFT": 225, "RIGHT": 1380, "UP": 222, "DOWN": 1356}, 'spawn': (500, 500),
-             'door': {'x': (0, 9999), 'y': (0, 9999)},
-             'enemy_spawn': {'x': (500, 1900), 'y': (330, 800)}},
         'MainMenu': {'image': "picture/background/menu.png",
                      'border': {"LEFT": 9999, "RIGHT": 9999, "UP": 9999, "DOWN": 9999}},
         'GameOver': {'image': "picture/background/game_over_bg.png",
@@ -31,8 +27,8 @@ class Background:
                  'door': {'x': (0, 9999), 'y': (0, 9999)},
                  'border': {"LEFT": 9999, "RIGHT": 9999, "UP": 9999, "DOWN": 9999}, 'spawn': (500, 500)},
         'setting': {'image': "picture/background/setting_bg.png",
-                 'door': {'x': (0, 9999), 'y': (0, 9999)},
-                 'border': {"LEFT": 9999, "RIGHT": 9999, "UP": 9999, "DOWN": 9999}, 'spawn': (500, 500)},
+                    'door': {'x': (0, 9999), 'y': (0, 9999)},
+                    'border': {"LEFT": 9999, "RIGHT": 9999, "UP": 9999, "DOWN": 9999}, 'spawn': (500, 500)},
     }
 
     @classmethod
