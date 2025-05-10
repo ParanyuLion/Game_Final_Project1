@@ -321,7 +321,10 @@ class RunGame:
         if self.__complete_level and self.__at_door:
             InteractUI.draw_interact_door(self.__screen)
         # self.camera.draw(self.__screen)
+
+
         self.__screen.blit(self.__gear_img, self.__gear_button)
+
 
     def __entities_events(self):
         """players event"""
@@ -537,8 +540,8 @@ class RunGame:
 
     def show_stat_table(self):
         df = pd.read_csv("data_record/game_stats_per_min.csv")
-        grouped_df = df.groupby("level").mean().reset_index()
-        grouped_df["level"] = grouped_df["level"].astype(int)
+        grouped_df = df.groupby("minutes").mean().reset_index()
+        grouped_df["minutes"] = grouped_df["minutes"].astype(int)
         grouped_df = grouped_df.round(2)
         self.__screen.fill((30, 30, 30))
         self.render_dataframe(grouped_df.head(30), x=350, y=40)
@@ -637,6 +640,10 @@ class RunGame:
                 if now - self.__last_update_data >= 60000:
                     self.__update_data_per_minute()
                     self.__last_update_data = now
+            if self.__game_state == 'playing' and self.__level_name != 'shop':
+                pg.mouse.set_cursor(pg.SYSTEM_CURSOR_CROSSHAIR)
+            else:
+                pg.mouse.set_cursor(pg.SYSTEM_CURSOR_ARROW)
 
             # start_time = pg.time.get_ticks()
             for event in pg.event.get():
@@ -646,6 +653,7 @@ class RunGame:
                     self.__running = False
                 if event.type == pg.KEYDOWN and self.__game_state == 'playing':
                     now = pg.time.get_ticks()
+
                     if event.key == pg.K_SPACE and self.__player.use_skill('SPACE') and self.__level_name != 'shop':
                         self.__before_dash_pos = self.__player.rect.copy()
                         self.__player.dash(self.__border)
@@ -799,6 +807,6 @@ class RunGame:
 
     pg.quit()
 
-
-play = RunGame()
-play.run_loop()
+if __name__ == "__main__":
+    play = RunGame()
+    play.run_loop()

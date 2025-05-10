@@ -19,7 +19,7 @@ class SoundManager:
         pg.mixer.init()
         self.sounds = {
             "bgm": {"type": "music", "path": "Sound/bg_music.wav"},
-            "CthuluTheme": {"type": "music", "path": "Sound/CthuluTheme.mp3"},
+            "CthuluTheme": {"type": "music", "path": "Sound/Theme.mp3"},
             "game_over_music": {"type": "music", "path": "Sound/game_over_music.mp3"},
             "game_over_sound": {"type": "effect", "sound": pg.mixer.Sound("Sound/game_over_sound.mp3"),
                            "volume": 1},

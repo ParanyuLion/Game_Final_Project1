@@ -287,10 +287,4 @@ class Cthulu(Enemy):
     def get_size(self):
         return self.image.get_size()
 
-    # def collide_other(self, others):
-    #     for other in others:
-    #         if other != self:
-    #             if self.rect.colliderect(other.rect):
-    #                 return True
-    #     return False
 

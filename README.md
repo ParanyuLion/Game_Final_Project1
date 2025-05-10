@@ -41,3 +41,7 @@ pip install -r requirements.txt
 ```
 python Run_game.py
 ```
+
+## Credits
+
+Please see [CREDITS.md](./CREDITS.md) for full list of asset attributions.

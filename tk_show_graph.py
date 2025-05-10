@@ -29,7 +29,7 @@ class GraphApp(ttk.Frame):
             'Histogram - Items Bought',
             'Bar Graph - Enemy Defeated per Minute',
             'Boxplot - Score per Minute',
-            'Table - Level Stats',
+            'Table - Minute Stats',
         )
         self.cb_graph.bind('<<ComboboxSelected>>', self.update_plot)
         self.cb_graph.grid(row=0, column=0, padx=10, pady=10)
@@ -71,7 +71,6 @@ class GraphApp(ttk.Frame):
 
         self.canvas.get_tk_widget().grid_remove()
         self.table_frame.grid_remove()
-
 
         if "Pie Chart" in graph_type:
             df = pd.read_csv("data_record/enemy_defeated.csv")
@@ -118,10 +117,10 @@ class GraphApp(ttk.Frame):
             self.ax.grid(True, axis='y', linestyle='--', alpha=0.6)
             self.canvas.get_tk_widget().grid()
 
-        elif "Table - Level Stats" in graph_type:
+        elif "Table - Minute Stats" in graph_type:
             df = pd.read_csv("data_record/game_stats_per_min.csv")
-            grouped_df = df.groupby("level").mean().reset_index()
-            grouped_df["level"] = grouped_df["level"].astype(int)
+            grouped_df = df.groupby("minutes").mean().reset_index()
+            grouped_df["minutes"] = grouped_df["minutes"].astype(int)
             grouped_df = grouped_df.round(2)
             self.display_dataframe(grouped_df.head(30))
             self.table_frame.grid()
