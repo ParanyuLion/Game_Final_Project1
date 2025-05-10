@@ -129,8 +129,6 @@ class GraphApp(ttk.Frame):
         self.canvas.draw()
 
 
-
-
 def run_graph_window():
     root = tk.Tk()
     root.title("Game Stats - Graph Viewer")

@@ -322,9 +322,7 @@ class RunGame:
             InteractUI.draw_interact_door(self.__screen)
         # self.camera.draw(self.__screen)
 
-
         self.__screen.blit(self.__gear_img, self.__gear_button)
-
 
     def __entities_events(self):
         """players event"""
@@ -806,6 +804,7 @@ class RunGame:
             print(f"FPS: {fps:.2f}")
 
     pg.quit()
+
 
 if __name__ == "__main__":
     play = RunGame()

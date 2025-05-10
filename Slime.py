@@ -151,10 +151,6 @@ class Slime(Enemy):
         if avoid_vector.length() > 0:
             self.__direction += avoid_vector.normalize() * 0.5
 
-    def respawn(self, health=10):
-        self.health = health
-        self.already_dead = False
-
     def get_damage(self, bullet, damage):
         if self.rect.colliderect(bullet.rect):
             self.health -= damage
