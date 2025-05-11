@@ -30,7 +30,8 @@ cd Game_Final_Project1
 # Windows
 python -m venv venv
 venv\Scripts\activate
-
+```
+```
 # macOS/Linux
 python3 -m venv venv
 source venv/bin/activate
@@ -42,8 +43,9 @@ method 1:
 ```
 # Windows
 pip install -r requirements.txt
-
-# if the above line not work, then do this line
+```
+```
+# if the above line of code not work, do this line
 python -m pip install -r requirements.txt
 ```
 
@@ -60,7 +62,8 @@ python -m pip install pygame
 python -m pip install matplotlib
 python -m pip install pandas
 python -m pip install numpy
-
+```
+```
 # macOS/Linux
 python3 -m pip install pygame
 python3 -m pip install matplotlib
@@ -90,7 +93,9 @@ python3 Run_game.py
 - Use Dash skill: Press 'SPACE BAR'
 - Enter new level: Press 'E'
 
+## Project Video
+- [Youtube](https://youtu.be/QJsO0zhgS38?si=LAQ79cyKAei1jSHd)
 
 ## Credits
 
-Please see [CREDITS.md](./CREDITS.md) for full list of asset attributions.
+- Please see [CREDITS.md](./CREDITS.md) for full list of asset attributions.

@@ -104,6 +104,8 @@ This game is 2D action game that has gameplay like “Soul Knight”. This game 
 ## UML Diagram
 <img src="UML.png" alt="UML"/>
 
+[UML_Link](https://lucid.app/lucidchart/4d0d02c8-7a70-41a0-a514-ec49460c037e/edit?viewport_loc=-5586%2C-1261%2C12619%2C5246%2CHWEp-vi-RSFO&invitationId=inv_721849d6-78e0-4955-99e8-566e74bfdfb5)
+
 ## 3.3 Algorithms Involved
 -Collision: if players collide with enemies, players will lose HP
 
@@ -187,4 +189,7 @@ Data analysis and report
 # 6. Document version
 Version: 5.0
 Date: 11 May 2025
+
+# 7. Project Video
+[Youtube](https://youtu.be/QJsO0zhgS38?si=LAQ79cyKAei1jSHd)
 

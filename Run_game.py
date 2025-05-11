@@ -1,7 +1,5 @@
 import pygame as pg
 import random
-import pandas as pd
-import matplotlib.pyplot as plt
 from Player import Player
 from Camera import Camera
 from background import Background as Bgd
@@ -24,7 +22,7 @@ class RunGame:
     def __init__(self):
         """set up game attributes"""
         pg.init()
-        pg.display.set_caption('Game')
+        pg.display.set_caption('Dungeon Hunter')
         self.__screen = pg.display.set_mode((Config.get('WIN_WIDTH'), Config.get('WIN_HEIGHT')))
         self.__screen.fill(Config.get('BG_COLOR'))
         self.__game_state = "menu"
@@ -494,9 +492,6 @@ class RunGame:
                     elif event.button == pg.BUTTON_LEFT and self.__game_state == "menu":
                         if self.__stat_button.collidepoint(event.pos):
                             run_graph_window()
-                            # SoundManager.get_instance().play_sound("Hover")
-                            # self.__previous_game_state = self.__game_state
-                            # self.__game_state = "stat"
                         elif self.__gear_button.collidepoint(event.pos):
                             self.__previous_game_state = self.__game_state
                             self.__game_state = "settings"
@@ -511,27 +506,6 @@ class RunGame:
                         elif self.__restart_button.collidepoint(event.pos):
                             SoundManager.get_instance().play_sound("Hover")
                             self.__restart_game()
-                    # """stat state"""
-                    # elif event.button == pg.BUTTON_LEFT and self.__game_state == "stat":
-                    #     run_graph_window()
-                        # if self.__stat_back_button.collidepoint(event.pos):
-                        #     self.__graph_generated = False
-                        #     SoundManager.get_instance().play_sound("Hover")
-                        #     self.__game_state = self.__previous_game_state
-                        # elif self.__pie_button.collidepoint(event.pos):
-                        #     self.__stat_display_state = 'Pie'
-                        # elif self.__line_button.collidepoint(event.pos):
-                        #     self.__stat_display_state = 'Line'
-                        # elif self.__bar_button.collidepoint(event.pos):
-                        #     self.__stat_display_state = 'Bar'
-                        # elif self.__table_button.collidepoint(event.pos):
-                        #     self.__stat_display_state = 'Table'
-                        # elif self.__his_button.collidepoint(event.pos):
-                        #     self.__stat_display_state = 'His'
-                        # elif self.__box_button.collidepoint(event.pos):
-                        #     self.__stat_display_state = 'Box'
-                        # elif self.__tk_button.collidepoint(event.pos):
-                        #     run_graph_window()
                     if self.__level_name == 'shop':
                         self.__shop.handle_event(event)
             """game state"""

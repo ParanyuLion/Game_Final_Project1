@@ -14,7 +14,7 @@ class Player(Entity):
         self.score = 0
         self.max_mana = 100
         self.mana = 100
-        self.gold = 500
+        self.gold = 1000
         self.speed = 5
         self.damage = 1
         self.health_potion = 5
@@ -275,7 +275,7 @@ class Player(Entity):
         self.score = 0
         self.health = 100
         self.mana = 100
-        self.gold = 500
+        self.gold = 1000
         self.speed = 5
         self.damage = 1
         self.health_potion = 5
