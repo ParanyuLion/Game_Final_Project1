@@ -1,6 +1,8 @@
 import tkinter as tk
 import tkinter.ttk as ttk
 import pandas as pd
+import matplotlib
+matplotlib.use('TkAgg')
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
 from matplotlib.figure import Figure
 

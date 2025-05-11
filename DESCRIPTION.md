@@ -155,10 +155,10 @@ The data will be stored in the CSV file.
 |         | Feature Name                        | Graph Objective                                       | Graph Type | X-axis                       | Y-axis                            |
 |---------|-------------------------------------|-------------------------------------------------------|------------|------------------------------|-----------------------------------|
 | Graph 1 | Type of enemy that defeated portion | To show that player defeated what enemy the most      | Pie chart  | None                         | None                              |
-| Graph 2 | Enemy Defeated Per minute           | To analyze the trend of enemy defeat rate over time   | Histogram  | Time (1 minute intervals)    | Number of Enemies Defeated        |
+| Graph 2 | Enemy Defeated Per minute           | To analyze the trend of enemy defeat rate over time   | Bar Graph  | Time (1 minute intervals)    | Number of Enemies Defeated        |
 | Graph 3 | Level that player complete          | To show how far players progressed in the game        | Line graph | levels                       | Frequency of player that complete |
 | Graph 4 | Score  that get in 1  minute        | To show that how much score do player get in 1 minute | Box plot   | Score  that get in 1  minute | None                              |
-| Graph 5 | Items Purchased by Players          | To show that which items purchased by Players         | Bar Graph  | Items that player purchased  | frequency                         |
+| Graph 5 | Items Purchased by Players          | To show that which items purchased by Players         | Histogram  | Items that player purchased  | frequency                         |
 
 # 5. Project Timeline
 | Week         | Task                                                                                                                 |
